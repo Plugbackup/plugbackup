@@ -1,0 +1,52 @@
+name: Баг
+description: Что-то работает не так
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Спасибо, что сообщаете. Если вы нашли **уязвимость**, не пишите о ней здесь: следуйте [политике безопасности](https://github.com/Plugbackup/plugbackup/security/policy).
+  - type: dropdown
+    id: component
+    attributes:
+      label: Где проявляется
+      options:
+        - Бот
+        - Сайт
+        - Нода (storectl, конфиги)
+        - Дизайн
+        - Другое
+    validations:
+      required: true
+  - type: textarea
+    id: what
+    attributes:
+      label: Что произошло
+      description: Опишите, что вы увидели.
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Как воспроизвести
+      placeholder: |
+        1. ...
+        2. ...
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Что ожидали увидеть
+  - type: input
+    id: environment
+    attributes:
+      label: Окружение
+      description: ОС, версии restic или rclone и всё, что может быть важно.
+  - type: checkboxes
+    id: secrets
+    attributes:
+      label: Проверка
+      options:
+        - label: Я убрал(а) из описания и логов пароли, токены, ключи и чужие данные.
+          required: true

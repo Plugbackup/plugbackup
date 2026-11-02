@@ -1,0 +1,55 @@
+# --- Secrets ---
+.env
+.env.*
+!.env.example
+secrets/
+
+# Keys and certificates
+*.pem
+*.key
+*.p12
+*.pfx
+*.ppk
+id_rsa*
+id_ed25519*
+id_ecdsa*
+id_dsa*
+!*.pub
+
+# WireGuard configs
+wg*.conf
+*.wg.conf
+wireguard/
+
+# --- Data and logs ---
+*.db
+*.sqlite
+*.sqlite3
+*.log
+logs/
+
+# --- Python ---
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+build/
+dist/
+
+# --- Node ---
+node_modules/
+npm-debug.log*
+yarn-error.log*
+.pnpm-store/
+
+# --- OS and editors ---
+.DS_Store
+Thumbs.db
+.idea/
+*.swp
