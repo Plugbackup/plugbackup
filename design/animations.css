@@ -1,0 +1,209 @@
+/*
+ * PlugBackup motion: logo intro, loader, hover and press states.
+ * Needs tokens.css. Everything honours prefers-reduced-motion (see the end of the file).
+ */
+
+/* Logo --------------------------------------------------------------------
+ * The base styles describe the finished mark. With .pb-logo--animate the P plugs into
+ * the grid of sockets (the faint pins) from the left, then the connected pin lights up.
+ * Markup: <svg class="pb-logo pb-logo--animate" viewBox="-4 -4 31 48">
+ *           <rect class="pb-logo__socket" .../>
+ *           <g class="pb-logo__plug"><rect class="pb-logo__pin" .../><rect class="pb-logo__lit" .../></g>
+ *           <rect class="pb-logo__pulse" .../>
+ *         </svg>
+ * The viewBox keeps 4 units of padding: the plug starts outside it and the pulse stays inside.
+ */
+
+.pb-logo {
+  display: block;
+  color: var(--color-text-primary);
+}
+.pb-logo__socket {
+  fill: currentColor;
+  opacity: 0.14;
+}
+.pb-logo__pin {
+  fill: currentColor;
+}
+.pb-logo__lit {
+  fill: var(--color-brand);
+}
+.pb-logo__pulse {
+  fill: none;
+  stroke: var(--color-brand);
+  stroke-width: 0.8;
+  opacity: 0;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+.pb-logo__word {
+  fill: currentColor;
+}
+
+.pb-logo--animate .pb-logo__socket {
+  animation: pb-fade-in var(--duration-base) var(--ease-enter) both;
+}
+.pb-logo--animate .pb-logo__plug {
+  animation: pb-plug-in var(--duration-slower) var(--ease-plug) 0.15s both;
+}
+.pb-logo--animate .pb-logo__lit {
+  animation: pb-lit var(--duration-slow) var(--ease-standard) 0.7s both;
+}
+.pb-logo--animate .pb-logo__pulse {
+  animation: pb-pulse 0.7s var(--ease-exit) 0.75s both;
+}
+
+@keyframes pb-fade-in {
+  from {
+    opacity: 0;
+  }
+}
+@keyframes pb-plug-in {
+  from {
+    transform: translateX(-30px);
+    opacity: 0;
+  }
+  45% {
+    opacity: 1;
+  }
+}
+@keyframes pb-lit {
+  from {
+    fill: currentColor;
+  }
+}
+@keyframes pb-pulse {
+  from {
+    opacity: 0.9;
+    transform: scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: scale(2.2);
+  }
+}
+
+/* Loader ------------------------------------------------------------------
+ * Five pins light up one after another, like data passing through a header.
+ * Size follows font-size. Give the wrapper role="status" and a visible or .pb-sr-only label.
+ * Markup: <span class="pb-loader"><i class="pb-loader__pin" style="--i:0"></i> ... (--i: 0..4)</span>
+ */
+
+.pb-loader {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25em;
+  font-size: 1rem;
+}
+.pb-loader--sm {
+  font-size: 0.75rem;
+}
+.pb-loader--lg {
+  font-size: 1.5rem;
+}
+.pb-loader__pin {
+  width: 0.5em;
+  height: 0.5em;
+  background: var(--color-border-strong);
+  border-radius: 25%;
+  animation: pb-scan 1.2s var(--ease-standard) infinite;
+  animation-delay: calc(var(--i, 0) * 0.12s);
+}
+.pb-button--primary .pb-loader__pin {
+  background: rgb(255 255 255 / 0.45);
+}
+
+@keyframes pb-scan {
+  0%,
+  55%,
+  100% {
+    transform: none;
+  }
+  20%,
+  35% {
+    background: var(--color-accent);
+    transform: translateY(-0.18em);
+  }
+}
+
+/* Hover, focus and press ---------------------------------------------------
+ * Colours of the states are in components.css; here they only get motion.
+ */
+
+.pb-button,
+.pb-copy,
+.pb-input,
+.pb-card,
+.pb-segmented button {
+  transition-property: background-color, border-color, color, box-shadow, transform;
+  transition-duration: var(--duration-fast);
+  transition-timing-function: var(--ease-standard);
+}
+.pb-button:active,
+.pb-copy:active {
+  transform: translateY(1px);
+}
+
+.pb-link {
+  transition: color var(--duration-fast) var(--ease-standard), text-underline-offset var(--duration-base) var(--ease-standard),
+    text-decoration-thickness var(--duration-base) var(--ease-standard);
+}
+.pb-link:hover {
+  text-decoration-thickness: 2px;
+  text-underline-offset: 0.3em;
+}
+
+.pb-card--interactive {
+  transition-duration: var(--duration-base);
+}
+.pb-card--interactive:hover {
+  transform: translateY(-2px);
+}
+
+/* On a plan card the lit pins hop in turn. */
+.pb-plan:hover .pb-tier__pin.is-on {
+  animation: pb-hop var(--duration-slow) var(--ease-plug) both;
+  animation-delay: calc(var(--i, 0) * 60ms);
+}
+@keyframes pb-hop {
+  40% {
+    transform: translateY(-3px);
+  }
+}
+
+/* Reduced motion ------------------------------------------------------------
+ * The finished state is shown at once: no sliding, no pulse, a static loader.
+ */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-delay: 0s !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    transition-delay: 0s !important;
+    scroll-behavior: auto !important;
+  }
+
+  .pb-logo--animate .pb-logo__socket,
+  .pb-logo--animate .pb-logo__plug,
+  .pb-logo--animate .pb-logo__lit,
+  .pb-logo--animate .pb-logo__pulse,
+  .pb-loader__pin,
+  .pb-plan:hover .pb-tier__pin.is-on {
+    animation: none;
+  }
+  .pb-loader__pin:nth-child(-n + 3) {
+    background: var(--color-accent);
+  }
+  .pb-button--primary .pb-loader__pin:nth-child(-n + 3) {
+    background: var(--color-text-on-accent);
+  }
+  .pb-button:active,
+  .pb-copy:active,
+  .pb-card--interactive:hover {
+    transform: none;
+  }
+}

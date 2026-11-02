@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
+  <title>PlugBackup</title>
+  <!-- Pins are 4 px on a 6 px pitch, so every edge lands on the pixel grid at 32 px. -->
+  <rect width="32" height="32" rx="7" fill="#16181C"/>
+  <g fill="#EDEFF2">
+    <rect x="8" y="2" width="4" height="4" rx="1"/>
+    <rect x="14" y="2" width="4" height="4" rx="1"/>
+    <rect x="20" y="2" width="4" height="4" rx="1"/>
+    <rect x="8" y="8" width="4" height="4" rx="1"/>
+    <rect x="20" y="8" width="4" height="4" rx="1"/>
+    <rect x="8" y="14" width="4" height="4" rx="1"/>
+    <rect x="14" y="14" width="4" height="4" rx="1"/>
+    <rect x="8" y="20" width="4" height="4" rx="1"/>
+    <rect x="8" y="26" width="4" height="4" rx="1"/>
+  </g>
+  <rect x="20" y="14" width="4" height="4" rx="1" fill="#4C6FFF"/>
+</svg>

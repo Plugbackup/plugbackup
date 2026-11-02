@@ -1,0 +1,23 @@
+{
+  "name": "plugbackup-design",
+  "version": "0.1.0",
+  "private": true,
+  "description": "PlugBackup design system: tokens, logo, graphics, showcase",
+  "license": "SEE LICENSE IN ../LICENSE",
+  "type": "module",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "export": "node scripts/build.mjs graphics",
+    "fonts": "node scripts/build.mjs fonts",
+    "check": "node scripts/build.mjs check"
+  },
+  "devDependencies": {
+    "@ibm/plex-mono": "^2.5.0",
+    "@ibm/plex-sans": "^1.1.0",
+    "@resvg/resvg-js": "^2.6.2",
+    "opentype.js": "^2.0.0"
+  }
+}

@@ -1,0 +1,28 @@
+{
+  "_note": "Тексты на графике. Это примеры: замените их своими. Цифры и цены сюда не вписывайте, берите из plans.json через {{plans.gb50.price}}, {{plans.beta.size}} и т. п. Перенос строки: \\n.",
+  "og-image": {
+    "title": "Хранилище\nрезервных копий",
+    "subtitle": "Шифрование на вашей стороне.\nSFTP, restic, rclone."
+  },
+  "bot-description": {
+    "title": "Хранилище резервных копий",
+    "subtitle": "Шифрование на вашей стороне",
+    "details": "SFTP · restic · rclone"
+  },
+  "banner-announce": {
+    "label": "Анонс",
+    "title": "Идёт бесплатная\nбета",
+    "subtitle": "{{plans.beta.size}} {{plans.beta.access}}.\nДоступ выдаёт {{bot.handle}}."
+  },
+  "banner-update": {
+    "label": "Обновление",
+    "title": "Тарифы на {{plans.gb50.gb}},\n{{plans.gb100.gb}} и {{plans.gb200.size}}",
+    "subtitle": "Оплата в {{payment}}.\nПодробности в {{bot.handle}}."
+  },
+  "banner-plan": {
+    "label": "Тариф",
+    "plan": "gb50",
+    "subtitle": "{{plan.line}}",
+    "footnote": "{{payment_note}}"
+  }
+}

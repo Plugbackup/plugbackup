@@ -1,0 +1,568 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <title>PlugBackup: дизайн-система</title>
+  <meta name="description" content="Токены, логотип, компоненты и графика PlugBackup.">
+  <link rel="icon" href="graphics/svg/favicon.svg" type="image/svg+xml">
+  <link rel="icon" href="graphics/png/favicon-32.png" sizes="32x32" type="image/png">
+  <link rel="apple-touch-icon" href="graphics/png/apple-touch-icon.png">
+  <link rel="stylesheet" href="fonts/fonts.css">
+  <link rel="stylesheet" href="tokens.css">
+  <link rel="stylesheet" href="components.css">
+  <link rel="stylesheet" href="animations.css">
+  <link rel="stylesheet" href="showcase.css">
+  <script>try{var t=localStorage.getItem('pb-theme');if(t==='light'||t==='dark')document.documentElement.dataset.theme=t}catch(e){}</script>
+  <script src="showcase.js" defer></script>
+</head>
+<body>
+  <a class="sc-skip" href="#main">К содержимому</a>
+
+  <header class="sc-header">
+    <div class="sc-container sc-header__inner">
+      <a class="sc-brand" href="#top" aria-label="PlugBackup, наверх">
+<!--@build:logo-lockup-->
+<svg class="pb-logo sc-lockup" viewBox="0 0 198.44 40" role="img" aria-label="PlugBackup"><rect class="pb-logo__socket" x="8.5" y="8.5" width="6" height="6" rx="1.5"/><rect class="pb-logo__socket" x="8.5" y="25.5" width="6" height="6" rx="1.5"/><rect class="pb-logo__socket" x="17" y="25.5" width="6" height="6" rx="1.5"/><rect class="pb-logo__socket" x="8.5" y="34" width="6" height="6" rx="1.5"/><rect class="pb-logo__socket" x="17" y="34" width="6" height="6" rx="1.5"/><g class="pb-logo__plug"><rect class="pb-logo__pin" x="0" y="0" width="6" height="6" rx="1.5"/><rect class="pb-logo__pin" x="8.5" y="0" width="6" height="6" rx="1.5"/><rect class="pb-logo__pin" x="17" y="0" width="6" height="6" rx="1.5"/><rect class="pb-logo__pin" x="0" y="8.5" width="6" height="6" rx="1.5"/><rect class="pb-logo__pin" x="17" y="8.5" width="6" height="6" rx="1.5"/><rect class="pb-logo__pin" x="0" y="17" width="6" height="6" rx="1.5"/><rect class="pb-logo__pin" x="8.5" y="17" width="6" height="6" rx="1.5"/><rect class="pb-logo__pin" x="0" y="25.5" width="6" height="6" rx="1.5"/><rect class="pb-logo__pin" x="0" y="34" width="6" height="6" rx="1.5"/><rect class="pb-logo__lit" x="17" y="17" width="6" height="6" rx="1.5"/></g><rect class="pb-logo__pulse" x="17" y="17" width="6" height="6" rx="1.5"/><path class="pb-logo__word" d="M43.91 29.77L40.24 29.77L40.24 10.23L47.66 10.23Q50.52 10.23 52.03 11.85Q53.54 13.48 53.54 16.28L53.54 16.28Q53.54 19.08 52.03 20.7Q50.52 22.32 47.66 22.32L47.66 22.32L43.91 22.32L43.91 29.77ZM43.91 13.22L43.91 19.33L46.9 19.33Q48.39 19.33 49.03 18.73Q49.68 18.12 49.68 16.81L49.68 16.81L49.68 15.74Q49.68 14.43 49.03 13.83Q48.39 13.22 46.9 13.22L46.9 13.22L43.91 13.22ZM55.98 29.77L55.98 26.94L60.57 26.94L60.57 11.88L55.98 11.88L55.98 9.05L64.15 9.05L64.15 26.94L68.77 26.94L68.77 29.77L55.98 29.77ZM81.04 29.77L81.04 27.22L80.9 27.22Q80.42 28.4 79.43 29.25Q78.43 30.11 76.67 30.11L76.67 30.11Q74.54 30.11 73.21 28.69Q71.88 27.28 71.88 24.65L71.88 24.65L71.88 15.32L75.46 15.32L75.46 24.14Q75.46 27.28 78.18 27.28L78.18 27.28Q78.71 27.28 79.23 27.14Q79.75 27 80.15 26.71Q80.56 26.41 80.8 25.99Q81.04 25.57 81.04 24.98L81.04 24.98L81.04 15.32L84.62 15.32L84.62 29.77L81.04 29.77ZM102.01 31.28L102.01 31.28Q102.01 33.55 100.12 34.63Q98.23 35.71 94.22 35.71L94.22 35.71Q92.26 35.71 90.95 35.47Q89.63 35.23 88.83 34.78Q88.04 34.34 87.7 33.71Q87.36 33.08 87.36 32.29L87.36 32.29Q87.36 31.09 88.06 30.44Q88.76 29.8 90.02 29.49L90.02 29.49L90.02 29.27Q89.18 28.99 88.69 28.48Q88.2 27.98 88.2 27.08L88.2 27.08Q88.2 26.02 88.92 25.49Q89.63 24.96 90.81 24.68L90.81 24.68L90.81 24.54Q89.52 23.92 88.79 22.8Q88.06 21.68 88.06 20.08L88.06 20.08Q88.06 18.88 88.5 17.94Q88.93 17 89.73 16.35Q90.53 15.69 91.65 15.34Q92.77 14.99 94.14 14.99L94.14 14.99Q95.6 14.99 96.77 15.38L96.77 15.38L96.77 14.76Q96.77 13.92 97.32 13.36Q97.86 12.8 98.84 12.8L98.84 12.8L101.45 12.8L101.45 15.49L98.03 15.49L98.03 15.97Q99.1 16.61 99.67 17.63Q100.24 18.66 100.24 20.08L100.24 20.08Q100.24 21.29 99.81 22.24Q99.38 23.19 98.58 23.84Q97.78 24.48 96.65 24.83Q95.51 25.18 94.14 25.18L94.14 25.18Q93.58 25.18 93.06 25.14Q92.54 25.1 92.07 24.96L92.07 24.96Q91.68 25.1 91.31 25.4Q90.95 25.71 90.95 26.22L90.95 26.22Q90.95 26.89 91.59 27.04Q92.24 27.2 93.13 27.2L93.13 27.2L96.41 27.2Q97.92 27.2 98.98 27.49Q100.05 27.78 100.72 28.33Q101.39 28.88 101.7 29.63Q102.01 30.39 102.01 31.28ZM98.65 31.54L98.65 31.54Q98.65 30.89 98.13 30.51Q97.61 30.14 96.21 30.14L96.21 30.14L91.23 30.14Q90.39 30.61 90.39 31.54L90.39 31.54Q90.39 32.29 91.02 32.8Q91.65 33.3 93.16 33.3L93.16 33.3L95.48 33.3Q98.65 33.3 98.65 31.54ZM94.14 22.83L94.14 22.83Q95.51 22.83 96.16 22.17Q96.8 21.51 96.8 20.45L96.8 20.45L96.8 19.72Q96.8 18.66 96.16 18Q95.51 17.34 94.14 17.34L94.14 17.34Q92.8 17.34 92.15 18Q91.51 18.66 91.51 19.72L91.51 19.72L91.51 20.45Q91.51 21.51 92.15 22.17Q92.8 22.83 94.14 22.83ZM104.3 29.77L104.3 10.23L110.94 10.23Q113.46 10.23 114.89 11.6Q116.32 12.97 116.32 15.27L116.32 15.27Q116.32 17.03 115.46 18.04Q114.61 19.05 113.26 19.47L113.26 19.47L113.26 19.55Q114.92 19.94 115.98 21.02Q117.04 22.1 117.04 24.14L117.04 24.14Q117.04 25.32 116.65 26.36Q116.26 27.39 115.55 28.15Q114.83 28.9 113.87 29.34Q112.9 29.77 111.78 29.77L111.78 29.77L104.3 29.77ZM106.66 27.73L111.08 27.73Q112.7 27.73 113.63 27Q114.55 26.27 114.55 24.76L114.55 24.76L114.55 23.61Q114.55 22.13 113.63 21.39Q112.7 20.64 111.08 20.64L111.08 20.64L106.66 20.64L106.66 27.73ZM106.66 18.71L110.69 18.71Q112.17 18.71 113.01 18.05Q113.85 17.4 113.85 16.05L113.85 16.05L113.85 14.96Q113.85 13.62 113.01 12.94Q112.17 12.27 110.69 12.27L110.69 12.27L106.66 12.27L106.66 18.71ZM133.2 29.77L131.66 29.77Q130.34 29.77 129.78 29.1Q129.22 28.43 129.08 27.42L129.08 27.42L128.94 27.42Q128.47 28.68 127.42 29.39Q126.37 30.11 124.6 30.11L124.6 30.11Q122.34 30.11 120.99 28.93Q119.65 27.76 119.65 25.71L119.65 25.71Q119.65 23.7 121.12 22.6Q122.59 21.51 125.86 21.51L125.86 21.51L128.94 21.51L128.94 20.08Q128.94 18.49 128.05 17.69Q127.15 16.89 125.5 16.89L125.5 16.89Q124.04 16.89 123.12 17.47Q122.2 18.04 121.64 19.02L121.64 19.02L120.12 17.9Q120.4 17.34 120.88 16.81Q121.36 16.28 122.06 15.87Q122.76 15.46 123.65 15.23Q124.55 14.99 125.64 14.99L125.64 14.99Q128.19 14.99 129.69 16.28Q131.18 17.56 131.18 19.86L131.18 19.86L131.18 27.81L133.2 27.81L133.2 29.77ZM125 28.23L125 28.23Q125.86 28.23 126.58 28.02Q127.29 27.81 127.82 27.46Q128.36 27.11 128.65 26.62Q128.94 26.13 128.94 25.57L128.94 25.57L128.94 23.19L125.86 23.19Q123.85 23.19 122.92 23.75Q122 24.31 122 25.38L122 25.38L122 25.96Q122 27.08 122.8 27.66Q123.6 28.23 125 28.23ZM142.66 30.11L142.66 30.11Q141.1 30.11 139.88 29.56Q138.66 29.02 137.82 28.04Q136.98 27.06 136.55 25.66Q136.11 24.26 136.11 22.55L136.11 22.55Q136.11 20.84 136.56 19.44Q137.01 18.04 137.85 17.05Q138.69 16.05 139.89 15.52Q141.1 14.99 142.64 14.99L142.64 14.99Q144.74 14.99 146.05 15.91Q147.37 16.84 147.98 18.32L147.98 18.32L146.19 19.27Q145.8 18.15 144.89 17.54Q143.98 16.92 142.64 16.92L142.64 16.92Q141.66 16.92 140.89 17.24Q140.12 17.56 139.58 18.15Q139.05 18.74 138.79 19.55Q138.52 20.36 138.52 21.32L138.52 21.32L138.52 23.78Q138.52 24.73 138.79 25.54Q139.05 26.36 139.58 26.94Q140.12 27.53 140.9 27.85Q141.68 28.18 142.69 28.18L142.69 28.18Q144.15 28.18 145.1 27.5Q146.05 26.83 146.61 25.66L146.61 25.66L148.21 26.75Q147.56 28.2 146.21 29.16Q144.85 30.11 142.66 30.11ZM152.66 29.77L152.66 9.05L154.9 9.05L154.9 22.13L155.01 22.13L157.53 19.75L162.35 15.32L165.09 15.32L159.1 20.98L165.79 29.77L163.02 29.77L157.39 22.27L154.9 24.54L154.9 29.77L152.66 29.77ZM177.5 29.77L177.5 27.42L177.38 27.42Q177.16 27.95 176.82 28.44Q176.49 28.93 176 29.3Q175.51 29.66 174.84 29.88Q174.16 30.11 173.27 30.11L173.27 30.11Q171 30.11 169.63 28.67Q168.26 27.22 168.26 24.59L168.26 24.59L168.26 15.32L170.5 15.32L170.5 24.2Q170.5 26.19 171.36 27.15Q172.23 28.12 173.91 28.12L173.91 28.12Q174.58 28.12 175.23 27.95Q175.87 27.78 176.38 27.45Q176.88 27.11 177.19 26.59Q177.5 26.08 177.5 25.35L177.5 25.35L177.5 15.32L179.74 15.32L179.74 29.77L177.5 29.77ZM184.3 35.37L184.3 15.32L186.54 15.32L186.54 17.68L186.65 17.68Q188.05 14.99 191.1 14.99L191.1 14.99Q193.76 14.99 195.26 16.98Q196.76 18.96 196.76 22.55L196.76 22.55Q196.76 26.13 195.26 28.12Q193.76 30.11 191.1 30.11L191.1 30.11Q188.05 30.11 186.65 27.42L186.65 27.42L186.54 27.42L186.54 35.37L184.3 35.37ZM190.24 28.12L190.24 28.12Q192.2 28.12 193.27 26.93Q194.35 25.74 194.35 23.78L194.35 23.78L194.35 21.32Q194.35 19.36 193.27 18.17Q192.2 16.98 190.24 16.98L190.24 16.98Q189.48 16.98 188.81 17.17Q188.14 17.37 187.63 17.75Q187.13 18.12 186.83 18.67Q186.54 19.22 186.54 19.94L186.54 19.94L186.54 25.15Q186.54 25.88 186.83 26.43Q187.13 26.97 187.63 27.35Q188.14 27.73 188.81 27.92Q189.48 28.12 190.24 28.12Z"/></svg>
+<!--@/build:logo-lockup-->
+      </a>
+      <nav class="sc-nav" aria-label="Разделы">
+        <a href="#logo">Логотип</a>
+        <a href="#colors">Цвета</a>
+        <a href="#type">Шрифты</a>
+        <a href="#tokens">Токены</a>
+        <a href="#components">Компоненты</a>
+        <a href="#motion">Анимации</a>
+        <a href="#graphics">Графика</a>
+      </nav>
+      <div class="pb-segmented sc-theme" role="group" aria-label="Тема витрины">
+        <button type="button" data-theme-choice="auto" aria-pressed="true">Авто</button>
+        <button type="button" data-theme-choice="light" aria-pressed="false">Светлая</button>
+        <button type="button" data-theme-choice="dark" aria-pressed="false">Тёмная</button>
+      </div>
+    </div>
+  </header>
+
+  <main id="main">
+    <div id="top" class="sc-container sc-hero">
+      <div class="sc-hero__text">
+        <span class="pb-label">Дизайн-система</span>
+        <h1 class="pb-display">PlugBackup</h1>
+        <p class="pb-lead">Воткнули, и копии в безопасном месте. Токены, логотип, компоненты и графика для сайта, бота и канала.</p>
+        <p class="pb-small">Страница открывается прямо из файла: сервер не нужен, внешних запросов нет. Шрифты лежат рядом и размещаются на вашем сервере.</p>
+        <div class="sc-row">
+          <a class="pb-button pb-button--primary pb-button--lg" href="#components">Смотреть компоненты</a>
+          <a class="pb-button pb-button--lg" href="tokens.css">tokens.css</a>
+          <a class="pb-button pb-button--ghost pb-button--lg" href="tokens.json">tokens.json</a>
+        </div>
+      </div>
+      <div class="sc-hero__logo">
+<!--@build:logo-hero-->
+<svg id="hero-logo" class="pb-logo pb-logo--animate sc-hero__mark" viewBox="-4 -4 31 48" role="img" aria-label="Знак PlugBackup: буква P из пинов"><rect class="pb-logo__socket" x="8.5" y="8.5" width="6" height="6" rx="1.5"/><rect class="pb-logo__socket" x="8.5" y="25.5" width="6" height="6" rx="1.5"/><rect class="pb-logo__socket" x="17" y="25.5" width="6" height="6" rx="1.5"/><rect class="pb-logo__socket" x="8.5" y="34" width="6" height="6" rx="1.5"/><rect class="pb-logo__socket" x="17" y="34" width="6" height="6" rx="1.5"/><g class="pb-logo__plug"><rect class="pb-logo__pin" x="0" y="0" width="6" height="6" rx="1.5"/><rect class="pb-logo__pin" x="8.5" y="0" width="6" height="6" rx="1.5"/><rect class="pb-logo__pin" x="17" y="0" width="6" height="6" rx="1.5"/><rect class="pb-logo__pin" x="0" y="8.5" width="6" height="6" rx="1.5"/><rect class="pb-logo__pin" x="17" y="8.5" width="6" height="6" rx="1.5"/><rect class="pb-logo__pin" x="0" y="17" width="6" height="6" rx="1.5"/><rect class="pb-logo__pin" x="8.5" y="17" width="6" height="6" rx="1.5"/><rect class="pb-logo__pin" x="0" y="25.5" width="6" height="6" rx="1.5"/><rect class="pb-logo__pin" x="0" y="34" width="6" height="6" rx="1.5"/><rect class="pb-logo__lit" x="17" y="17" width="6" height="6" rx="1.5"/></g><rect class="pb-logo__pulse" x="17" y="17" width="6" height="6" rx="1.5"/></svg>
+<!--@/build:logo-hero-->
+        <button class="pb-button pb-button--sm" type="button" data-replay="#hero-logo">Повторить анимацию</button>
+      </div>
+    </div>
+
+    <section id="logo" class="sc-section">
+      <div class="sc-container">
+        <div class="sc-section__head">
+          <span class="pb-label">01</span>
+          <h2 class="pb-h2">Логотип</h2>
+          <p class="pb-lead">Буква P, собранная из пинов разъёма 3×5. Один пин, «подключённый», светится синим. Рядом с ним запасные гнёзда: они чуть заметны и показывают, куда встаёт штекер.</p>
+        </div>
+
+        <h3 class="pb-h3 sc-sub">Варианты на фонах</h3>
+        <div class="sc-grid" style="--min: 18rem">
+          <figure class="sc-fig"><div class="sc-tile sc-tile--white"><img src="logo/logo-on-light.svg" alt="PlugBackup, вариант для светлого фона" height="48"></div><figcaption><code>logo-on-light.svg</code> светлый фон</figcaption></figure>
+          <figure class="sc-fig"><div class="sc-tile sc-tile--graphite"><img src="logo/logo-on-dark.svg" alt="PlugBackup, вариант для тёмного фона" height="48"></div><figcaption><code>logo-on-dark.svg</code> тёмный фон</figcaption></figure>
+          <figure class="sc-fig"><div class="sc-tile sc-tile--chalk"><img src="logo/logo-mono-black.svg" alt="PlugBackup, чёрный монохромный вариант" height="48"></div><figcaption><code>logo-mono-black.svg</code> один цвет, чёрный</figcaption></figure>
+          <figure class="sc-fig"><div class="sc-tile sc-tile--brand"><img src="logo/logo-mono-white.svg" alt="PlugBackup, белый монохромный вариант" height="48"></div><figcaption><code>logo-mono-white.svg</code> один цвет, белый</figcaption></figure>
+        </div>
+
+        <h3 class="pb-h3 sc-sub">Знак и круг</h3>
+        <div class="sc-grid" style="--min: 11rem">
+          <figure class="sc-fig"><div class="sc-tile sc-tile--white"><img src="logo/mark-on-light.svg" alt="Знак на светлом фоне" height="96"></div><figcaption><code>mark-on-light.svg</code></figcaption></figure>
+          <figure class="sc-fig"><div class="sc-tile sc-tile--graphite"><img src="logo/mark-on-dark.svg" alt="Знак на тёмном фоне" height="96"></div><figcaption><code>mark-on-dark.svg</code></figcaption></figure>
+          <figure class="sc-fig"><div class="sc-tile sc-tile--white"><img src="logo/mark-circle-graphite.svg" alt="Знак в графитовом круге" height="96"></div><figcaption><code>mark-circle-graphite.svg</code></figcaption></figure>
+          <figure class="sc-fig"><div class="sc-tile sc-tile--graphite"><img src="logo/mark-circle-chalk.svg" alt="Знак в светлом круге" height="96"></div><figcaption><code>mark-circle-chalk.svg</code></figcaption></figure>
+          <figure class="sc-fig"><div class="sc-tile sc-tile--white"><img src="logo/wordmark-on-light.svg" alt="Слово PlugBackup" height="28"></div><figcaption><code>wordmark-on-light.svg</code></figcaption></figure>
+          <figure class="sc-fig"><div class="sc-tile sc-tile--graphite"><img src="logo/wordmark-on-dark.svg" alt="Слово PlugBackup на тёмном" height="28"></div><figcaption><code>wordmark-on-dark.svg</code></figcaption></figure>
+        </div>
+
+        <h3 class="pb-h3 sc-sub">Размеры и охранное поле</h3>
+        <div class="sc-grid" style="--min: 20rem">
+          <div class="sc-demo">
+            <p class="pb-small">Охранное поле равно двум пинам, то есть 30% высоты знака.</p>
+            <div class="sc-clear-wrap"><div class="sc-clear" style="--h: 4rem"><img src="logo/logo-on-light.svg" alt="" style="height: var(--h)"></div></div>
+          </div>
+          <div class="sc-demo">
+            <p class="pb-small">Знак: не меньше 24 px по высоте. Меньше: упрощённая версия <code class="pb-code">favicon.svg</code> без запасных гнёзд.</p>
+            <div class="sc-sizes">
+              <figure><img src="logo/mark-on-light.svg" alt="" height="24"><figcaption>24</figcaption></figure>
+              <figure><img src="logo/mark-on-light.svg" alt="" height="32"><figcaption>32</figcaption></figure>
+              <figure><img src="logo/mark-on-light.svg" alt="" height="48"><figcaption>48</figcaption></figure>
+              <figure><img src="graphics/svg/favicon.svg" alt="" width="16" height="16"><figcaption>16</figcaption></figure>
+              <figure><img src="graphics/svg/favicon.svg" alt="" width="32" height="32"><figcaption>32</figcaption></figure>
+            </div>
+          </div>
+        </div>
+        <p class="pb-small sc-note">Правила использования, запреты и тон голоса: <a class="pb-link" href="brand.md">brand.md</a>. Название и логотип не входят в лицензию AGPL, см. <a class="pb-link" href="../TRADEMARKS.md">TRADEMARKS.md</a>.</p>
+      </div>
+    </section>
+
+    <section id="colors" class="sc-section">
+      <div class="sc-container">
+        <div class="sc-section__head">
+          <span class="pb-label">02</span>
+          <h2 class="pb-h2">Цвета</h2>
+          <p class="pb-lead">Графитовая нейтральная шкала и один синий акцент. Статусные цвета спокойные, без неона. Светлая и тёмная темы заданы одним набором семантических токенов.</p>
+        </div>
+
+        <h3 class="pb-h3 sc-sub">Палитра</h3>
+<!--@build:palette-->
+<div class="sc-palette"><h4 class="pb-h4">Цвет знака</h4><div class="sc-chips"><div class="sc-chip" style="--chip:#4C6FFF;--chip-fg:#000000"><span>brand</span><code>#4C6FFF</code></div></div><p class="pb-small">Только для графики (включённый пин, акценты на графике). Для текста и кнопок есть отдельные токены ниже: этот цвет не проходит AA для мелкого текста.</p></div>
+<div class="sc-palette"><h4 class="pb-h4">Нейтральные</h4><div class="sc-chips"><div class="sc-chip" style="--chip:#FFFFFF;--chip-fg:#16181C"><span>neutral-0</span><code>#FFFFFF</code></div><div class="sc-chip" style="--chip:#F6F7F9;--chip-fg:#16181C"><span>neutral-50</span><code>#F6F7F9</code></div><div class="sc-chip" style="--chip:#EDEFF2;--chip-fg:#16181C"><span>neutral-100</span><code>#EDEFF2</code></div><div class="sc-chip" style="--chip:#DDE0E5;--chip-fg:#16181C"><span>neutral-200</span><code>#DDE0E5</code></div><div class="sc-chip" style="--chip:#C3C8D0;--chip-fg:#16181C"><span>neutral-300</span><code>#C3C8D0</code></div><div class="sc-chip" style="--chip:#A3AAB5;--chip-fg:#16181C"><span>neutral-400</span><code>#A3AAB5</code></div><div class="sc-chip" style="--chip:#8A929C;--chip-fg:#16181C"><span>neutral-500</span><code>#8A929C</code></div><div class="sc-chip" style="--chip:#646C77;--chip-fg:#FFFFFF"><span>neutral-600</span><code>#646C77</code></div><div class="sc-chip" style="--chip:#4A515B;--chip-fg:#FFFFFF"><span>neutral-700</span><code>#4A515B</code></div><div class="sc-chip" style="--chip:#2E333A;--chip-fg:#FFFFFF"><span>neutral-800</span><code>#2E333A</code></div><div class="sc-chip" style="--chip:#23272D;--chip-fg:#FFFFFF"><span>neutral-850</span><code>#23272D</code></div><div class="sc-chip" style="--chip:#16181C;--chip-fg:#FFFFFF"><span>neutral-900</span><code>#16181C</code></div><div class="sc-chip" style="--chip:#0E1013;--chip-fg:#FFFFFF"><span>neutral-950</span><code>#0E1013</code></div></div></div>
+<div class="sc-palette"><h4 class="pb-h4">Акцент</h4><div class="sc-chips"><div class="sc-chip" style="--chip:#EEF1FF;--chip-fg:#16181C"><span>accent-50</span><code>#EEF1FF</code></div><div class="sc-chip" style="--chip:#DDE3FF;--chip-fg:#16181C"><span>accent-100</span><code>#DDE3FF</code></div><div class="sc-chip" style="--chip:#BBC7FF;--chip-fg:#16181C"><span>accent-200</span><code>#BBC7FF</code></div><div class="sc-chip" style="--chip:#8FA4FF;--chip-fg:#16181C"><span>accent-300</span><code>#8FA4FF</code></div><div class="sc-chip" style="--chip:#6F89FF;--chip-fg:#16181C"><span>accent-400</span><code>#6F89FF</code></div><div class="sc-chip" style="--chip:#4C6FFF;--chip-fg:#000000"><span>accent-500</span><code>#4C6FFF</code></div><div class="sc-chip" style="--chip:#405CF2;--chip-fg:#FFFFFF"><span>accent-600</span><code>#405CF2</code></div><div class="sc-chip" style="--chip:#2B45D6;--chip-fg:#FFFFFF"><span>accent-700</span><code>#2B45D6</code></div><div class="sc-chip" style="--chip:#2237A8;--chip-fg:#FFFFFF"><span>accent-800</span><code>#2237A8</code></div><div class="sc-chip" style="--chip:#1B2B80;--chip-fg:#FFFFFF"><span>accent-900</span><code>#1B2B80</code></div></div></div>
+<div class="sc-palette"><h4 class="pb-h4">Успех</h4><div class="sc-chips"><div class="sc-chip" style="--chip:#E6F4EC;--chip-fg:#16181C"><span>green-50</span><code>#E6F4EC</code></div><div class="sc-chip" style="--chip:#9FD3B7;--chip-fg:#16181C"><span>green-200</span><code>#9FD3B7</code></div><div class="sc-chip" style="--chip:#6FD6A3;--chip-fg:#16181C"><span>green-300</span><code>#6FD6A3</code></div><div class="sc-chip" style="--chip:#136C45;--chip-fg:#FFFFFF"><span>green-700</span><code>#136C45</code></div><div class="sc-chip" style="--chip:#1F5A3F;--chip-fg:#FFFFFF"><span>green-800</span><code>#1F5A3F</code></div><div class="sc-chip" style="--chip:#11261C;--chip-fg:#FFFFFF"><span>green-950</span><code>#11261C</code></div></div></div>
+<div class="sc-palette"><h4 class="pb-h4">Предупреждение</h4><div class="sc-chips"><div class="sc-chip" style="--chip:#FFF3DC;--chip-fg:#16181C"><span>amber-50</span><code>#FFF3DC</code></div><div class="sc-chip" style="--chip:#F0C676;--chip-fg:#16181C"><span>amber-200</span><code>#F0C676</code></div><div class="sc-chip" style="--chip:#FFC247;--chip-fg:#16181C"><span>amber-300</span><code>#FFC247</code></div><div class="sc-chip" style="--chip:#7A4A00;--chip-fg:#FFFFFF"><span>amber-700</span><code>#7A4A00</code></div><div class="sc-chip" style="--chip:#6B4A10;--chip-fg:#FFFFFF"><span>amber-800</span><code>#6B4A10</code></div><div class="sc-chip" style="--chip:#2B1F08;--chip-fg:#FFFFFF"><span>amber-950</span><code>#2B1F08</code></div></div></div>
+<div class="sc-palette"><h4 class="pb-h4">Ошибка</h4><div class="sc-chips"><div class="sc-chip" style="--chip:#FDECEA;--chip-fg:#16181C"><span>red-50</span><code>#FDECEA</code></div><div class="sc-chip" style="--chip:#F1A7A1;--chip-fg:#16181C"><span>red-200</span><code>#F1A7A1</code></div><div class="sc-chip" style="--chip:#FF8A80;--chip-fg:#16181C"><span>red-300</span><code>#FF8A80</code></div><div class="sc-chip" style="--chip:#B3261E;--chip-fg:#FFFFFF"><span>red-700</span><code>#B3261E</code></div><div class="sc-chip" style="--chip:#7A2A24;--chip-fg:#FFFFFF"><span>red-800</span><code>#7A2A24</code></div><div class="sc-chip" style="--chip:#2D1311;--chip-fg:#FFFFFF"><span>red-950</span><code>#2D1311</code></div></div></div>
+<!--@/build:palette-->
+
+        <h3 class="pb-h3 sc-sub">Семантические токены</h3>
+        <p class="pb-small">Левый квадрат: светлая тема, правый: тёмная. В компонентах используйте только эти токены, а не палитру напрямую.</p>
+        <div class="sc-token-groups">
+<!--@build:semantic-->
+<section class="sc-token-group"><h4 class="pb-label">Фоны</h4><div class="sc-token"><span class="sc-token__pair"><i style="background:#F6F7F9" title="Светлая тема"></i><i style="background:#16181C" title="Тёмная тема"></i></span><code>--color-bg-page</code><span class="sc-token__vals">#F6F7F9 · #16181C</span></div><div class="sc-token"><span class="sc-token__pair"><i style="background:#FFFFFF" title="Светлая тема"></i><i style="background:#1D2025" title="Тёмная тема"></i></span><code>--color-bg-surface</code><span class="sc-token__vals">#FFFFFF · #1D2025</span></div><div class="sc-token"><span class="sc-token__pair"><i style="background:#EDEFF2" title="Светлая тема"></i><i style="background:#101215" title="Тёмная тема"></i></span><code>--color-bg-sunken</code><span class="sc-token__vals">#EDEFF2 · #101215</span></div></section>
+<section class="sc-token-group"><h4 class="pb-label">Границы</h4><div class="sc-token"><span class="sc-token__pair"><i style="background:#DDE0E5" title="Светлая тема"></i><i style="background:#2E333A" title="Тёмная тема"></i></span><code>--color-border</code><span class="sc-token__vals">#DDE0E5 · #2E333A</span></div><div class="sc-token"><span class="sc-token__pair"><i style="background:#737B86" title="Светлая тема"></i><i style="background:#7B848F" title="Тёмная тема"></i></span><code>--color-border-strong</code><span class="sc-token__vals">#737B86 · #7B848F</span></div></section>
+<section class="sc-token-group"><h4 class="pb-label">Текст</h4><div class="sc-token"><span class="sc-token__pair"><i style="background:#16181C" title="Светлая тема"></i><i style="background:#EDEFF2" title="Тёмная тема"></i></span><code>--color-text-primary</code><span class="sc-token__vals">#16181C · #EDEFF2</span></div><div class="sc-token"><span class="sc-token__pair"><i style="background:#4A515B" title="Светлая тема"></i><i style="background:#A3AAB5" title="Тёмная тема"></i></span><code>--color-text-secondary</code><span class="sc-token__vals">#4A515B · #A3AAB5</span></div><div class="sc-token"><span class="sc-token__pair"><i style="background:#646C77" title="Светлая тема"></i><i style="background:#8A929C" title="Тёмная тема"></i></span><code>--color-text-muted</code><span class="sc-token__vals">#646C77 · #8A929C</span></div><div class="sc-token"><span class="sc-token__pair"><i style="background:#2B45D6" title="Светлая тема"></i><i style="background:#8FA4FF" title="Тёмная тема"></i></span><code>--color-text-link</code><span class="sc-token__vals">#2B45D6 · #8FA4FF</span></div><div class="sc-token"><span class="sc-token__pair"><i style="background:#1B2B80" title="Светлая тема"></i><i style="background:#BBC7FF" title="Тёмная тема"></i></span><code>--color-text-link-hover</code><span class="sc-token__vals">#1B2B80 · #BBC7FF</span></div><div class="sc-token"><span class="sc-token__pair"><i style="background:#FFFFFF" title="Светлая тема"></i><i style="background:#FFFFFF" title="Тёмная тема"></i></span><code>--color-text-on-accent</code><span class="sc-token__vals">#FFFFFF · #FFFFFF</span></div></section>
+<section class="sc-token-group"><h4 class="pb-label">Акцент и фокус</h4><div class="sc-token"><span class="sc-token__pair"><i style="background:#405CF2" title="Светлая тема"></i><i style="background:#405CF2" title="Тёмная тема"></i></span><code>--color-accent</code><span class="sc-token__vals">#405CF2 · #405CF2</span></div><div class="sc-token"><span class="sc-token__pair"><i style="background:#2B45D6" title="Светлая тема"></i><i style="background:#4A63F2" title="Тёмная тема"></i></span><code>--color-accent-hover</code><span class="sc-token__vals">#2B45D6 · #4A63F2</span></div><div class="sc-token"><span class="sc-token__pair"><i style="background:#2237A8" title="Светлая тема"></i><i style="background:#2F49D8" title="Тёмная тема"></i></span><code>--color-accent-active</code><span class="sc-token__vals">#2237A8 · #2F49D8</span></div><div class="sc-token"><span class="sc-token__pair"><i style="background:#EEF1FF" title="Светлая тема"></i><i style="background:#1A2140" title="Тёмная тема"></i></span><code>--color-accent-subtle</code><span class="sc-token__vals">#EEF1FF · #1A2140</span></div><div class="sc-token"><span class="sc-token__pair"><i style="background:#BBC7FF" title="Светлая тема"></i><i style="background:#2F3F8F" title="Тёмная тема"></i></span><code>--color-accent-border</code><span class="sc-token__vals">#BBC7FF · #2F3F8F</span></div><div class="sc-token"><span class="sc-token__pair"><i style="background:#405CF2" title="Светлая тема"></i><i style="background:#8FA4FF" title="Тёмная тема"></i></span><code>--color-focus-ring</code><span class="sc-token__vals">#405CF2 · #8FA4FF</span></div></section>
+<section class="sc-token-group"><h4 class="pb-label">Статусы</h4><div class="sc-token"><span class="sc-token__pair"><i style="background:#136C45" title="Светлая тема"></i><i style="background:#6FD6A3" title="Тёмная тема"></i></span><code>--color-success-fg</code><span class="sc-token__vals">#136C45 · #6FD6A3</span></div><div class="sc-token"><span class="sc-token__pair"><i style="background:#E6F4EC" title="Светлая тема"></i><i style="background:#11261C" title="Тёмная тема"></i></span><code>--color-success-bg</code><span class="sc-token__vals">#E6F4EC · #11261C</span></div><div class="sc-token"><span class="sc-token__pair"><i style="background:#9FD3B7" title="Светлая тема"></i><i style="background:#1F5A3F" title="Тёмная тема"></i></span><code>--color-success-border</code><span class="sc-token__vals">#9FD3B7 · #1F5A3F</span></div><div class="sc-token"><span class="sc-token__pair"><i style="background:#7A4A00" title="Светлая тема"></i><i style="background:#FFC247" title="Тёмная тема"></i></span><code>--color-warning-fg</code><span class="sc-token__vals">#7A4A00 · #FFC247</span></div><div class="sc-token"><span class="sc-token__pair"><i style="background:#FFF3DC" title="Светлая тема"></i><i style="background:#2B1F08" title="Тёмная тема"></i></span><code>--color-warning-bg</code><span class="sc-token__vals">#FFF3DC · #2B1F08</span></div><div class="sc-token"><span class="sc-token__pair"><i style="background:#F0C676" title="Светлая тема"></i><i style="background:#6B4A10" title="Тёмная тема"></i></span><code>--color-warning-border</code><span class="sc-token__vals">#F0C676 · #6B4A10</span></div><div class="sc-token"><span class="sc-token__pair"><i style="background:#B3261E" title="Светлая тема"></i><i style="background:#FF8A80" title="Тёмная тема"></i></span><code>--color-danger-fg</code><span class="sc-token__vals">#B3261E · #FF8A80</span></div><div class="sc-token"><span class="sc-token__pair"><i style="background:#FDECEA" title="Светлая тема"></i><i style="background:#2D1311" title="Тёмная тема"></i></span><code>--color-danger-bg</code><span class="sc-token__vals">#FDECEA · #2D1311</span></div><div class="sc-token"><span class="sc-token__pair"><i style="background:#F1A7A1" title="Светлая тема"></i><i style="background:#7A2A24" title="Тёмная тема"></i></span><code>--color-danger-border</code><span class="sc-token__vals">#F1A7A1 · #7A2A24</span></div><div class="sc-token"><span class="sc-token__pair"><i style="background:#2B45D6" title="Светлая тема"></i><i style="background:#8FA4FF" title="Тёмная тема"></i></span><code>--color-info-fg</code><span class="sc-token__vals">#2B45D6 · #8FA4FF</span></div><div class="sc-token"><span class="sc-token__pair"><i style="background:#EEF1FF" title="Светлая тема"></i><i style="background:#1A2140" title="Тёмная тема"></i></span><code>--color-info-bg</code><span class="sc-token__vals">#EEF1FF · #1A2140</span></div><div class="sc-token"><span class="sc-token__pair"><i style="background:#BBC7FF" title="Светлая тема"></i><i style="background:#2F3F8F" title="Тёмная тема"></i></span><code>--color-info-border</code><span class="sc-token__vals">#BBC7FF · #2F3F8F</span></div></section>
+<section class="sc-token-group"><h4 class="pb-label">Блок кода</h4><div class="sc-token"><span class="sc-token__pair"><i style="background:#16181C" title="Светлая тема"></i><i style="background:#0E1013" title="Тёмная тема"></i></span><code>--color-code-bg</code><span class="sc-token__vals">#16181C · #0E1013</span></div><div class="sc-token"><span class="sc-token__pair"><i style="background:#EDEFF2" title="Светлая тема"></i><i style="background:#EDEFF2" title="Тёмная тема"></i></span><code>--color-code-fg</code><span class="sc-token__vals">#EDEFF2 · #EDEFF2</span></div><div class="sc-token"><span class="sc-token__pair"><i style="background:#A3AAB5" title="Светлая тема"></i><i style="background:#A3AAB5" title="Тёмная тема"></i></span><code>--color-code-muted</code><span class="sc-token__vals">#A3AAB5 · #A3AAB5</span></div><div class="sc-token"><span class="sc-token__pair"><i style="background:#8FA4FF" title="Светлая тема"></i><i style="background:#8FA4FF" title="Тёмная тема"></i></span><code>--color-code-accent</code><span class="sc-token__vals">#8FA4FF · #8FA4FF</span></div><div class="sc-token"><span class="sc-token__pair"><i style="background:#7FD9AA" title="Светлая тема"></i><i style="background:#7FD9AA" title="Тёмная тема"></i></span><code>--color-code-string</code><span class="sc-token__vals">#7FD9AA · #7FD9AA</span></div><div class="sc-token"><span class="sc-token__pair"><i style="background:#FFC247" title="Светлая тема"></i><i style="background:#FFC247" title="Тёмная тема"></i></span><code>--color-code-flag</code><span class="sc-token__vals">#FFC247 · #FFC247</span></div><div class="sc-token"><span class="sc-token__pair"><i style="background:#2E333A" title="Светлая тема"></i><i style="background:#2E333A" title="Тёмная тема"></i></span><code>--color-code-border</code><span class="sc-token__vals">#2E333A · #2E333A</span></div></section>
+<section class="sc-token-group"><h4 class="pb-label">Недоступные элементы</h4><div class="sc-token"><span class="sc-token__pair"><i style="background:#EDEFF2" title="Светлая тема"></i><i style="background:#23272D" title="Тёмная тема"></i></span><code>--color-disabled-bg</code><span class="sc-token__vals">#EDEFF2 · #23272D</span></div><div class="sc-token"><span class="sc-token__pair"><i style="background:#8A929C" title="Светлая тема"></i><i style="background:#646C77" title="Тёмная тема"></i></span><code>--color-disabled-fg</code><span class="sc-token__vals">#8A929C · #646C77</span></div></section>
+<!--@/build:semantic-->
+        </div>
+
+        <h3 class="pb-h3 sc-sub">Контраст WCAG AA</h3>
+        <p class="pb-small">Каждая пара «текст и фон», которая встречается в компонентах, проверяется скриптом при сборке. Если одна проверка не проходит, сборка останавливается.</p>
+<!--@build:contrast-->
+<details class="sc-details"><summary>Таблица контрастов: 101 проверок, все проходят AA</summary><div class="sc-scroll"><table class="sc-table"><thead><tr><th scope="col">Пара</th><th scope="col">Светлая тема</th><th scope="col">Тёмная тема</th><th scope="col">Норма</th></tr></thead><tbody><tr><td><code>text-primary</code> на <code>bg-page</code></td><td><span class="sc-aa" style="color:#16181C;background:#F6F7F9">Aa</span> <span class="sc-ratio">16.58 ✓</span></td><td><span class="sc-aa" style="color:#EDEFF2;background:#16181C">Aa</span> <span class="sc-ratio">15.42 ✓</span></td><td class="num">4.5:1</td></tr>
+<tr><td><code>text-primary</code> на <code>bg-surface</code></td><td><span class="sc-aa" style="color:#16181C;background:#FFFFFF">Aa</span> <span class="sc-ratio">17.77 ✓</span></td><td><span class="sc-aa" style="color:#EDEFF2;background:#1D2025">Aa</span> <span class="sc-ratio">14.18 ✓</span></td><td class="num">4.5:1</td></tr>
+<tr><td><code>text-primary</code> на <code>bg-sunken</code></td><td><span class="sc-aa" style="color:#16181C;background:#EDEFF2">Aa</span> <span class="sc-ratio">15.42 ✓</span></td><td><span class="sc-aa" style="color:#EDEFF2;background:#101215">Aa</span> <span class="sc-ratio">16.28 ✓</span></td><td class="num">4.5:1</td></tr>
+<tr><td><code>text-secondary</code> на <code>bg-page</code></td><td><span class="sc-aa" style="color:#4A515B;background:#F6F7F9">Aa</span> <span class="sc-ratio">7.47 ✓</span></td><td><span class="sc-aa" style="color:#A3AAB5;background:#16181C">Aa</span> <span class="sc-ratio">7.59 ✓</span></td><td class="num">4.5:1</td></tr>
+<tr><td><code>text-secondary</code> на <code>bg-surface</code></td><td><span class="sc-aa" style="color:#4A515B;background:#FFFFFF">Aa</span> <span class="sc-ratio">8.01 ✓</span></td><td><span class="sc-aa" style="color:#A3AAB5;background:#1D2025">Aa</span> <span class="sc-ratio">6.98 ✓</span></td><td class="num">4.5:1</td></tr>
+<tr><td><code>text-secondary</code> на <code>bg-sunken</code></td><td><span class="sc-aa" style="color:#4A515B;background:#EDEFF2">Aa</span> <span class="sc-ratio">6.95 ✓</span></td><td><span class="sc-aa" style="color:#A3AAB5;background:#101215">Aa</span> <span class="sc-ratio">8.01 ✓</span></td><td class="num">4.5:1</td></tr>
+<tr><td><code>text-muted</code> на <code>bg-page</code></td><td><span class="sc-aa" style="color:#646C77;background:#F6F7F9">Aa</span> <span class="sc-ratio">4.95 ✓</span></td><td><span class="sc-aa" style="color:#8A929C;background:#16181C">Aa</span> <span class="sc-ratio">5.64 ✓</span></td><td class="num">4.5:1</td></tr>
+<tr><td><code>text-muted</code> на <code>bg-surface</code></td><td><span class="sc-aa" style="color:#646C77;background:#FFFFFF">Aa</span> <span class="sc-ratio">5.31 ✓</span></td><td><span class="sc-aa" style="color:#8A929C;background:#1D2025">Aa</span> <span class="sc-ratio">5.19 ✓</span></td><td class="num">4.5:1</td></tr>
+<tr><td><code>text-muted</code> на <code>bg-sunken</code></td><td><span class="sc-aa" style="color:#646C77;background:#EDEFF2">Aa</span> <span class="sc-ratio">4.61 ✓</span></td><td><span class="sc-aa" style="color:#8A929C;background:#101215">Aa</span> <span class="sc-ratio">5.96 ✓</span></td><td class="num">4.5:1</td></tr>
+<tr><td><code>text-link</code> на <code>bg-page</code></td><td><span class="sc-aa" style="color:#2B45D6;background:#F6F7F9">Aa</span> <span class="sc-ratio">6.69 ✓</span></td><td><span class="sc-aa" style="color:#8FA4FF;background:#16181C">Aa</span> <span class="sc-ratio">7.55 ✓</span></td><td class="num">4.5:1</td></tr>
+<tr><td><code>text-link</code> на <code>bg-surface</code></td><td><span class="sc-aa" style="color:#2B45D6;background:#FFFFFF">Aa</span> <span class="sc-ratio">7.17 ✓</span></td><td><span class="sc-aa" style="color:#8FA4FF;background:#1D2025">Aa</span> <span class="sc-ratio">6.94 ✓</span></td><td class="num">4.5:1</td></tr>
+<tr><td><code>text-link</code> на <code>bg-sunken</code></td><td><span class="sc-aa" style="color:#2B45D6;background:#EDEFF2">Aa</span> <span class="sc-ratio">6.23 ✓</span></td><td><span class="sc-aa" style="color:#8FA4FF;background:#101215">Aa</span> <span class="sc-ratio">7.97 ✓</span></td><td class="num">4.5:1</td></tr>
+<tr><td><code>text-link-hover</code> на <code>bg-page</code></td><td><span class="sc-aa" style="color:#1B2B80;background:#F6F7F9">Aa</span> <span class="sc-ratio">11.49 ✓</span></td><td><span class="sc-aa" style="color:#BBC7FF;background:#16181C">Aa</span> <span class="sc-ratio">10.77 ✓</span></td><td class="num">4.5:1</td></tr>
+<tr><td><code>text-link-hover</code> на <code>bg-surface</code></td><td><span class="sc-aa" style="color:#1B2B80;background:#FFFFFF">Aa</span> <span class="sc-ratio">12.32 ✓</span></td><td><span class="sc-aa" style="color:#BBC7FF;background:#1D2025">Aa</span> <span class="sc-ratio">9.89 ✓</span></td><td class="num">4.5:1</td></tr>
+<tr><td><code>text-on-accent</code> на <code>accent</code></td><td><span class="sc-aa" style="color:#FFFFFF;background:#405CF2">Aa</span> <span class="sc-ratio">5.20 ✓</span></td><td><span class="sc-aa" style="color:#FFFFFF;background:#405CF2">Aa</span> <span class="sc-ratio">5.20 ✓</span></td><td class="num">4.5:1</td></tr>
+<tr><td><code>text-on-accent</code> на <code>accent-hover</code></td><td><span class="sc-aa" style="color:#FFFFFF;background:#2B45D6">Aa</span> <span class="sc-ratio">7.17 ✓</span></td><td><span class="sc-aa" style="color:#FFFFFF;background:#4A63F2">Aa</span> <span class="sc-ratio">4.81 ✓</span></td><td class="num">4.5:1</td></tr>
+<tr><td><code>text-on-accent</code> на <code>accent-active</code></td><td><span class="sc-aa" style="color:#FFFFFF;background:#2237A8">Aa</span> <span class="sc-ratio">9.63 ✓</span></td><td><span class="sc-aa" style="color:#FFFFFF;background:#2F49D8">Aa</span> <span class="sc-ratio">6.85 ✓</span></td><td class="num">4.5:1</td></tr>
+<tr><td><code>text-primary</code> на <code>accent-subtle</code></td><td><span class="sc-aa" style="color:#16181C;background:#EEF1FF">Aa</span> <span class="sc-ratio">15.79 ✓</span></td><td><span class="sc-aa" style="color:#EDEFF2;background:#1A2140">Aa</span> <span class="sc-ratio">13.65 ✓</span></td><td class="num">4.5:1</td></tr>
+<tr><td><code>text-link</code> на <code>accent-subtle</code></td><td><span class="sc-aa" style="color:#2B45D6;background:#EEF1FF">Aa</span> <span class="sc-ratio">6.38 ✓</span></td><td><span class="sc-aa" style="color:#8FA4FF;background:#1A2140">Aa</span> <span class="sc-ratio">6.68 ✓</span></td><td class="num">4.5:1</td></tr>
+<tr><td><code>success-fg</code> на <code>success-bg</code></td><td><span class="sc-aa" style="color:#136C45;background:#E6F4EC">Aa</span> <span class="sc-ratio">5.68 ✓</span></td><td><span class="sc-aa" style="color:#6FD6A3;background:#11261C">Aa</span> <span class="sc-ratio">8.97 ✓</span></td><td class="num">4.5:1</td></tr>
+<tr><td><code>success-fg</code> на <code>bg-page</code></td><td><span class="sc-aa" style="color:#136C45;background:#F6F7F9">Aa</span> <span class="sc-ratio">6.01 ✓</span></td><td><span class="sc-aa" style="color:#6FD6A3;background:#16181C">Aa</span> <span class="sc-ratio">10.00 ✓</span></td><td class="num">4.5:1</td></tr>
+<tr><td><code>success-fg</code> на <code>bg-surface</code></td><td><span class="sc-aa" style="color:#136C45;background:#FFFFFF">Aa</span> <span class="sc-ratio">6.44 ✓</span></td><td><span class="sc-aa" style="color:#6FD6A3;background:#1D2025">Aa</span> <span class="sc-ratio">9.19 ✓</span></td><td class="num">4.5:1</td></tr>
+<tr><td><code>warning-fg</code> на <code>warning-bg</code></td><td><span class="sc-aa" style="color:#7A4A00;background:#FFF3DC">Aa</span> <span class="sc-ratio">6.80 ✓</span></td><td><span class="sc-aa" style="color:#FFC247;background:#2B1F08">Aa</span> <span class="sc-ratio">10.02 ✓</span></td><td class="num">4.5:1</td></tr>
+<tr><td><code>warning-fg</code> на <code>bg-page</code></td><td><span class="sc-aa" style="color:#7A4A00;background:#F6F7F9">Aa</span> <span class="sc-ratio">6.97 ✓</span></td><td><span class="sc-aa" style="color:#FFC247;background:#16181C">Aa</span> <span class="sc-ratio">11.05 ✓</span></td><td class="num">4.5:1</td></tr>
+<tr><td><code>warning-fg</code> на <code>bg-surface</code></td><td><span class="sc-aa" style="color:#7A4A00;background:#FFFFFF">Aa</span> <span class="sc-ratio">7.48 ✓</span></td><td><span class="sc-aa" style="color:#FFC247;background:#1D2025">Aa</span> <span class="sc-ratio">10.15 ✓</span></td><td class="num">4.5:1</td></tr>
+<tr><td><code>danger-fg</code> на <code>danger-bg</code></td><td><span class="sc-aa" style="color:#B3261E;background:#FDECEA">Aa</span> <span class="sc-ratio">5.71 ✓</span></td><td><span class="sc-aa" style="color:#FF8A80;background:#2D1311">Aa</span> <span class="sc-ratio">7.58 ✓</span></td><td class="num">4.5:1</td></tr>
+<tr><td><code>danger-fg</code> на <code>bg-page</code></td><td><span class="sc-aa" style="color:#B3261E;background:#F6F7F9">Aa</span> <span class="sc-ratio">6.09 ✓</span></td><td><span class="sc-aa" style="color:#FF8A80;background:#16181C">Aa</span> <span class="sc-ratio">7.78 ✓</span></td><td class="num">4.5:1</td></tr>
+<tr><td><code>danger-fg</code> на <code>bg-surface</code></td><td><span class="sc-aa" style="color:#B3261E;background:#FFFFFF">Aa</span> <span class="sc-ratio">6.53 ✓</span></td><td><span class="sc-aa" style="color:#FF8A80;background:#1D2025">Aa</span> <span class="sc-ratio">7.15 ✓</span></td><td class="num">4.5:1</td></tr>
+<tr><td><code>info-fg</code> на <code>info-bg</code></td><td><span class="sc-aa" style="color:#2B45D6;background:#EEF1FF">Aa</span> <span class="sc-ratio">6.38 ✓</span></td><td><span class="sc-aa" style="color:#8FA4FF;background:#1A2140">Aa</span> <span class="sc-ratio">6.68 ✓</span></td><td class="num">4.5:1</td></tr>
+<tr><td><code>info-fg</code> на <code>bg-page</code></td><td><span class="sc-aa" style="color:#2B45D6;background:#F6F7F9">Aa</span> <span class="sc-ratio">6.69 ✓</span></td><td><span class="sc-aa" style="color:#8FA4FF;background:#16181C">Aa</span> <span class="sc-ratio">7.55 ✓</span></td><td class="num">4.5:1</td></tr>
+<tr><td><code>info-fg</code> на <code>bg-surface</code></td><td><span class="sc-aa" style="color:#2B45D6;background:#FFFFFF">Aa</span> <span class="sc-ratio">7.17 ✓</span></td><td><span class="sc-aa" style="color:#8FA4FF;background:#1D2025">Aa</span> <span class="sc-ratio">6.94 ✓</span></td><td class="num">4.5:1</td></tr>
+<tr><td><code>text-primary</code> на <code>success-bg</code></td><td><span class="sc-aa" style="color:#16181C;background:#E6F4EC">Aa</span> <span class="sc-ratio">15.67 ✓</span></td><td><span class="sc-aa" style="color:#EDEFF2;background:#11261C">Aa</span> <span class="sc-ratio">13.83 ✓</span></td><td class="num">4.5:1</td></tr>
+<tr><td><code>text-primary</code> на <code>warning-bg</code></td><td><span class="sc-aa" style="color:#16181C;background:#FFF3DC">Aa</span> <span class="sc-ratio">16.17 ✓</span></td><td><span class="sc-aa" style="color:#EDEFF2;background:#2B1F08">Aa</span> <span class="sc-ratio">13.99 ✓</span></td><td class="num">4.5:1</td></tr>
+<tr><td><code>text-primary</code> на <code>danger-bg</code></td><td><span class="sc-aa" style="color:#16181C;background:#FDECEA">Aa</span> <span class="sc-ratio">15.54 ✓</span></td><td><span class="sc-aa" style="color:#EDEFF2;background:#2D1311">Aa</span> <span class="sc-ratio">15.03 ✓</span></td><td class="num">4.5:1</td></tr>
+<tr><td><code>text-primary</code> на <code>info-bg</code></td><td><span class="sc-aa" style="color:#16181C;background:#EEF1FF">Aa</span> <span class="sc-ratio">15.79 ✓</span></td><td><span class="sc-aa" style="color:#EDEFF2;background:#1A2140">Aa</span> <span class="sc-ratio">13.65 ✓</span></td><td class="num">4.5:1</td></tr>
+<tr><td><code>code-fg</code> на <code>code-bg</code></td><td><span class="sc-aa" style="color:#EDEFF2;background:#16181C">Aa</span> <span class="sc-ratio">15.42 ✓</span></td><td><span class="sc-aa" style="color:#EDEFF2;background:#0E1013">Aa</span> <span class="sc-ratio">16.53 ✓</span></td><td class="num">4.5:1</td></tr>
+<tr><td><code>code-muted</code> на <code>code-bg</code></td><td><span class="sc-aa" style="color:#A3AAB5;background:#16181C">Aa</span> <span class="sc-ratio">7.59 ✓</span></td><td><span class="sc-aa" style="color:#A3AAB5;background:#0E1013">Aa</span> <span class="sc-ratio">8.14 ✓</span></td><td class="num">4.5:1</td></tr>
+<tr><td><code>code-accent</code> на <code>code-bg</code></td><td><span class="sc-aa" style="color:#8FA4FF;background:#16181C">Aa</span> <span class="sc-ratio">7.55 ✓</span></td><td><span class="sc-aa" style="color:#8FA4FF;background:#0E1013">Aa</span> <span class="sc-ratio">8.09 ✓</span></td><td class="num">4.5:1</td></tr>
+<tr><td><code>code-string</code> на <code>code-bg</code></td><td><span class="sc-aa" style="color:#7FD9AA;background:#16181C">Aa</span> <span class="sc-ratio">10.50 ✓</span></td><td><span class="sc-aa" style="color:#7FD9AA;background:#0E1013">Aa</span> <span class="sc-ratio">11.25 ✓</span></td><td class="num">4.5:1</td></tr>
+<tr><td><code>code-flag</code> на <code>code-bg</code></td><td><span class="sc-aa" style="color:#FFC247;background:#16181C">Aa</span> <span class="sc-ratio">11.05 ✓</span></td><td><span class="sc-aa" style="color:#FFC247;background:#0E1013">Aa</span> <span class="sc-ratio">11.84 ✓</span></td><td class="num">4.5:1</td></tr>
+<tr><td><code>border-strong</code> на <code>bg-page</code></td><td><span class="sc-aa" style="color:#737B86;background:#F6F7F9">Aa</span> <span class="sc-ratio">3.99 ✓</span></td><td><span class="sc-aa" style="color:#7B848F;background:#16181C">Aa</span> <span class="sc-ratio">4.68 ✓</span></td><td class="num">3:1</td></tr>
+<tr><td><code>border-strong</code> на <code>bg-surface</code></td><td><span class="sc-aa" style="color:#737B86;background:#FFFFFF">Aa</span> <span class="sc-ratio">4.28 ✓</span></td><td><span class="sc-aa" style="color:#7B848F;background:#1D2025">Aa</span> <span class="sc-ratio">4.30 ✓</span></td><td class="num">3:1</td></tr>
+<tr><td><code>accent</code> на <code>bg-page</code></td><td><span class="sc-aa" style="color:#405CF2;background:#F6F7F9">Aa</span> <span class="sc-ratio">4.86 ✓</span></td><td><span class="sc-aa" style="color:#405CF2;background:#16181C">Aa</span> <span class="sc-ratio">3.41 ✓</span></td><td class="num">3:1</td></tr>
+<tr><td><code>accent</code> на <code>bg-surface</code></td><td><span class="sc-aa" style="color:#405CF2;background:#FFFFFF">Aa</span> <span class="sc-ratio">5.20 ✓</span></td><td><span class="sc-aa" style="color:#405CF2;background:#1D2025">Aa</span> <span class="sc-ratio">3.13 ✓</span></td><td class="num">3:1</td></tr>
+<tr><td><code>focus-ring</code> на <code>bg-page</code></td><td><span class="sc-aa" style="color:#405CF2;background:#F6F7F9">Aa</span> <span class="sc-ratio">4.86 ✓</span></td><td><span class="sc-aa" style="color:#8FA4FF;background:#16181C">Aa</span> <span class="sc-ratio">7.55 ✓</span></td><td class="num">3:1</td></tr>
+<tr><td><code>focus-ring</code> на <code>bg-surface</code></td><td><span class="sc-aa" style="color:#405CF2;background:#FFFFFF">Aa</span> <span class="sc-ratio">5.20 ✓</span></td><td><span class="sc-aa" style="color:#8FA4FF;background:#1D2025">Aa</span> <span class="sc-ratio">6.94 ✓</span></td><td class="num">3:1</td></tr>
+<tr><td><code>focus-ring</code> на <code>bg-sunken</code></td><td><span class="sc-aa" style="color:#405CF2;background:#EDEFF2">Aa</span> <span class="sc-ratio">4.52 ✓</span></td><td><span class="sc-aa" style="color:#8FA4FF;background:#101215">Aa</span> <span class="sc-ratio">7.97 ✓</span></td><td class="num">3:1</td></tr><tr><td>Включённый пин на графитовом фоне</td><td colspan="2"><span class="sc-aa" style="color:#4C6FFF;background:#16181C">Aa</span> <span class="sc-ratio">4.25 ✓</span> <code>#4C6FFF</code> на <code>#16181C</code></td><td class="num">3:1</td></tr>
+<tr><td>Включённый пин на белом фоне</td><td colspan="2"><span class="sc-aa" style="color:#4C6FFF;background:#FFFFFF">Aa</span> <span class="sc-ratio">4.17 ✓</span> <code>#4C6FFF</code> на <code>#FFFFFF</code></td><td class="num">3:1</td></tr>
+<tr><td>Пины знака (мел) на графите</td><td colspan="2"><span class="sc-aa" style="color:#EDEFF2;background:#16181C">Aa</span> <span class="sc-ratio">15.42 ✓</span> <code>#EDEFF2</code> на <code>#16181C</code></td><td class="num">3:1</td></tr>
+<tr><td>Пины знака (графит) на белом</td><td colspan="2"><span class="sc-aa" style="color:#16181C;background:#FFFFFF">Aa</span> <span class="sc-ratio">17.77 ✓</span> <code>#16181C</code> на <code>#FFFFFF</code></td><td class="num">3:1</td></tr>
+<tr><td>Текст на графике: мел на графите</td><td colspan="2"><span class="sc-aa" style="color:#EDEFF2;background:#16181C">Aa</span> <span class="sc-ratio">15.42 ✓</span> <code>#EDEFF2</code> на <code>#16181C</code></td><td class="num">4.5:1</td></tr>
+<tr><td>Текст на графике: вторичный на графите</td><td colspan="2"><span class="sc-aa" style="color:#A3AAB5;background:#16181C">Aa</span> <span class="sc-ratio">7.59 ✓</span> <code>#A3AAB5</code> на <code>#16181C</code></td><td class="num">4.5:1</td></tr>
+<tr><td>Текст на графике: акцент на графите</td><td colspan="2"><span class="sc-aa" style="color:#8FA4FF;background:#16181C">Aa</span> <span class="sc-ratio">7.55 ✓</span> <code>#8FA4FF</code> на <code>#16181C</code></td><td class="num">4.5:1</td></tr></tbody></table></div><p class="pb-small">Та же таблица лежит в <a class="pb-link" href="contrast.md">contrast.md</a>.</p></details>
+<!--@/build:contrast-->
+      </div>
+    </section>
+
+    <section id="type" class="sc-section">
+      <div class="sc-container">
+        <div class="sc-section__head">
+          <span class="pb-label">03</span>
+          <h2 class="pb-h2">Шрифты</h2>
+          <p class="pb-lead">IBM Plex Sans для текста и IBM Plex Mono для кода, цифр тарифов и подписей. Оба под лицензией SIL OFL 1.1, обе с кириллицей и знаком ₽. Файлы лежат в <code class="pb-code">fonts/</code>, запросов к чужим серверам нет.</p>
+        </div>
+
+        <div class="sc-grid" style="--min: 22rem">
+          <div class="sc-demo sc-specimen">
+            <span class="pb-label">IBM Plex Sans</span>
+            <p class="sc-specimen__big" style="font-family: var(--font-family-sans); font-weight: var(--font-weight-semibold)">Копии шифруются на вашей стороне</p>
+            <p class="sc-specimen__weights" style="font-family: var(--font-family-sans)"><span style="font-weight:400">Regular 400</span> <span style="font-weight:500">Medium 500</span> <span style="font-weight:600">SemiBold 600</span></p>
+            <p class="sc-specimen__glyphs" style="font-family: var(--font-family-sans)">АБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ абвгдеёжзийклмнопрстуфхцчшщъыьэюя ABCDEFGHIJKLMNOPQRSTUVWXYZ abcdefghijklmnopqrstuvwxyz 0123456789 ₽ № « » — → ≈ ✓</p>
+          </div>
+          <div class="sc-demo sc-specimen">
+            <span class="pb-label">IBM Plex Mono</span>
+            <p class="sc-specimen__big" style="font-family: var(--font-family-mono); font-weight: var(--font-weight-semibold)">50 ГБ · 79 ₽/мес</p>
+            <p class="sc-specimen__weights" style="font-family: var(--font-family-mono)"><span style="font-weight:400">Regular 400</span> <span style="font-weight:500">Medium 500</span> <span style="font-weight:600">SemiBold 600</span></p>
+            <p class="sc-specimen__glyphs" style="font-family: var(--font-family-mono)">АБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ абвгдеёжзийклмнопрстуфхцчшщъыьэюя ABCDEFGHIJKLMNOPQRSTUVWXYZ abcdefghijklmnopqrstuvwxyz 0123456789 ₽ № « » — → ≈ ✓ 0O 1lI</p>
+          </div>
+        </div>
+
+        <h3 class="pb-h3 sc-sub">Шкала размеров</h3>
+        <div class="sc-type-list">
+<!--@build:type-scale-->
+<div class="sc-type"><div class="sc-type__meta"><code>--font-size-xs</code><span>0.75rem · 12 px</span></div><div class="sc-type__sample" style="font-size:var(--font-size-xs)">Резервные копии</div></div>
+<div class="sc-type"><div class="sc-type__meta"><code>--font-size-sm</code><span>0.875rem · 14 px</span></div><div class="sc-type__sample" style="font-size:var(--font-size-sm)">Резервные копии</div></div>
+<div class="sc-type"><div class="sc-type__meta"><code>--font-size-base</code><span>1rem · 16 px</span></div><div class="sc-type__sample" style="font-size:var(--font-size-base)">Резервные копии</div></div>
+<div class="sc-type"><div class="sc-type__meta"><code>--font-size-lg</code><span>1.125rem · 18 px</span></div><div class="sc-type__sample" style="font-size:var(--font-size-lg)">Резервные копии</div></div>
+<div class="sc-type"><div class="sc-type__meta"><code>--font-size-xl</code><span>1.25rem · 20 px</span></div><div class="sc-type__sample" style="font-size:var(--font-size-xl)">Резервные копии</div></div>
+<div class="sc-type"><div class="sc-type__meta"><code>--font-size-2xl</code><span>1.5rem · 24 px</span></div><div class="sc-type__sample" style="font-size:var(--font-size-2xl)">Резервные копии</div></div>
+<div class="sc-type"><div class="sc-type__meta"><code>--font-size-3xl</code><span>1.875rem · 30 px</span></div><div class="sc-type__sample" style="font-size:var(--font-size-3xl)">Резервные копии</div></div>
+<div class="sc-type"><div class="sc-type__meta"><code>--font-size-4xl</code><span>2.25rem · 36 px</span></div><div class="sc-type__sample" style="font-size:var(--font-size-4xl)">Резервные копии</div></div>
+<div class="sc-type"><div class="sc-type__meta"><code>--font-size-5xl</code><span>3rem · 48 px</span></div><div class="sc-type__sample" style="font-size:var(--font-size-5xl)">Резервные копии</div></div>
+<div class="sc-type"><div class="sc-type__meta"><code>--font-size-6xl</code><span>3.75rem · 60 px</span></div><div class="sc-type__sample" style="font-size:var(--font-size-6xl)">Резервные копии</div></div>
+<!--@/build:type-scale-->
+        </div>
+
+        <h3 class="pb-h3 sc-sub">Роли</h3>
+        <div class="sc-scroll">
+          <table class="sc-table">
+            <thead><tr><th scope="col">Роль</th><th scope="col">Класс</th><th scope="col">Размер и начертание</th><th scope="col">Пример</th></tr></thead>
+            <tbody>
+              <tr><td>Заголовок первого экрана</td><td><code>.pb-display</code></td><td>4xl–6xl, 600, плавно</td><td><span class="pb-h2">Хранилище</span></td></tr>
+              <tr><td>Заголовок страницы</td><td><code>.pb-h1</code></td><td>4xl, 600</td><td><span class="pb-h1">Тарифы</span></td></tr>
+              <tr><td>Заголовок раздела</td><td><code>.pb-h2</code></td><td>3xl, 600</td><td><span class="pb-h2">Подключение</span></td></tr>
+              <tr><td>Подзаголовок</td><td><code>.pb-h3</code>, <code>.pb-h4</code></td><td>2xl и xl, 600</td><td><span class="pb-h3">Настройка restic</span></td></tr>
+              <tr><td>Вводный абзац</td><td><code>.pb-lead</code></td><td>lg, 400, вторичный цвет</td><td><span class="pb-lead">Копии шифруются до отправки.</span></td></tr>
+              <tr><td>Основной текст</td><td><code>.pb-body</code></td><td>base, 400</td><td><span class="pb-body">Ключ остаётся у вас.</span></td></tr>
+              <tr><td>Мелкий текст</td><td><code>.pb-small</code>, <code>.pb-caption</code></td><td>sm и xs</td><td><span class="pb-small">Сумма в рублях — ориентир.</span></td></tr>
+              <tr><td>Подпись, название тарифа</td><td><code>.pb-label</code></td><td>Mono xs, 500, разрядка</td><td><span class="pb-label">Тариф</span></td></tr>
+              <tr><td>Код, адреса, объёмы</td><td><code>.pb-code</code></td><td>Mono, 0,9 em</td><td><code class="pb-code">restic init</code></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <section id="tokens" class="sc-section">
+      <div class="sc-container">
+        <div class="sc-section__head">
+          <span class="pb-label">04</span>
+          <h2 class="pb-h2">Токены</h2>
+          <p class="pb-lead">Источник правды: <a class="pb-link" href="tokens.json">tokens.json</a>. Из него скрипт собирает <a class="pb-link" href="tokens.css">tokens.css</a>, поэтому значения в них всегда совпадают. Тема берётся из <code class="pb-code">prefers-color-scheme</code> и переопределяется атрибутом <code class="pb-code">data-theme="light"</code> или <code class="pb-code">"dark"</code> на <code class="pb-code">&lt;html&gt;</code>.</p>
+        </div>
+
+        <h3 class="pb-h3 sc-sub">Отступы</h3>
+        <div class="sc-space-list">
+<!--@build:space-->
+<div class="sc-space"><code>--space-1</code><span class="sc-space__bar" style="width:var(--space-1)"></span><span class="sc-space__val">4 px</span></div>
+<div class="sc-space"><code>--space-2</code><span class="sc-space__bar" style="width:var(--space-2)"></span><span class="sc-space__val">8 px</span></div>
+<div class="sc-space"><code>--space-3</code><span class="sc-space__bar" style="width:var(--space-3)"></span><span class="sc-space__val">12 px</span></div>
+<div class="sc-space"><code>--space-4</code><span class="sc-space__bar" style="width:var(--space-4)"></span><span class="sc-space__val">16 px</span></div>
+<div class="sc-space"><code>--space-5</code><span class="sc-space__bar" style="width:var(--space-5)"></span><span class="sc-space__val">20 px</span></div>
+<div class="sc-space"><code>--space-6</code><span class="sc-space__bar" style="width:var(--space-6)"></span><span class="sc-space__val">24 px</span></div>
+<div class="sc-space"><code>--space-8</code><span class="sc-space__bar" style="width:var(--space-8)"></span><span class="sc-space__val">32 px</span></div>
+<div class="sc-space"><code>--space-10</code><span class="sc-space__bar" style="width:var(--space-10)"></span><span class="sc-space__val">40 px</span></div>
+<div class="sc-space"><code>--space-12</code><span class="sc-space__bar" style="width:var(--space-12)"></span><span class="sc-space__val">48 px</span></div>
+<div class="sc-space"><code>--space-16</code><span class="sc-space__bar" style="width:var(--space-16)"></span><span class="sc-space__val">64 px</span></div>
+<div class="sc-space"><code>--space-20</code><span class="sc-space__bar" style="width:var(--space-20)"></span><span class="sc-space__val">80 px</span></div>
+<div class="sc-space"><code>--space-24</code><span class="sc-space__bar" style="width:var(--space-24)"></span><span class="sc-space__val">96 px</span></div>
+<div class="sc-space"><code>--space-px</code><span class="sc-space__bar" style="width:var(--space-px)"></span><span class="sc-space__val">1 px</span></div>
+<!--@/build:space-->
+        </div>
+
+        <h3 class="pb-h3 sc-sub">Скругления</h3>
+        <div class="sc-row sc-row--top">
+<!--@build:radius-->
+<figure class="sc-radius"><span style="border-radius:var(--radius-none)"></span><figcaption><code>--radius-none</code><br>0</figcaption></figure>
+<figure class="sc-radius"><span style="border-radius:var(--radius-xs)"></span><figcaption><code>--radius-xs</code><br>2px</figcaption></figure>
+<figure class="sc-radius"><span style="border-radius:var(--radius-sm)"></span><figcaption><code>--radius-sm</code><br>4px</figcaption></figure>
+<figure class="sc-radius"><span style="border-radius:var(--radius-md)"></span><figcaption><code>--radius-md</code><br>6px</figcaption></figure>
+<figure class="sc-radius"><span style="border-radius:var(--radius-lg)"></span><figcaption><code>--radius-lg</code><br>10px</figcaption></figure>
+<figure class="sc-radius"><span style="border-radius:var(--radius-xl)"></span><figcaption><code>--radius-xl</code><br>16px</figcaption></figure>
+<figure class="sc-radius"><span style="border-radius:var(--radius-full)"></span><figcaption><code>--radius-full</code><br>полный</figcaption></figure>
+<!--@/build:radius-->
+        </div>
+
+        <h3 class="pb-h3 sc-sub">Тени и фокус</h3>
+        <div class="sc-row sc-row--top">
+<!--@build:shadow-->
+<figure class="sc-shadow"><span style="box-shadow:var(--shadow-sm)"></span><figcaption><code>--shadow-sm</code></figcaption></figure>
+<figure class="sc-shadow"><span style="box-shadow:var(--shadow-md)"></span><figcaption><code>--shadow-md</code></figcaption></figure>
+<figure class="sc-shadow"><span style="box-shadow:var(--shadow-lg)"></span><figcaption><code>--shadow-lg</code></figcaption></figure>
+<figure class="sc-shadow"><span class="sc-shadow__focus" style="box-shadow:var(--shadow-focus)"></span><figcaption><code>--shadow-focus</code></figcaption></figure>
+<!--@/build:shadow-->
+        </div>
+
+        <h3 class="pb-h3 sc-sub">Длительности и кривые</h3>
+        <div class="sc-row">
+          <button class="pb-button pb-button--sm" type="button" data-motion-toggle>Запустить</button>
+          <p class="pb-small">При <code class="pb-code">prefers-reduced-motion: reduce</code> движение отключено, и пины сразу встанут в конечное положение.</p>
+        </div>
+        <div class="sc-motion-grid">
+<!--@build:motion-->
+<div><h4 class="pb-h4">Длительности</h4><div class="sc-motion" style="--d:var(--duration-fast);--e:var(--ease-standard)"><code>--duration-fast</code><span class="sc-motion__val">120ms</span><span class="sc-motion__track"><i></i></span></div><div class="sc-motion" style="--d:var(--duration-base);--e:var(--ease-standard)"><code>--duration-base</code><span class="sc-motion__val">200ms</span><span class="sc-motion__track"><i></i></span></div><div class="sc-motion" style="--d:var(--duration-slow);--e:var(--ease-standard)"><code>--duration-slow</code><span class="sc-motion__val">360ms</span><span class="sc-motion__track"><i></i></span></div><div class="sc-motion" style="--d:var(--duration-slower);--e:var(--ease-standard)"><code>--duration-slower</code><span class="sc-motion__val">700ms</span><span class="sc-motion__track"><i></i></span></div></div><div><h4 class="pb-h4">Кривые</h4><div class="sc-motion" style="--d:900ms;--e:var(--ease-standard)"><code>--ease-standard</code><span class="sc-motion__val">cubic-bezier(0.2, 0, 0, 1)</span><span class="sc-motion__track"><i></i></span></div><div class="sc-motion" style="--d:900ms;--e:var(--ease-enter)"><code>--ease-enter</code><span class="sc-motion__val">cubic-bezier(0, 0, 0.2, 1)</span><span class="sc-motion__track"><i></i></span></div><div class="sc-motion" style="--d:900ms;--e:var(--ease-exit)"><code>--ease-exit</code><span class="sc-motion__val">cubic-bezier(0.4, 0, 1, 1)</span><span class="sc-motion__track"><i></i></span></div><div class="sc-motion" style="--d:900ms;--e:var(--ease-plug)"><code>--ease-plug</code><span class="sc-motion__val">cubic-bezier(0.34, 1.45, 0.64, 1)</span><span class="sc-motion__track"><i></i></span></div><div class="sc-motion" style="--d:900ms;--e:var(--ease-linear)"><code>--ease-linear</code><span class="sc-motion__val">linear</span><span class="sc-motion__track"><i></i></span></div></div>
+<!--@/build:motion-->
+        </div>
+      </div>
+    </section>
+
+    <section id="components" class="sc-section">
+      <div class="sc-container">
+        <div class="sc-section__head">
+          <span class="pb-label">05</span>
+          <h2 class="pb-h2">Компоненты</h2>
+          <p class="pb-lead">Классы с префиксом <code class="pb-code">pb-</code> лежат в <a class="pb-link" href="components.css">components.css</a>. Наведите курсор, нажмите Tab и Enter: у всех интерактивных элементов есть состояния hover, focus и pressed.</p>
+        </div>
+
+        <h3 class="pb-h3 sc-sub">Кнопки</h3>
+        <div class="sc-demo sc-stack">
+          <div class="sc-row">
+            <button class="pb-button pb-button--primary" type="button">Открыть бота</button>
+            <button class="pb-button" type="button">Копировать ключ</button>
+            <button class="pb-button pb-button--ghost" type="button">Отмена</button>
+            <button class="pb-button pb-button--danger" type="button">Удалить копию</button>
+          </div>
+          <div class="sc-row">
+            <button class="pb-button pb-button--primary pb-button--sm" type="button">Маленькая</button>
+            <button class="pb-button pb-button--primary" type="button">Обычная</button>
+            <button class="pb-button pb-button--primary pb-button--lg" type="button">Большая</button>
+          </div>
+          <div class="sc-row">
+            <button class="pb-button pb-button--primary" type="button" disabled>Недоступна</button>
+            <button class="pb-button" type="button" disabled>Недоступна</button>
+            <button class="pb-button pb-button--primary" type="button" data-busy-demo>
+              <span class="pb-loader pb-loader--sm" aria-hidden="true"><i class="pb-loader__pin" style="--i:0"></i><i class="pb-loader__pin" style="--i:1"></i><i class="pb-loader__pin" style="--i:2"></i><i class="pb-loader__pin" style="--i:3"></i><i class="pb-loader__pin" style="--i:4"></i></span>
+              <span data-busy-label>Отправить</span>
+            </button>
+          </div>
+          <p class="pb-caption">Последняя кнопка показывает состояние загрузки: нажмите, и она на две секунды станет занятой.</p>
+        </div>
+
+        <h3 class="pb-h3 sc-sub">Карточки тарифов</h3>
+        <p class="pb-small">Цены и объёмы берутся из <a class="pb-link" href="data/plans.json">data/plans.json</a>. Кнопка на всех карточках ведёт в бота. Пины в углу карточки только украшают.</p>
+<!--@build:plans-->
+<div class="pb-plans"><article class="pb-card pb-card--interactive pb-plan pb-plan--featured">
+  <header class="pb-plan__head"><h4 class="pb-plan__name">Бета</h4><span class="pb-tier" aria-hidden="true"><i class="pb-tier__pin is-on" style="--i:0"></i><i class="pb-tier__pin" style="--i:1"></i><i class="pb-tier__pin" style="--i:2"></i><i class="pb-tier__pin" style="--i:3"></i></span></header>
+  <p class="pb-plan__size">10&nbsp;ГБ</p>
+  <p class="pb-plan__price">Бесплатно</p>
+  <p class="pb-plan__access">По инвайт-коду</p>
+  <ul class="pb-plan__features"><li>Загрузка по SFTP через restic или rclone</li><li>Шифрование на вашей стороне, до отправки</li><li>Клиенты изолированы друг от друга</li></ul>
+  <a class="pb-button pb-button--block pb-plan__cta pb-button--primary" href="https://t.me/PlugBackupBot">Открыть @PlugBackupBot</a>
+</article>
+<article class="pb-card pb-card--interactive pb-plan">
+  <header class="pb-plan__head"><h4 class="pb-plan__name">Тариф</h4><span class="pb-tier" aria-hidden="true"><i class="pb-tier__pin is-on" style="--i:0"></i><i class="pb-tier__pin is-on" style="--i:1"></i><i class="pb-tier__pin" style="--i:2"></i><i class="pb-tier__pin" style="--i:3"></i></span></header>
+  <p class="pb-plan__size">50&nbsp;ГБ</p>
+  <p class="pb-plan__price">79&nbsp;₽ <span class="pb-plan__period">/мес</span></p>
+  <p class="pb-plan__note">Бета: один диск, без резервирования</p>
+  <ul class="pb-plan__features"><li>Загрузка по SFTP через restic или rclone</li><li>Шифрование на вашей стороне, до отправки</li><li>Клиенты изолированы друг от друга</li></ul>
+  <a class="pb-button pb-button--block pb-plan__cta" href="https://t.me/PlugBackupBot">Открыть @PlugBackupBot</a>
+</article>
+<article class="pb-card pb-card--interactive pb-plan">
+  <header class="pb-plan__head"><h4 class="pb-plan__name">Тариф</h4><span class="pb-tier" aria-hidden="true"><i class="pb-tier__pin is-on" style="--i:0"></i><i class="pb-tier__pin is-on" style="--i:1"></i><i class="pb-tier__pin is-on" style="--i:2"></i><i class="pb-tier__pin" style="--i:3"></i></span></header>
+  <p class="pb-plan__size">100&nbsp;ГБ</p>
+  <p class="pb-plan__price">149&nbsp;₽ <span class="pb-plan__period">/мес</span></p>
+  <p class="pb-plan__note">Бета: один диск, без резервирования</p>
+  <ul class="pb-plan__features"><li>Загрузка по SFTP через restic или rclone</li><li>Шифрование на вашей стороне, до отправки</li><li>Клиенты изолированы друг от друга</li></ul>
+  <a class="pb-button pb-button--block pb-plan__cta" href="https://t.me/PlugBackupBot">Открыть @PlugBackupBot</a>
+</article>
+<article class="pb-card pb-card--interactive pb-plan">
+  <header class="pb-plan__head"><h4 class="pb-plan__name">Тариф</h4><span class="pb-tier" aria-hidden="true"><i class="pb-tier__pin is-on" style="--i:0"></i><i class="pb-tier__pin is-on" style="--i:1"></i><i class="pb-tier__pin is-on" style="--i:2"></i><i class="pb-tier__pin is-on" style="--i:3"></i></span></header>
+  <p class="pb-plan__size">200&nbsp;ГБ</p>
+  <p class="pb-plan__price">249&nbsp;₽ <span class="pb-plan__period">/мес</span></p>
+  <p class="pb-plan__note">Бета: один диск, без резервирования</p>
+  <ul class="pb-plan__features"><li>Загрузка по SFTP через restic или rclone</li><li>Шифрование на вашей стороне, до отправки</li><li>Клиенты изолированы друг от друга</li></ul>
+  <a class="pb-button pb-button--block pb-plan__cta" href="https://t.me/PlugBackupBot">Открыть @PlugBackupBot</a>
+</article></div>
+<p class="pb-caption sc-footnote">Оплата в Telegram Stars. Сумма в рублях — ориентир.</p>
+<!--@/build:plans-->
+
+        <h3 class="pb-h3 sc-sub">Блок кода</h3>
+        <div class="pb-code-block">
+          <div class="pb-code-block__bar">
+            <span>bash</span>
+            <button class="pb-copy" type="button" data-copy="#code-restic"><span data-copy-label>Копировать</span></button>
+            <span class="pb-sr-only" role="status" aria-live="polite" data-copy-status></span>
+          </div>
+<pre><code id="code-restic"><span class="pb-tok-comment"># Данные подключения выдаёт бот; адрес здесь для примера</span>
+<span class="pb-tok-cmd">restic</span> <span class="pb-tok-flag">-r</span> sftp:USER@192.0.2.10:repo init
+<span class="pb-tok-cmd">restic</span> <span class="pb-tok-flag">-r</span> sftp:USER@192.0.2.10:repo backup ~/Documents <span class="pb-tok-flag">--tag</span> <span class="pb-tok-str">"docs"</span></code></pre>
+        </div>
+
+        <h3 class="pb-h3 sc-sub">Плашки статуса</h3>
+        <div class="sc-demo">
+          <div class="sc-row">
+            <span class="pb-badge pb-badge--success">Доступ активен</span>
+            <span class="pb-badge pb-badge--warning">Квота почти исчерпана</span>
+            <span class="pb-badge pb-badge--danger">Ошибка подключения</span>
+            <span class="pb-badge pb-badge--info">Бета</span>
+            <span class="pb-badge">Ожидает оплаты</span>
+          </div>
+        </div>
+        <p class="pb-caption">Статус всегда передаётся словом, а не только цветом. Надписи в примере: образцы.</p>
+
+        <h3 class="pb-h3 sc-sub">Предупреждения</h3>
+        <div class="sc-alerts">
+          <div class="pb-alert pb-alert--warning" role="note">
+            <div><p class="pb-alert__title">Не теряйте пароль шифрования</p><p class="pb-alert__text">Если вы потеряете пароль шифрования, восстановить данные будет нельзя. У нас его нет.</p></div>
+          </div>
+          <div class="pb-alert pb-alert--info" role="note">
+            <div><p class="pb-alert__title">Шифрование на вашей стороне</p><p class="pb-alert__text">restic и rclone шифруют данные до отправки на ноду.</p></div>
+          </div>
+          <div class="pb-alert pb-alert--success" role="status">
+            <div><p class="pb-alert__title">Репозиторий создан</p><p class="pb-alert__text">Можно запускать первую резервную копию.</p></div>
+          </div>
+          <div class="pb-alert pb-alert--danger" role="alert">
+            <div><p class="pb-alert__title">Не удалось подключиться по SFTP</p><p class="pb-alert__text">Проверьте адрес и логин. Если всё верно, напишите в бота.</p></div>
+          </div>
+        </div>
+
+        <h3 class="pb-h3 sc-sub">Поля ввода</h3>
+        <form class="sc-demo sc-fields" onsubmit="return false">
+          <div class="pb-field">
+            <label class="pb-field__label" for="f-code">Инвайт-код</label>
+            <input class="pb-input pb-input--mono" id="f-code" name="code" placeholder="XXXX-XXXX" autocomplete="off" aria-describedby="f-code-hint">
+            <p class="pb-field__hint" id="f-code-hint">Код из приглашения. Вводите без пробелов.</p>
+          </div>
+          <div class="pb-field">
+            <label class="pb-field__label" for="f-host">Адрес ноды</label>
+            <div class="pb-input-group">
+              <input class="pb-input pb-input--mono" id="f-host" value="192.0.2.10" readonly aria-describedby="f-host-hint">
+              <button class="pb-button" type="button" data-copy="#f-host"><span data-copy-label>Копировать</span></button>
+            </div>
+            <p class="pb-field__hint" id="f-host-hint">Пример адреса из диапазона для документации.</p>
+            <span class="pb-sr-only" role="status" aria-live="polite" data-copy-status></span>
+          </div>
+          <div class="pb-field">
+            <label class="pb-field__label" for="f-login">Логин SFTP</label>
+            <input class="pb-input pb-input--mono" id="f-login" aria-invalid="true" aria-describedby="f-login-error">
+            <p class="pb-field__error" id="f-login-error">Логин не может быть пустым.</p>
+          </div>
+          <div class="pb-field">
+            <label class="pb-field__label" for="f-plan">Тариф</label>
+            <input class="pb-input" id="f-plan" value="Бета" disabled>
+            <p class="pb-field__hint">Недоступное поле: контраст для него не требуется.</p>
+          </div>
+        </form>
+      </div>
+    </section>
+
+    <section id="motion" class="sc-section">
+      <div class="sc-container">
+        <div class="sc-section__head">
+          <span class="pb-label">06</span>
+          <h2 class="pb-h2">Анимации</h2>
+          <p class="pb-lead">Весь код в <a class="pb-link" href="animations.css">animations.css</a>, только CSS, без скриптов. Движение показывает смысл: штекер входит в разъём, данные проходят по пинам.</p>
+        </div>
+
+        <div class="sc-grid" style="--min: 17rem">
+          <div class="sc-demo sc-demo--center">
+            <span class="pb-label">Появление логотипа</span>
+<!--@build:logo-motion-->
+<svg id="motion-logo" class="pb-logo pb-logo--animate sc-motion-logo" viewBox="-4 -4 31 48" role="img" aria-label="Знак PlugBackup: анимация появления"><rect class="pb-logo__socket" x="8.5" y="8.5" width="6" height="6" rx="1.5"/><rect class="pb-logo__socket" x="8.5" y="25.5" width="6" height="6" rx="1.5"/><rect class="pb-logo__socket" x="17" y="25.5" width="6" height="6" rx="1.5"/><rect class="pb-logo__socket" x="8.5" y="34" width="6" height="6" rx="1.5"/><rect class="pb-logo__socket" x="17" y="34" width="6" height="6" rx="1.5"/><g class="pb-logo__plug"><rect class="pb-logo__pin" x="0" y="0" width="6" height="6" rx="1.5"/><rect class="pb-logo__pin" x="8.5" y="0" width="6" height="6" rx="1.5"/><rect class="pb-logo__pin" x="17" y="0" width="6" height="6" rx="1.5"/><rect class="pb-logo__pin" x="0" y="8.5" width="6" height="6" rx="1.5"/><rect class="pb-logo__pin" x="17" y="8.5" width="6" height="6" rx="1.5"/><rect class="pb-logo__pin" x="0" y="17" width="6" height="6" rx="1.5"/><rect class="pb-logo__pin" x="8.5" y="17" width="6" height="6" rx="1.5"/><rect class="pb-logo__pin" x="0" y="25.5" width="6" height="6" rx="1.5"/><rect class="pb-logo__pin" x="0" y="34" width="6" height="6" rx="1.5"/><rect class="pb-logo__lit" x="17" y="17" width="6" height="6" rx="1.5"/></g><rect class="pb-logo__pulse" x="17" y="17" width="6" height="6" rx="1.5"/></svg>
+<!--@/build:logo-motion-->
+            <button class="pb-button pb-button--sm" type="button" data-replay="#motion-logo">Повторить</button>
+          </div>
+          <div class="sc-demo sc-demo--center">
+            <span class="pb-label">Индикатор загрузки</span>
+            <div class="sc-row sc-row--center">
+              <span class="pb-loader pb-loader--sm" role="status"><i class="pb-loader__pin" style="--i:0"></i><i class="pb-loader__pin" style="--i:1"></i><i class="pb-loader__pin" style="--i:2"></i><i class="pb-loader__pin" style="--i:3"></i><i class="pb-loader__pin" style="--i:4"></i><span class="pb-sr-only">Загрузка</span></span>
+              <span class="pb-loader" role="status"><i class="pb-loader__pin" style="--i:0"></i><i class="pb-loader__pin" style="--i:1"></i><i class="pb-loader__pin" style="--i:2"></i><i class="pb-loader__pin" style="--i:3"></i><i class="pb-loader__pin" style="--i:4"></i><span class="pb-sr-only">Загрузка</span></span>
+              <span class="pb-loader pb-loader--lg" role="status"><i class="pb-loader__pin" style="--i:0"></i><i class="pb-loader__pin" style="--i:1"></i><i class="pb-loader__pin" style="--i:2"></i><i class="pb-loader__pin" style="--i:3"></i><i class="pb-loader__pin" style="--i:4"></i><span class="pb-sr-only">Загрузка</span></span>
+            </div>
+            <p class="pb-caption">Размер задаётся через font-size. Подпись для скринридера обязательна.</p>
+          </div>
+          <div class="sc-demo sc-demo--center">
+            <span class="pb-label">Hover</span>
+            <a class="pb-card pb-card--interactive sc-hover-card" href="#motion"><span class="pb-h4">Карточка</span><span class="pb-small">Поднимается на 2 px, рамка и тень меняются.</span></a>
+            <p class="pb-small">Ссылка <a class="pb-link" href="#motion">подчёркивается толще</a>, кнопка при нажатии опускается на 1 px.</p>
+          </div>
+        </div>
+
+        <div class="pb-alert pb-alert--info sc-note" role="note">
+          <div><p class="pb-alert__title">Уважаем prefers-reduced-motion</p><p class="pb-alert__text">Если в системе включено «уменьшить движение», знак сразу рисуется целиком, пульс убран, а индикатор загрузки становится статичным: три пина горят. Состояния hover меняют только цвет.</p></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="graphics" class="sc-section">
+      <div class="sc-container">
+        <div class="sc-section__head">
+          <span class="pb-label">07</span>
+          <h2 class="pb-h2">Графика</h2>
+          <p class="pb-lead">Исходники лежат в <code class="pb-code">graphics/src</code>, готовые файлы: SVG в <code class="pb-code">graphics/svg</code>, PNG в <code class="pb-code">graphics/png</code>. Тексты и цены на графике берутся из <code class="pb-code">data/</code>.</p>
+        </div>
+
+        <h3 class="pb-h3 sc-sub">Telegram</h3>
+        <div class="sc-grid" style="--min: 18rem">
+          <figure class="sc-fig sc-fig--round"><img src="graphics/png/avatar.png" alt="Аватар бота и канала" width="640" height="640" loading="lazy"><figcaption>Аватар бота и канала, 640×640. Всё важное внутри круга. <a class="pb-link" href="graphics/svg/avatar.svg">SVG</a> · <a class="pb-link" href="graphics/png/avatar.png">PNG</a></figcaption></figure>
+          <figure class="sc-fig"><img src="graphics/png/bot-description.png" alt="Картинка описания бота" width="640" height="360" loading="lazy"><figcaption>Картинка описания бота, 640×360. <a class="pb-link" href="graphics/svg/bot-description.svg">SVG</a> · <a class="pb-link" href="graphics/png/bot-description.png">PNG</a></figcaption></figure>
+        </div>
+        <div class="sc-grid" style="--min: 18rem">
+          <figure class="sc-fig"><img src="graphics/png/banner-announce.png" alt="Баннер «Анонс»" width="1280" height="720" loading="lazy"><figcaption>Баннер «Анонс», 1280×720. <a class="pb-link" href="graphics/svg/banner-announce.svg">SVG</a> · <a class="pb-link" href="graphics/png/banner-announce.png">PNG</a></figcaption></figure>
+          <figure class="sc-fig"><img src="graphics/png/banner-update.png" alt="Баннер «Обновление»" width="1280" height="720" loading="lazy"><figcaption>Баннер «Обновление», 1280×720. <a class="pb-link" href="graphics/svg/banner-update.svg">SVG</a> · <a class="pb-link" href="graphics/png/banner-update.png">PNG</a></figcaption></figure>
+          <figure class="sc-fig"><img src="graphics/png/banner-plan.png" alt="Баннер «Тариф»" width="1280" height="720" loading="lazy"><figcaption>Баннер «Тариф», 1280×720. <a class="pb-link" href="graphics/svg/banner-plan.svg">SVG</a> · <a class="pb-link" href="graphics/png/banner-plan.png">PNG</a></figcaption></figure>
+        </div>
+
+        <h3 class="pb-h3 sc-sub">Сайт</h3>
+        <div class="sc-grid" style="--min: 18rem">
+          <figure class="sc-fig"><img src="graphics/png/og-image.png" alt="Картинка Open Graph" width="1200" height="630" loading="lazy"><figcaption>Картинка для ссылок (Open Graph), 1200×630. <a class="pb-link" href="graphics/svg/og-image.svg">SVG</a> · <a class="pb-link" href="graphics/png/og-image.png">PNG</a></figcaption></figure>
+          <div class="sc-demo">
+            <div class="sc-sizes">
+              <figure><img src="graphics/svg/favicon.svg" alt="Favicon" width="64" height="64"><figcaption>favicon.svg</figcaption></figure>
+              <figure><img src="graphics/png/favicon-32.png" alt="Favicon 32 px" width="32" height="32"><figcaption>32×32</figcaption></figure>
+              <figure><img src="graphics/png/apple-touch-icon.png" alt="Apple touch icon" width="90" height="90"><figcaption>apple-touch-icon 180×180</figcaption></figure>
+            </div>
+            <p class="pb-small">Подключение в <code class="pb-code">&lt;head&gt;</code> сайта:</p>
+            <div class="pb-code-block">
+<pre><code>&lt;link rel="icon" href="/favicon.svg" type="image/svg+xml"&gt;
+&lt;link rel="icon" href="/favicon-32.png" sizes="32x32" type="image/png"&gt;
+&lt;link rel="apple-touch-icon" href="/apple-touch-icon.png"&gt;</code></pre>
+            </div>
+          </div>
+        </div>
+
+        <h3 class="pb-h3 sc-sub">Как перегенерировать</h3>
+        <div class="pb-code-block">
+          <div class="pb-code-block__bar">
+            <span>bash</span>
+            <button class="pb-copy" type="button" data-copy="#code-build"><span data-copy-label>Копировать</span></button>
+            <span class="pb-sr-only" role="status" aria-live="polite" data-copy-status></span>
+          </div>
+<pre><code id="code-build"><span class="pb-tok-comment"># один раз: поставить зависимости</span>
+<span class="pb-tok-cmd">cd</span> design &amp;&amp; <span class="pb-tok-cmd">npm</span> install
+<span class="pb-tok-comment"># после правок в tokens.json, data/ или graphics/src: пересобрать всё</span>
+<span class="pb-tok-cmd">npm</span> run build
+<span class="pb-tok-comment"># только картинки: SVG и PNG</span>
+<span class="pb-tok-cmd">npm</span> run export</code></pre>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="sc-footer">
+    <div class="sc-container">
+      <p class="pb-small">Код дизайн-системы распространяется по GNU AGPL-3.0. Название PlugBackup и логотип в лицензию не входят, см. <a class="pb-link" href="../TRADEMARKS.md">TRADEMARKS.md</a>. Шрифты IBM Plex: SIL Open Font License 1.1, тексты лицензий лежат в <code class="pb-code">fonts/</code>.</p>
+    </div>
+  </footer>
+</body>
+</html>

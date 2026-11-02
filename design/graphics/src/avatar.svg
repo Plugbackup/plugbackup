@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="640" height="640" viewBox="0 0 640 640">
+  <title>PlugBackup: аватар бота и канала</title>
+  <!-- Telegram crops the picture to a circle (r = 320). The mark stays within r = 231. -->
+  <rect width="640" height="640" fill="{{color.neutral.900}}"/>
+  <g transform="translate(205 120) scale(10)">{{@mark:on-dark}}</g>
+</svg>

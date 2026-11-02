@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="640" height="360" viewBox="0 0 640 360">
+  <title>PlugBackup: картинка описания бота</title>
+  <rect width="640" height="360" fill="{{color.neutral.900}}"/>
+  <g transform="translate(56 80) scale(5)">{{@mark:on-dark}}</g>
+  <g transform="translate(236 148) scale(2.2)">{{@wordmark:on-dark}}</g>
+  <text x="236" y="200" font-family="'IBM Plex Sans', sans-serif" font-size="23" font-weight="500" fill="{{color.neutral.100}}" data-max="27">{{title}}</text>
+  <text x="236" y="234" font-family="'IBM Plex Sans', sans-serif" font-size="19" font-weight="400" fill="{{color.neutral.400}}" data-max="30">{{subtitle}}</text>
+  <text x="236" y="272" font-family="'IBM Plex Mono', monospace" font-size="16" font-weight="400" fill="{{color.neutral.500}}" data-max="32">{{details}}</text>
+</svg>

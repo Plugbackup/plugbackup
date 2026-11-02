@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="720" viewBox="0 0 1280 720">
+  <title>PlugBackup: {{label}} {{plan.name}}</title>
+  <rect width="1280" height="720" fill="{{color.neutral.900}}"/>
+  <g transform="translate(924 150) scale(12)">{{@mark:on-dark}}</g>
+  <g transform="translate(80 60) scale(1.2)">{{@lockup:on-dark}}</g>
+  <rect x="1174" y="71" width="26" height="26" rx="6.5" fill="{{color.brand}}"/>
+  <text x="1160" y="94" text-anchor="end" font-family="'IBM Plex Mono', monospace" font-size="28" font-weight="500" fill="{{color.neutral.400}}">{{label}}</text>
+  <!-- Headline: the size of the plan, up to 6 characters. Plans live in data/plans.json. -->
+  <text x="80" y="330" font-family="'IBM Plex Mono', monospace" font-size="190" font-weight="600" letter-spacing="-4" word-spacing="-44" fill="{{color.neutral.100}}" data-max="6">{{plan.size}}</text>
+  <text x="80" y="450" font-family="'IBM Plex Sans', sans-serif" font-size="72" font-weight="600" letter-spacing="-1.4" fill="{{color.accent.300}}" data-max="12">{{plan.price}}</text>
+  <text x="80" y="528" font-family="'IBM Plex Sans', sans-serif" font-size="32" font-weight="400" fill="{{color.neutral.400}}" data-max="40">{{subtitle}}</text>
+  <text x="80" y="590" font-family="'IBM Plex Mono', monospace" font-size="22" font-weight="400" fill="{{color.neutral.500}}" data-max="52">{{footnote}}</text>
+  <text x="80" y="664" font-family="'IBM Plex Mono', monospace" font-size="24" font-weight="400" fill="{{color.neutral.500}}">{{bot.handle}} · {{site}}</text>
+</svg>

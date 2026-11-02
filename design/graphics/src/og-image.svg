@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+  <title>PlugBackup: картинка для ссылок (Open Graph)</title>
+  <rect width="1200" height="630" fill="{{color.neutral.900}}"/>
+  <g transform="translate(868 95) scale(11)">{{@mark:on-dark}}</g>
+  <g transform="translate(72 64) scale(1.25)">{{@lockup:on-dark}}</g>
+  <text x="72" y="262" font-family="'IBM Plex Sans', sans-serif" font-size="76" font-weight="600" letter-spacing="-1.5" fill="{{color.neutral.100}}" data-lh="1.12" data-max="17">{{title}}</text>
+  <text x="72" y="432" font-family="'IBM Plex Sans', sans-serif" font-size="30" font-weight="400" fill="{{color.neutral.400}}" data-lh="1.35" data-max="34">{{subtitle}}</text>
+  <text x="72" y="568" font-family="'IBM Plex Mono', monospace" font-size="26" font-weight="400" fill="{{color.neutral.500}}">{{site}}</text>
+</svg>

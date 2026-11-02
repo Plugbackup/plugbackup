@@ -1,0 +1,49 @@
+{
+  "_note": "Единственное место, где записаны тарифы. Карточки на витрине, баннеры и примеры текстов берут данные отсюда. Меняйте цифры здесь и запускайте npm run build.",
+  "bot": {
+    "handle": "@PlugBackupBot",
+    "url": "https://t.me/PlugBackupBot"
+  },
+  "site": "plugbackup.site",
+  "payment": "Telegram Stars",
+  "payment_note": "Оплата в Telegram Stars. Сумма в рублях — ориентир.",
+  "features": [
+    "Загрузка по SFTP через restic или rclone",
+    "Шифрование на вашей стороне, до отправки",
+    "Клиенты изолированы друг от друга"
+  ],
+  "plans": [
+    {
+      "id": "beta",
+      "name": "Бета",
+      "gb": 10,
+      "price_rub": 0,
+      "access": "по инвайт-коду",
+      "note": null
+    },
+    {
+      "id": "gb50",
+      "name": "50 ГБ",
+      "gb": 50,
+      "price_rub": 79,
+      "access": null,
+      "note": "Бета: один диск, без резервирования"
+    },
+    {
+      "id": "gb100",
+      "name": "100 ГБ",
+      "gb": 100,
+      "price_rub": 149,
+      "access": null,
+      "note": "Бета: один диск, без резервирования"
+    },
+    {
+      "id": "gb200",
+      "name": "200 ГБ",
+      "gb": 200,
+      "price_rub": 249,
+      "access": null,
+      "note": "Бета: один диск, без резервирования"
+    }
+  ]
+}

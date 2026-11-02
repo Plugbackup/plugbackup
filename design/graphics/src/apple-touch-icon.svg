@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="180" height="180" viewBox="0 0 180 180">
+  <title>PlugBackup</title>
+  <!-- iOS rounds the corners itself, so the background is a full-bleed square. -->
+  <rect width="180" height="180" fill="{{color.neutral.900}}"/>
+  <g transform="translate(57.8 34) scale(2.8)">{{@mark:on-dark}}</g>
+</svg>
