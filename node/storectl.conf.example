@@ -1,0 +1,24 @@
+# /etc/plugbackup/storectl.conf — настройки storectl. Все строки необязательны,
+# ниже значения по умолчанию.
+
+# Родительский ZFS-набор: клиент u1001 живёт в tank/clients/u1001.
+ZFS_PARENT=tank/clients
+# Где монтируются клиентские наборы. Это корень chroot клиента: /srv/plugbackup/u1001.
+MOUNT_BASE=/srv/plugbackup
+
+# Ключи клиентов. Файл называется по логину, владелец root.
+KEYS_DIR=/etc/plugbackup/authorized_keys.d
+# Сюда ключ уходит при suspend и возвращается при resume.
+SUSPENDED_DIR=/etc/plugbackup/suspended.d
+
+# Секрет для HMAC-хешей IP-адресов (команда logins). Не меньше 32 байт, права 0600.
+HMAC_KEY_FILE=/etc/plugbackup/ip-hmac.key
+
+LOCK_FILE=/run/lock/storectl.lock
+
+# Числовой gid группы plugbackup-clients и начало диапазона uid: u1001 получит 31001.
+CLIENT_GID=30000
+UID_BASE=30000
+
+# Сколько последних событий отдаёт logins за один вызов.
+LOGIN_MAX_EVENTS=2000

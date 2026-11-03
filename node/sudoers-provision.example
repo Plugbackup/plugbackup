@@ -1,0 +1,7 @@
+# /etc/sudoers.d/plugbackup-provision (права 0440, проверка: visudo -cf <файл>)
+#
+# Пользователь provision не может ничего, кроме запуска storectl в режиме --ssh.
+# Сами аргументы приходят в SSH_ORIGINAL_COMMAND и проверяются внутри storectl.
+
+Defaults:provision env_keep += "SSH_ORIGINAL_COMMAND"
+provision ALL=(root) NOPASSWD: /usr/local/sbin/storectl --ssh

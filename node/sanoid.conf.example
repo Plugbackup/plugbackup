@@ -1,0 +1,19 @@
+# /etc/sanoid/sanoid.conf — ежедневные снимки клиентских датасетов, хранение 7 дней.
+#
+# Имя родительского набора должно совпадать с ZFS_PARENT в /etc/plugbackup/storectl.conf.
+# Новые клиенты подхватываются сами: recursive = yes действует на все дочерние наборы.
+
+[tank/clients]
+        use_template = clients
+        recursive = yes
+
+[template_clients]
+        # Один снимок в сутки, семь штук. Часовых, месячных и годовых нет.
+        daily = 7
+        hourly = 0
+        weekly = 0
+        monthly = 0
+        yearly = 0
+
+        autosnap = yes
+        autoprune = yes

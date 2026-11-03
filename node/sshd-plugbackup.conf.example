@@ -1,0 +1,17 @@
+# /etc/ssh/sshd_config.d/plugbackup.conf — клиенты хранилища.
+# Нужна строка `Include /etc/ssh/sshd_config.d/*.conf` в основном sshd_config.
+
+Match Group plugbackup-clients
+    # Корень chroot: /srv/plugbackup/<логин>. Каталог принадлежит root и не доступен на запись
+    # другим, это требование sshd. Данные клиента лежат в подкаталоге data.
+    ChrootDirectory /srv/plugbackup/%u
+    ForceCommand internal-sftp
+    # Ключи лежат вне домашнего каталога, владелец root: клиент не может их изменить.
+    AuthorizedKeysFile /etc/plugbackup/authorized_keys.d/%u
+    PasswordAuthentication no
+    KbdInteractiveAuthentication no
+    AllowTcpForwarding no
+    X11Forwarding no
+    PermitTTY no
+    PermitTunnel no
+    AllowAgentForwarding no

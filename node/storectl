@@ -1,0 +1,509 @@
+#!/usr/bin/env python3
+"""storectl — управление клиентами хранилища PlugBackup на ноде.
+
+Команды (все аргументы проверяются строго, до любых действий):
+
+    add <login> <quota>G <тело ключа ed25519>   создать клиента или обновить ключ и квоту
+    resize <login> <quota>G                     изменить квоту (refquota)
+    suspend <login>                             закрыть доступ, данные остаются
+    resume <login>                              вернуть доступ
+    delete <login>                              удалить клиента вместе с данными и снимками
+    usage <login>                               две строки: занято и квота, в байтах
+    logins <login> <since>                      попытки входа с unix-времени since
+
+Коды выхода: 0 успех, 2 неверные аргументы, 3 клиента нет, 4 конфликт,
+5 квота ниже занятого места, 6 внутренняя ошибка.
+
+Вызывается ботом по SSH: `sudo -n /usr/local/sbin/storectl --ssh`, команда берётся из
+SSH_ORIGINAL_COMMAND. Только стандартная библиотека Python 3.9+. Подробнее: node/README.md.
+"""
+
+from __future__ import annotations
+
+import base64
+import binascii
+import contextlib
+import hashlib
+import hmac
+import ipaddress
+import json
+import os
+import re
+import subprocess
+import sys
+import time
+from dataclasses import dataclass
+from pathlib import Path
+from typing import Callable, Iterator, Mapping, Sequence
+
+try:
+    import fcntl
+except ImportError:  # Windows: только для разработки и тестов
+    fcntl = None  # type: ignore[assignment]
+
+OK, USAGE, NOT_FOUND, CONFLICT, QUOTA_BELOW_USAGE, INTERNAL = 0, 2, 3, 4, 5, 6
+
+GIB = 1024**3
+MAX_QUOTA_GB = 100_000
+DEFAULT_CONFIG = "/etc/plugbackup/storectl.conf"
+MAX_LOOKBACK_S = 31 * 24 * 3600
+HASH_HEX_LEN = 16
+
+LOGIN_RE = re.compile(r"u[0-9]{4,9}")
+QUOTA_RE = re.compile(r"([0-9]{1,5})G")
+SINCE_RE = re.compile(r"[0-9]{1,12}")
+KEY_BODY_RE = re.compile(r"AAAAC3NzaC1lZDI1NTE5[A-Za-z0-9+/=]+")
+_KEY_BLOB_PREFIX = b"\x00\x00\x00\x0bssh-ed25519\x00\x00\x00\x20"
+_KEY_BLOB_LEN = len(_KEY_BLOB_PREFIX) + 32
+
+# Строки журнала sshd. Пользователь и адрес берутся из самого сообщения.
+_OK_RE = re.compile(r"Accepted \S+ for (\S+) from (\S+) port [0-9]+")
+_FAIL_RES = (
+    re.compile(r"Failed \S+ for (?:invalid user )?(\S+) from (\S+) port [0-9]+"),
+    re.compile(r"Invalid user (\S+) from (\S+) port [0-9]+"),
+    re.compile(r"Connection closed by authenticating user (\S+) (\S+) port [0-9]+"),
+    re.compile(r"Disconnected from authenticating user (\S+) (\S+) port [0-9]+"),
+)
+
+
+class StoreError(Exception):
+    def __init__(self, code: int, message: str) -> None:
+        super().__init__(message)
+        self.code = code
+
+
+# --- проверка аргументов ---------------------------------------------------------------
+
+
+def check_login(value: str) -> str:
+    if not LOGIN_RE.fullmatch(value):
+        raise StoreError(USAGE, "логин: u и 4–9 цифр")
+    return value
+
+
+def check_quota(value: str) -> int:
+    match = QUOTA_RE.fullmatch(value)
+    if not match or not 1 <= int(match[1]) <= MAX_QUOTA_GB:
+        raise StoreError(USAGE, "квота: число и G, например 50G")
+    return int(match[1])
+
+
+def check_key(value: str) -> str:
+    """Тело ключа ssh-ed25519: регулярка, затем точный разбор blob."""
+    if not KEY_BODY_RE.fullmatch(value):
+        raise StoreError(USAGE, "ключ: неверный формат")
+    try:
+        blob = base64.b64decode(value, validate=True)
+    except (binascii.Error, ValueError):
+        raise StoreError(USAGE, "ключ: неверный base64") from None
+    canonical = base64.b64encode(blob).decode("ascii") == value
+    if len(blob) != _KEY_BLOB_LEN or not blob.startswith(_KEY_BLOB_PREFIX) or not canonical:
+        raise StoreError(USAGE, "ключ: это не ed25519")
+    return value
+
+
+def check_since(value: str) -> int:
+    if not SINCE_RE.fullmatch(value):
+        raise StoreError(USAGE, "since: unix-время в секундах")
+    return int(value)
+
+
+# --- конфигурация --------------------------------------------------------------------
+
+
+@dataclass(frozen=True)
+class Config:
+    zfs_parent: str = "tank/clients"
+    mount_base: str = "/srv/plugbackup"
+    keys_dir: Path = Path("/etc/plugbackup/authorized_keys.d")
+    suspended_dir: Path = Path("/etc/plugbackup/suspended.d")
+    hmac_key_file: Path = Path("/etc/plugbackup/ip-hmac.key")
+    lock_file: Path = Path("/run/lock/storectl.lock")
+    client_gid: int = 30000
+    uid_base: int = 30000
+    login_max_events: int = 2000
+
+
+# Имена ZFS начинаются с буквы или цифры: так значение не станет опцией команды zfs.
+_ZFS_NAME_RE = re.compile(r"[A-Za-z0-9][A-Za-z0-9_.:-]*(/[A-Za-z0-9][A-Za-z0-9_.:-]*)*")
+_MOUNT_BASE_RE = re.compile(r"/[A-Za-z0-9_][A-Za-z0-9_./-]*")
+
+
+def load_config(path: str | Path) -> Config:
+    """Читает файл KEY=VALUE. Отсутствующий файл означает значения по умолчанию."""
+    values: dict[str, str] = {}
+    with contextlib.suppress(FileNotFoundError):
+        for raw in Path(path).read_text(encoding="utf-8").splitlines():
+            line = raw.strip()
+            if line and not line.startswith("#") and "=" in line:
+                key, _, value = line.partition("=")
+                values[key.strip()] = value.strip().strip('"')
+    defaults = Config()
+    parent = values.get("ZFS_PARENT", defaults.zfs_parent)
+    if not _ZFS_NAME_RE.fullmatch(parent):
+        raise StoreError(INTERNAL, "ZFS_PARENT: недопустимое имя")
+    mount_base = values.get("MOUNT_BASE", defaults.mount_base)
+    if not _MOUNT_BASE_RE.fullmatch(mount_base):
+        raise StoreError(INTERNAL, "MOUNT_BASE: нужен абсолютный путь без пробелов")
+    try:
+        return Config(
+            zfs_parent=parent,
+            mount_base=mount_base,
+            keys_dir=Path(values.get("KEYS_DIR", str(defaults.keys_dir))),
+            suspended_dir=Path(values.get("SUSPENDED_DIR", str(defaults.suspended_dir))),
+            hmac_key_file=Path(values.get("HMAC_KEY_FILE", str(defaults.hmac_key_file))),
+            lock_file=Path(values.get("LOCK_FILE", str(defaults.lock_file))),
+            client_gid=int(values.get("CLIENT_GID", defaults.client_gid)),
+            uid_base=int(values.get("UID_BASE", defaults.uid_base)),
+            login_max_events=int(values.get("LOGIN_MAX_EVENTS", defaults.login_max_events)),
+        )
+    except ValueError:
+        raise StoreError(INTERNAL, "конфигурация: число ожидалось") from None
+
+
+# --- запуск внешних команд -----------------------------------------------------------
+
+
+@dataclass(frozen=True)
+class Result:
+    returncode: int
+    stdout: str = ""
+    stderr: str = ""
+
+
+Runner = Callable[[Sequence[str]], Result]
+
+
+def system_runner(args: Sequence[str]) -> Result:
+    """Запускает команду списком аргументов, без оболочки."""
+    try:
+        done = subprocess.run(  # noqa: S603
+            list(args),
+            capture_output=True,
+            text=True,
+            timeout=120,
+            check=False,
+            stdin=subprocess.DEVNULL,
+        )
+    except FileNotFoundError:
+        raise StoreError(INTERNAL, f"нет команды {args[0]}") from None
+    except subprocess.TimeoutExpired:
+        raise StoreError(INTERNAL, f"{args[0]}: не ответила за 120 секунд") from None
+    return Result(done.returncode, done.stdout, done.stderr)
+
+
+# --- основная логика -------------------------------------------------------------------
+
+
+class Store:
+    def __init__(
+        self,
+        config: Config,
+        run: Runner = system_runner,
+        now: Callable[[], float] = time.time,
+    ) -> None:
+        self.cfg = config
+        self._run = run
+        self._now = now
+
+    # имена и пути строятся только из проверенного логина
+
+    def dataset(self, login: str) -> str:
+        return f"{self.cfg.zfs_parent}/{login}"
+
+    def mountpoint(self, login: str) -> str:
+        return f"{self.cfg.mount_base}/{login}"
+
+    def _uid(self, login: str) -> int:
+        return self.cfg.uid_base + int(login[1:])
+
+    @contextlib.contextmanager
+    def _lock(self) -> Iterator[None]:
+        """Одна операция за раз: быстрые повторы от бота не должны мешать друг другу."""
+        if fcntl is None:
+            yield
+            return
+        self.cfg.lock_file.parent.mkdir(parents=True, exist_ok=True)
+        with open(self.cfg.lock_file, "a", encoding="utf-8") as handle:
+            fcntl.flock(handle, fcntl.LOCK_EX)
+            try:
+                yield
+            finally:
+                fcntl.flock(handle, fcntl.LOCK_UN)
+
+    def _cmd(self, *args: str, ok: Sequence[int] = (0,)) -> Result:
+        result = self._run(args)
+        if result.returncode not in ok:
+            detail = " ".join(result.stderr.split())[:200]
+            raise StoreError(INTERNAL, f"{args[0]} {args[1] if len(args) > 1 else ''}: {detail}")
+        return result
+
+    def _dataset_exists(self, login: str) -> bool:
+        """False только если ZFS прямо сказал, что набора нет. Любой другой сбой — ошибка.
+
+        Иначе временная ошибка zfs выглядела бы как «клиента нет», и delete отчитался бы
+        об успехе, не удалив данные.
+        """
+        result = self._run(["zfs", "list", "-H", "-o", "name", self.dataset(login)])
+        if result.returncode == 0:
+            return True
+        if result.returncode == 1 and "does not exist" in result.stderr:
+            return False
+        detail = " ".join(result.stderr.split())[:200]
+        raise StoreError(INTERNAL, f"zfs list: {detail}")
+
+    def _user_exists(self, login: str) -> bool:
+        return self._run(["getent", "passwd", login]).returncode == 0
+
+    def _referenced(self, login: str) -> int:
+        out = self._cmd(
+            "zfs", "get", "-Hp", "-o", "value", "referenced", self.dataset(login)
+        ).stdout
+        return int(out.strip())
+
+    def _key_file(self, login: str) -> Path:
+        return self.cfg.keys_dir / login
+
+    def _suspended_file(self, login: str) -> Path:
+        return self.cfg.suspended_dir / login
+
+    def _require_client(self, login: str) -> None:
+        if not self._dataset_exists(login):
+            raise StoreError(NOT_FOUND, f"клиент {login} не найден")
+
+    def _kill_sessions(self, login: str) -> None:
+        if not self._user_exists(login):
+            return  # pkill с неизвестным пользователем завершился бы ошибкой
+        # pkill: 0 — убиты, 1 — процессов не было. И то и другое нормально.
+        self._cmd("pkill", "-KILL", "-u", login, ok=(0, 1))
+
+    # --- команды ---
+
+    def add(self, login: str, quota_gb: int, key: str) -> None:
+        """Идемпотентно: создаёт клиента или обновляет ключ и квоту существующего."""
+        uid = self._uid(login)
+        with self._lock():
+            if not self._user_exists(login):
+                self._cmd(
+                    "useradd", "--no-create-home", "--no-user-group",
+                    "--gid", str(self.cfg.client_gid), "--home-dir", "/",
+                    "--shell", "/usr/sbin/nologin", "--uid", str(uid), login,
+                )  # fmt: skip
+            self._ensure_dataset(login, quota_gb)
+            # Каталог данных создаём при каждом add: прерванный запуск не оставит клиента без него.
+            self._cmd(
+                "install", "-d", "-o", str(uid), "-g", str(self.cfg.client_gid),
+                "-m", "0700", f"{self.mountpoint(login)}/data",
+            )  # fmt: skip
+            self._write_key(login, key)
+
+    def _ensure_dataset(self, login: str, quota_gb: int) -> None:
+        dataset = self.dataset(login)
+        if self._dataset_exists(login):
+            if quota_gb * GIB < self._referenced(login):
+                raise StoreError(QUOTA_BELOW_USAGE, "занято больше новой квоты")
+            self._cmd("zfs", "set", f"refquota={quota_gb}G", dataset)
+        else:
+            self._cmd(
+                "zfs", "create", "-o", f"mountpoint={self.mountpoint(login)}",
+                "-o", f"refquota={quota_gb}G", dataset,
+            )  # fmt: skip
+
+    def _write_key(self, login: str, key: str) -> None:
+        suspended = self._suspended_file(login).exists()
+        target_dir = self.cfg.suspended_dir if suspended else self.cfg.keys_dir
+        target_dir.mkdir(parents=True, exist_ok=True)
+        target = target_dir / login
+        temp = target_dir / f".{login}.tmp"
+        # restrict: никаких пробросов портов, pty и агента; sftp даёт ForceCommand в sshd_config.
+        temp.write_text(f"restrict ssh-ed25519 {key}\n", encoding="utf-8")
+        os.chmod(temp, 0o644)
+        os.replace(temp, target)
+        # Ключ лежит ровно в одном каталоге: активном или заблокированном.
+        other = self._key_file(login) if suspended else self._suspended_file(login)
+        with contextlib.suppress(FileNotFoundError):
+            other.unlink()
+
+    def resize(self, login: str, quota_gb: int) -> None:
+        with self._lock():
+            self._require_client(login)
+            if quota_gb * GIB < self._referenced(login):
+                raise StoreError(QUOTA_BELOW_USAGE, "занято больше новой квоты")
+            self._cmd("zfs", "set", f"refquota={quota_gb}G", self.dataset(login))
+
+    def suspend(self, login: str) -> None:
+        with self._lock():
+            self._require_client(login)
+            active, parked = self._key_file(login), self._suspended_file(login)
+            if active.exists():
+                parked.parent.mkdir(parents=True, exist_ok=True)
+                os.replace(active, parked)
+            elif not parked.exists():
+                raise StoreError(NOT_FOUND, "ключ клиента не найден")
+            self._kill_sessions(login)
+
+    def resume(self, login: str) -> None:
+        with self._lock():
+            self._require_client(login)
+            active, parked = self._key_file(login), self._suspended_file(login)
+            if parked.exists():
+                active.parent.mkdir(parents=True, exist_ok=True)
+                os.replace(parked, active)
+            elif not active.exists():
+                raise StoreError(NOT_FOUND, "ключ клиента не найден")
+
+    def delete(self, login: str) -> None:
+        """Идемпотентно: если клиента уже нет, это успех."""
+        with self._lock():
+            self._kill_sessions(login)
+            for path in (self._key_file(login), self._suspended_file(login)):
+                with contextlib.suppress(FileNotFoundError):
+                    path.unlink()
+            if self._dataset_exists(login):
+                self._cmd("zfs", "destroy", "-r", self.dataset(login))
+            if self._user_exists(login):
+                self._cmd("userdel", login)
+
+    def usage(self, login: str) -> str:
+        self._require_client(login)
+        out = self._cmd(
+            "zfs", "get", "-Hp", "-o", "value", "referenced,refquota", self.dataset(login)
+        ).stdout
+        values = out.split()
+        if len(values) != 2 or not all(item.isdigit() for item in values):
+            raise StoreError(INTERNAL, "zfs get вернул неожиданный ответ")
+        return f"{values[0]}\n{values[1]}\n"
+
+    def logins(self, login: str, since: int) -> str:
+        """Время, результат и хеш IP каждой попытки входа. Сырые адреса не покидают ноду."""
+        secret = self._hmac_secret()
+        now = int(self._now())
+        since = max(since, now - MAX_LOOKBACK_S)
+        out = self._cmd(
+            "journalctl", "--no-pager", "-o", "json", "--since", f"@{since}",
+            "SYSLOG_IDENTIFIER=sshd", "SYSLOG_IDENTIFIER=sshd-session",
+        ).stdout  # fmt: skip
+        events = sorted(parse_journal(out, login, secret, since))
+        lines = [f"{ts} {'ok' if ok else 'fail'} {digest}" for ts, ok, digest in events]
+        lines = lines[-self.cfg.login_max_events :]
+        return "".join(f"{line}\n" for line in lines)
+
+    def _hmac_secret(self) -> bytes:
+        try:
+            secret = self.cfg.hmac_key_file.read_bytes().strip()
+        except OSError:
+            raise StoreError(INTERNAL, "нет файла с секретом для хешей IP") from None
+        if len(secret) < 32:
+            raise StoreError(INTERNAL, "секрет для хешей IP короче 32 байт")
+        return secret
+
+
+# --- журнал sshd -----------------------------------------------------------------------
+
+
+def ip_hash(secret: bytes, login: str, address: str) -> str | None:
+    """HMAC-SHA256 от логина и адреса. Для разных клиентов один IP даёт разные хеши."""
+    try:
+        ip = ipaddress.ip_address(address)
+    except ValueError:
+        return None
+    if isinstance(ip, ipaddress.IPv6Address) and ip.ipv4_mapped is not None:
+        ip = ip.ipv4_mapped
+    message = f"{login}\0{ip}".encode()
+    return hmac.new(secret, message, hashlib.sha256).hexdigest()[:HASH_HEX_LEN]
+
+
+def classify(message: str) -> tuple[bool, str, str] | None:
+    """(успех, пользователь, адрес) для строки журнала sshd или None, если она не про вход."""
+    match = _OK_RE.match(message)
+    if match:
+        return True, match[1], match[2]
+    for pattern in _FAIL_RES:
+        match = pattern.match(message)
+        if match:
+            return False, match[1], match[2]
+    return None
+
+
+def parse_journal(
+    text: str, login: str, secret: bytes, since: int
+) -> list[tuple[int, bool, str]]:
+    events = []
+    for raw in text.splitlines():
+        try:
+            entry = json.loads(raw)
+            message = entry["MESSAGE"]
+            ts = int(entry["__REALTIME_TIMESTAMP"]) // 1_000_000
+        except (ValueError, KeyError, TypeError):
+            continue
+        if not isinstance(message, str) or ts < since:
+            continue
+        found = classify(message)
+        if found is None or found[1] != login:
+            continue
+        digest = ip_hash(secret, login, found[2])
+        if digest is not None:
+            events.append((ts, found[0], digest))
+    return events
+
+
+# --- разбор командной строки -------------------------------------------------------------
+
+_USAGE_TEXT = "использование: storectl add|resize|suspend|resume|delete|usage|logins ..."
+
+
+def parse_command(argv: Sequence[str], env: Mapping[str, str]) -> tuple[str, list[object]]:
+    """Превращает аргументы в (команда, проверенные значения)."""
+    if list(argv) == ["--ssh"]:
+        # Через sshd пользовательский текст приходит только так, и он проходит те же проверки.
+        argv = env.get("SSH_ORIGINAL_COMMAND", "").split()
+    if not argv:
+        raise StoreError(USAGE, _USAGE_TEXT)
+    name, rest = argv[0], list(argv[1:])
+    shapes: dict[str, tuple[Callable[[str], object], ...]] = {
+        "add": (check_login, check_quota, check_key),
+        "resize": (check_login, check_quota),
+        "suspend": (check_login,),
+        "resume": (check_login,),
+        "delete": (check_login,),
+        "usage": (check_login,),
+        "logins": (check_login, check_since),
+    }
+    checks = shapes.get(name)
+    if checks is None or len(rest) != len(checks):
+        raise StoreError(USAGE, _USAGE_TEXT)
+    return name, [check(value) for check, value in zip(checks, rest)]
+
+
+def execute(store: Store, name: str, values: list[object]) -> str:
+    method = getattr(store, name)
+    result = method(*values)
+    return result if isinstance(result, str) else ""
+
+
+def main(
+    argv: Sequence[str] | None = None,
+    env: Mapping[str, str] | None = None,
+    store: Store | None = None,
+) -> int:
+    argv = sys.argv[1:] if argv is None else argv
+    env = os.environ if env is None else env
+    try:
+        name, values = parse_command(argv, env)
+        if store is None:
+            via_ssh = list(argv) == ["--ssh"]
+            config_path = DEFAULT_CONFIG if via_ssh else env.get("STORECTL_CONF", DEFAULT_CONFIG)
+            store = Store(load_config(config_path))
+        output = execute(store, name, values)
+    except StoreError as error:
+        print(f"storectl: {error}", file=sys.stderr)
+        return error.code
+    except Exception as error:  # noqa: BLE001  (наружу уходит только код и тип ошибки)
+        print(f"storectl: внутренняя ошибка ({type(error).__name__})", file=sys.stderr)
+        return INTERNAL
+    sys.stdout.write(output)
+    return OK
+
+
+if __name__ == "__main__":
+    sys.exit(main())
