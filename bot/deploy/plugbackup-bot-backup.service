@@ -1,0 +1,17 @@
+# /etc/systemd/system/plugbackup-bot-backup.service — разовая копия базы, запускается таймером.
+
+[Unit]
+Description=PlugBackup bot database backup
+
+[Service]
+Type=oneshot
+User=plugbackup-bot
+Group=plugbackup-bot
+ExecStart=/opt/plugbackup/bot/deploy/backup-db.sh
+StateDirectory=plugbackup-bot
+UMask=0077
+ProtectSystem=strict
+ProtectHome=yes
+PrivateTmp=yes
+NoNewPrivileges=yes
+ReadWritePaths=/var/lib/plugbackup-bot

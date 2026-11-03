@@ -1,0 +1,46 @@
+# /etc/systemd/system/plugbackup-bot.service
+#
+# Предполагает: код в /opt/plugbackup, виртуальное окружение в /opt/plugbackup/bot/.venv,
+# настройки в /etc/plugbackup-bot/.env, база в /var/lib/plugbackup-bot.
+# Юнит написан без проверки на живой системе. Если сервис не стартует, смотрите
+# journalctl -u plugbackup-bot и по очереди ослабляйте строки защиты.
+
+[Unit]
+Description=PlugBackup Telegram bot
+After=network-online.target wg-quick@wg0.service
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=plugbackup-bot
+Group=plugbackup-bot
+WorkingDirectory=/opt/plugbackup/bot
+EnvironmentFile=/etc/plugbackup-bot/.env
+Environment=PYTHONDONTWRITEBYTECODE=1
+ExecStart=/opt/plugbackup/bot/.venv/bin/python -m plugbackup_bot
+Restart=on-failure
+RestartSec=5
+
+# Каталог /var/lib/plugbackup-bot создаётся автоматически и принадлежит пользователю бота.
+StateDirectory=plugbackup-bot
+# База с Telegram id клиентов не должна быть доступна другим пользователям.
+UMask=0077
+
+# Защита. Бот пишет только в свой каталог и ходит только по сети.
+NoNewPrivileges=yes
+ProtectSystem=strict
+ProtectHome=yes
+PrivateTmp=yes
+PrivateDevices=yes
+ProtectKernelTunables=yes
+ProtectKernelModules=yes
+ProtectControlGroups=yes
+RestrictAddressFamilies=AF_INET AF_INET6 AF_UNIX
+RestrictNamespaces=yes
+LockPersonality=yes
+CapabilityBoundingSet=
+ReadWritePaths=/var/lib/plugbackup-bot
+ReadOnlyPaths=/etc/plugbackup-bot /opt/plugbackup
+
+[Install]
+WantedBy=multi-user.target
