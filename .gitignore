@@ -29,6 +29,8 @@ wireguard/
 *.sqlite3
 *.log
 logs/
+# Готовые файлы профиля бота (scripts/setup_profile.py).
+profile_out/
 
 # --- Python ---
 __pycache__/

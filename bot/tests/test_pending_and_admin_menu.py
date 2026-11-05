@@ -8,9 +8,10 @@ from aiogram.types import BotCommandScopeChat
 from fakes import FakeClock, make_bot
 from harness import ADMIN, OTHER, Harness
 from helpers import fake_key_body
+from plugbackup_bot.commands import ADMIN_COMMANDS, COMMANDS, COMMANDS_EN
 from plugbackup_bot.db import Database
 from plugbackup_bot.db import invites as invites_repo
-from plugbackup_bot.runtime import ADMIN_COMMANDS, COMMANDS, configure_bot
+from plugbackup_bot.runtime import configure_bot
 from plugbackup_bot.tg import admin_texts, keyboards, texts
 from plugbackup_bot.tg.states import AccessStates
 
@@ -130,10 +131,13 @@ async def test_an_invite_from_the_button_really_works(h: Harness) -> None:
 async def test_admins_get_a_wider_command_menu() -> None:
     bot, session = make_bot()
     await configure_bot(bot, [900, 901])
-    general, first, second = session.of(SetMyCommands)
+    general, general_en, first, second = session.of(SetMyCommands)
 
     assert general.scope is None
+    assert general.language_code is None
+    assert general_en.language_code == "en"
     assert [c.command for c in general.commands] == [c for c, _ in COMMANDS]
+    assert [c.command for c in general_en.commands] == [c for c, _ in COMMANDS_EN]
     for method, admin_id in ((first, 900), (second, 901)):
         assert isinstance(method.scope, BotCommandScopeChat)
         assert method.scope.chat_id == admin_id
@@ -145,13 +149,14 @@ async def test_admins_get_a_wider_command_menu() -> None:
 async def test_telegram_refusals_do_not_break_startup() -> None:
     bot, session = make_bot()
     refusal = TelegramAPIError(SetMyCommands(commands=[]), "Bad Request: chat not found")
-    session.errors.extend([refusal, refusal])  # и общее меню, и меню админа
+    session.errors.extend([refusal] * 3)  # оба общих меню и меню админа
     await configure_bot(bot, [900])  # не бросает
-    assert len(session.of(SetMyCommands)) == 2
+    assert len(session.of(SetMyCommands)) == 3
 
 
 def test_command_descriptions_fit_telegram_limits() -> None:
-    for name, description in ADMIN_COMMANDS:
+    for name, description in (*ADMIN_COMMANDS, *COMMANDS_EN):
         assert 1 <= len(name) <= 32 and name == name.lower()
         assert 3 <= len(description) <= 256
     assert len({name for name, _ in ADMIN_COMMANDS}) == len(ADMIN_COMMANDS)
+    assert [n for n, _ in COMMANDS_EN] == [n for n, _ in COMMANDS]

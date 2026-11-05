@@ -17,10 +17,15 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
+# Только для scripts/: Pillow готовит аватар (PNG -> JPG).
+tools = [
+    "pillow>=11,<13",
+]
 dev = [
     "pytest>=8",
     "pytest-asyncio>=1.0",
     "ruff>=0.8",
+    "pillow>=11,<13",
 ]
 
 [tool.setuptools.packages.find]

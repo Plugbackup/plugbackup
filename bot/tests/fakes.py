@@ -15,10 +15,16 @@ from aiogram.methods import (
     CreateInvoiceLink,
     EditMessageReplyMarkup,
     EditMessageText,
+    GetMe,
     SendMessage,
+    SetMyCommands,
+    SetMyDescription,
+    SetMyName,
+    SetMyProfilePhoto,
+    SetMyShortDescription,
     TelegramMethod,
 )
-from aiogram.types import Chat, InlineKeyboardMarkup, Message
+from aiogram.types import Chat, InlineKeyboardMarkup, Message, User
 
 from plugbackup_bot.db.clients import Client
 from plugbackup_bot.db.jobs import Job
@@ -136,7 +142,8 @@ class FakeSession(BaseSession):
     def __init__(self) -> None:
         super().__init__()
         self.requests: list[TelegramMethod[Any]] = []
-        self.errors: list[Exception] = []
+        # Ошибки по очереди на следующие запросы; None пропускает запрос без ошибки.
+        self.errors: list[Exception | None] = []
 
     async def close(self) -> None:
         return None
@@ -146,13 +153,18 @@ class FakeSession(BaseSession):
     ):
         self.requests.append(method)
         if self.errors:
-            raise self.errors.pop(0)
+            error = self.errors.pop(0)
+            if error is not None:
+                raise error
         if isinstance(method, (SendMessage, EditMessageText)):
             self._validate_text(bot, method)
         if isinstance(method, (SendMessage, EditMessageText, EditMessageReplyMarkup)):
             self._validate_markup(method)
         if isinstance(method, AnswerCallbackQuery) and len(method.text or "") > MAX_CALLBACK_ANSWER:
             raise TelegramBadRequest(method=method, message="Bad Request: MESSAGE_TOO_LONG")
+        self._validate_profile(method)
+        if isinstance(method, GetMe):
+            return User(id=1000, is_bot=True, first_name="PlugBackup", username="PlugBackupBot")
         if isinstance(method, SendMessage):
             return Message(
                 message_id=len(self.requests),
@@ -163,6 +175,33 @@ class FakeSession(BaseSession):
         if isinstance(method, CreateInvoiceLink):
             return "https://t.me/$fake-invoice"
         return True
+
+    @staticmethod
+    def _validate_profile(method: TelegramMethod[Any]) -> None:
+        """Лимиты профиля бота из Bot API."""
+        problem = None
+        if isinstance(method, SetMyName) and len(method.name or "") > 64:
+            problem = "name is too long"
+        elif (
+            isinstance(method, SetMyShortDescription) and len(method.short_description or "") > 120
+        ):
+            problem = "short description is too long"
+        elif isinstance(method, SetMyDescription) and len(method.description or "") > 512:
+            problem = "description is too long"
+        elif isinstance(method, SetMyCommands):
+            if len(method.commands) > 100:
+                problem = "too many commands"
+            for command in method.commands:
+                if not re.fullmatch(r"[a-z0-9_]{1,32}", command.command):
+                    problem = f"BOT_COMMAND_INVALID: {command.command}"
+                elif not 3 <= len(command.description) <= 256:
+                    problem = f"BOT_COMMAND_DESCRIPTION_INVALID: {command.command}"
+        elif isinstance(method, SetMyProfilePhoto):
+            data = getattr(getattr(method.photo, "photo", None), "data", b"")
+            if not bytes(data).startswith(bytes([0xFF, 0xD8, 0xFF])):
+                problem = "PHOTO_INVALID: the profile photo must be a JPG"
+        if problem:
+            raise TelegramBadRequest(method=method, message=f"Bad Request: {problem}")
 
     @staticmethod
     def _validate_markup(method: SendMessage | EditMessageText | EditMessageReplyMarkup) -> None:

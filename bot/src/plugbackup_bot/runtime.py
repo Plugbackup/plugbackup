@@ -11,6 +11,7 @@ from dataclasses import dataclass, field
 from aiogram import Bot, Dispatcher
 from aiogram.types import ErrorEvent
 
+from plugbackup_bot.commands import set_commands
 from plugbackup_bot.config import Settings
 from plugbackup_bot.db import Database, migrate
 from plugbackup_bot.db.nodes import sync_nodes
@@ -56,28 +57,6 @@ MAINTENANCE_STARTUP_DELAY_S = 600
 
 # Не чаще раза в 5 минут сообщаем админу о необработанных ошибках в handlers.
 ERROR_ALERT_GAP_S = 300
-
-COMMANDS = (
-    ("start", "о сервисе"),
-    ("status", "занято, тариф, дата списания"),
-    ("upgrade", "сменить тариф"),
-    ("key", "заменить SSH-ключ"),
-    ("alerts", "настройки уведомлений"),
-    ("restore", "запросить восстановление"),
-    ("rules", "правила"),
-    ("help", "справка"),
-)
-
-# Меню администратора: те же команды клиента плюс админские. Показывается только админам.
-ADMIN_COMMANDS = (
-    ("admin", "панель администратора"),
-    ("stats", "статистика и выручка"),
-    ("nodes", "ноды и их загрузка"),
-    ("invite", "инвайт-коды беты"),
-    ("client", "карточка клиента"),
-    ("broadcast", "рассылка"),
-    *COMMANDS,
-)
 
 
 @dataclass
@@ -221,18 +200,4 @@ def _error_handler(notifier: TelegramNotifier):  # type: ignore[no-untyped-def]
 
 async def configure_bot(bot: Bot, admin_ids: Collection[int] = ()) -> None:
     """Меню команд в Telegram: общее и расширенное для админов. Сбой не мешает запуску."""
-    from aiogram.types import BotCommand, BotCommandScopeChat
-
-    try:
-        await bot.set_my_commands([BotCommand(command=c, description=d) for c, d in COMMANDS])
-    except Exception:
-        log.warning("could not set the bot commands", exc_info=True)
-    for admin_id in admin_ids:
-        try:
-            await bot.set_my_commands(
-                [BotCommand(command=c, description=d) for c, d in ADMIN_COMMANDS],
-                scope=BotCommandScopeChat(chat_id=admin_id),
-            )
-        except Exception:
-            # Пока админ не написал боту, у Telegram нет такого чата: меню появится после /start.
-            log.warning("could not set the admin commands for %s", admin_id, exc_info=True)
+    await set_commands(bot, admin_ids)

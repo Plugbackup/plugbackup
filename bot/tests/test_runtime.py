@@ -170,8 +170,9 @@ async def test_kicking_the_provisioner_runs_it_in_the_background(env: Path) -> N
 async def test_commands_menu_is_set_and_failures_are_tolerated() -> None:
     bot, session = make_bot()
     await configure_bot(bot)
-    [method] = session.of(SetMyCommands)
+    method, english = session.of(SetMyCommands)
     assert [c.command for c in method.commands][:2] == ["start", "status"]
+    assert english.language_code == "en"
 
     session.errors.append(TelegramAPIError(method, "boom"))
     await configure_bot(bot)  # не бросает

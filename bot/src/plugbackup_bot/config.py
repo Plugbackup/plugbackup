@@ -17,6 +17,13 @@ NODE_NAME_RE = re.compile(r"^[a-z0-9][a-z0-9-]{0,31}$")
 MAX_PRICE_STARS = 10_000
 
 
+def split_ids(value: object) -> object:
+    """«1,2,3» из .env превращает в список чисел; остальное отдаёт pydantic как есть."""
+    if isinstance(value, str):
+        return [int(part) for part in value.split(",") if part.strip()]
+    return value
+
+
 def is_hostname(value: str) -> bool:
     return HOSTNAME_RE.fullmatch(value) is not None
 
@@ -93,9 +100,7 @@ class Settings(BaseSettings):
     @field_validator("admin_ids", mode="before")
     @classmethod
     def _split_admin_ids(cls, value: object) -> object:
-        if isinstance(value, str):
-            return [int(part) for part in value.split(",") if part.strip()]
-        return value
+        return split_ids(value)
 
     @field_validator("prices_stars")
     @classmethod
