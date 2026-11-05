@@ -6,7 +6,7 @@ emoji_map.json. Команда всегда отправляет настоящ�
 
 import asyncio
 import html
-from collections.abc import Collection, Iterator
+from collections.abc import Iterator
 from pathlib import Path
 
 from aiogram import F, Router
@@ -14,9 +14,11 @@ from aiogram.exceptions import TelegramBadRequest
 from aiogram.filters import Command
 from aiogram.types import CallbackQuery, InlineKeyboardButton, InlineKeyboardMarkup, Message
 
+from plugbackup_bot.domain.roles import Actor, Permission
 from plugbackup_bot.emoji import GLYPHS, NAMES, E
 from plugbackup_bot.emoji_tools import EmojiToolError, Pack, read_pack
-from plugbackup_bot.tg.admin_filter import IsAdmin
+from plugbackup_bot.services.admins import AdminDirectory
+from plugbackup_bot.tg.admin.core import AdminFilter, requires
 from plugbackup_bot.tg.emoji_fallback import probing
 
 # В одном сообщении Telegram принимает до 100 сущностей, а на каждый эмодзи их две.
@@ -113,7 +115,8 @@ def retry_markup() -> InlineKeyboardMarkup:
     )
 
 
-async def cmd_emoji_preview(message: Message, emoji_pack_file: Path) -> None:
+@requires(Permission.EMOJI)
+async def cmd_emoji_preview(message: Message, emoji_pack_file: Path, actor: Actor) -> None:
     try:
         pack = read_pack(emoji_pack_file)
     except EmojiToolError as error:
@@ -132,18 +135,20 @@ async def cmd_emoji_preview(message: Message, emoji_pack_file: Path) -> None:
         await message.answer(html.escape(REJECTED.format(reason=error.message)))
 
 
-async def cb_noop(callback: CallbackQuery) -> None:
+@requires(Permission.EMOJI)
+async def cb_noop(callback: CallbackQuery, actor: Actor) -> None:
     await callback.answer(NOOP_ANSWER)
 
 
-async def cb_retry(callback: CallbackQuery) -> None:
+@requires(Permission.EMOJI)
+async def cb_retry(callback: CallbackQuery, actor: Actor) -> None:
     E.retry()
     await callback.answer(RETRIED)
 
 
-def build_router(admin_ids: Collection[int]) -> Router:
+def build_router(directory: AdminDirectory) -> Router:
     router = Router(name="emoji_preview")
-    only_admins = IsAdmin(admin_ids)
+    only_admins = AdminFilter(directory)
     router.message.filter(only_admins)
     router.callback_query.filter(only_admins)
     router.message.register(cmd_emoji_preview, Command("emoji_preview"))

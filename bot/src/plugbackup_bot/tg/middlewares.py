@@ -90,7 +90,7 @@ class UserMiddleware(BaseMiddleware):
         user = data.get("event_from_user")
         if user is not None and not user.is_bot:
             async with self._db.transaction() as conn:
-                await touch_user(conn, user.id, self._clock.now())
+                await touch_user(conn, user.id, self._clock.now(), user.username)
         return await handler(event, data)
 
 

@@ -28,6 +28,7 @@ from plugbackup_bot.db import Database
 from plugbackup_bot.db import invites as invites_repo
 from plugbackup_bot.services.access import AccessService
 from plugbackup_bot.services.admin import AdminService
+from plugbackup_bot.services.admins import AdminDirectory
 from plugbackup_bot.services.alert_settings import AlertSettingsService
 from plugbackup_bot.services.billing import BillingService
 from plugbackup_bot.services.broadcast import BroadcastService
@@ -45,6 +46,7 @@ from plugbackup_bot.ui.screen import Ui
 USER = User(id=5, is_bot=False, first_name="Тест")
 OTHER = User(id=6, is_bot=False, first_name="Другой")
 ADMIN = User(id=900, is_bot=False, first_name="Админ")
+SUPPORT = User(id=901, is_bot=False, first_name="Помощник")
 ADMIN_CHAT = 777
 
 
@@ -79,6 +81,7 @@ class Harness:
     alert_settings: AlertSettingsService
     restore: RestoreService
     admin: AdminService
+    directory: AdminDirectory
     broadcast: BroadcastService
     kicks: list[int] = field(default_factory=list)
     _update_id: int = 0
@@ -105,13 +108,15 @@ class Harness:
         )
         alert_settings = AlertSettingsService(db, clock, "Europe/Moscow")
         restore = RestoreService(db, clock, "Europe/Moscow")
-        admin = AdminService(db, clock, billing)
+        admin = AdminService(db, clock, billing, CATALOG)
+        directory = AdminDirectory(db, clock, [ADMIN.id])
+        await directory.sync()
         broadcast = BroadcastService(db, clock, messenger, rate_per_s=1000)
         storage = MemoryStorage()
         harness = cls(
             db, clock, bot, session, None, storage,  # type: ignore[arg-type]
             stars, storectl, messenger, alerter, billing, access, provisioner, lifecycle,
-            alert_settings, restore, admin, broadcast,
+            alert_settings, restore, admin, directory, broadcast,
         )  # fmt: skip
         deps = Deps(
             db=db,
@@ -124,7 +129,7 @@ class Harness:
             restore=restore,
             admin=admin,
             broadcast=broadcast,
-            admin_ids=[ADMIN.id],
+            directory=directory,
             admin_chat_id=ADMIN_CHAT,
             messenger=messenger,
             alerter=alerter,

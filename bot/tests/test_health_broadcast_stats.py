@@ -7,14 +7,14 @@ import pytest_asyncio
 
 from fakes import FakeClock, RecordingAlerter, RecordingMessenger
 from harness import Harness
-from helpers import NOW, add_client, add_node, add_user
+from helpers import NOW, add_client, add_node, add_user, plain
 from plugbackup_bot.db import Database
 from plugbackup_bot.db import invites as invites_repo
 from plugbackup_bot.db.nodes import Node, list_nodes
 from plugbackup_bot.services.broadcast import MAX_TEXT, BroadcastService
 from plugbackup_bot.services.health import HealthMonitor, tcp_probe
 from plugbackup_bot.services.stats import collect, month_bounds
-from plugbackup_bot.tg import admin_texts
+from plugbackup_bot.tg.admin import views
 
 MIN = 60
 HOUR = 3600
@@ -268,9 +268,12 @@ async def test_stats_collection_and_text(db: Database, clock: FakeClock) -> None
     assert load.sold_gb == 10 + 50 + 50 + 100 + 50
     assert load.free_gb == 300 - 260
 
-    text = admin_texts.stats(stats, h.access._catalog, "Europe/Moscow")
-    assert "• 50 ГБ — 3" in text
-    assert "node1: 260 / 300 ГБ, свободно 40 ГБ" in text
-    assert "Выручка с 1 октября 2025: 150 Stars" in text
-    assert "Очередь storectl: ждёт 1, упало 1" in text
+    assert stats.new_week == 6  # все созданы «сейчас» по часам теста, удалённые тоже
+
+    text = plain(views.dashboard(stats, h.access._catalog, "Europe/Moscow"))
+    assert "50 ГБ — 3" in text
+    assert "node1: онлайн, продано 260 из 300 ГБ" in text
+    assert "Выручка с 1 октября 2025: 150 Stars" in text
+    assert "Продано: 260 ГБ из 300 ГБ (87%)" in text
+    assert "Задачи на нодах: ждут 1, упали 1" in text
     assert "Неиспользованных инвайтов: 2" in text

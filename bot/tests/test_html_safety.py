@@ -10,7 +10,6 @@ from aiogram.exceptions import TelegramBadRequest
 from fakes import check_telegram_html, make_bot
 from harness import ADMIN, Harness
 from plugbackup_bot.db import Database
-from plugbackup_bot.tg import admin_texts
 
 BAD = [
     "/maint <нода|all> <текст>",
@@ -39,7 +38,11 @@ MODULES = [
     "plugbackup_bot.tg.alert_ui",
     "plugbackup_bot.tg.notices",
     "plugbackup_bot.tg.keyboards",
-    "plugbackup_bot.tg.handlers.admin",
+    "plugbackup_bot.tg.admin.views",
+    "plugbackup_bot.tg.admin.clients",
+    "plugbackup_bot.tg.admin.menu",
+    "plugbackup_bot.tg.admin.dashboard",
+    "plugbackup_bot.tg.admin.legacy",
     "plugbackup_bot.tg.handlers.access",
     "plugbackup_bot.tg.handlers.alerts",
     "plugbackup_bot.tg.handlers.restore",
@@ -71,14 +74,14 @@ async def test_the_fake_telegram_refuses_what_the_real_one_refuses() -> None:
 
 
 async def test_the_admin_screen_that_failed_in_telegram_now_goes_through(db: Database) -> None:
-    """Точный случай сбоя: /admin с «<нода|all>» в справке."""
+    """Точный случай сбоя: /admin с «<нода|all>» в справке. Поддельный Telegram разбирает
+    разметку так же строго, как настоящий."""
     from fakes import FakeClock
 
     harness = await Harness.build(db, FakeClock())
     await harness.say("/admin", user=ADMIN)
-    assert harness.last().text.startswith("Админка")
+    assert "Админка" in harness.last().text
     assert "<нода" not in harness.last().text
-    check_telegram_html(admin_texts.ADMIN_HELP)
 
 
 async def test_error_replies_with_user_input_stay_valid(db: Database) -> None:

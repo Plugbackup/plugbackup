@@ -2,7 +2,7 @@
 
 import asyncio
 import time
-from collections.abc import Callable, Collection
+from collections.abc import Callable
 from dataclasses import dataclass, field
 from pathlib import Path
 
@@ -15,15 +15,16 @@ from plugbackup_bot.domain.plans import PlanCatalog
 from plugbackup_bot.infra.clock import Clock
 from plugbackup_bot.services.access import AccessService
 from plugbackup_bot.services.admin import AdminService
+from plugbackup_bot.services.admins import AdminDirectory
 from plugbackup_bot.services.alert_settings import AlertSettingsService
 from plugbackup_bot.services.billing import BillingService
 from plugbackup_bot.services.broadcast import BroadcastService
 from plugbackup_bot.services.lifecycle import LifecycleService
 from plugbackup_bot.services.notify import AdminAlerter, Messenger
 from plugbackup_bot.services.restore import RestoreService
+from plugbackup_bot.tg.admin.router import build_router as build_admin_router
 from plugbackup_bot.tg.handlers import (
     access,
-    admin,
     alerts,
     emoji_preview,
     lifecycle,
@@ -48,7 +49,7 @@ class Deps:
     restore: RestoreService
     admin: AdminService
     broadcast: BroadcastService
-    admin_ids: Collection[int]
+    directory: AdminDirectory
     admin_chat_id: int
     messenger: Messenger
     alerter: AdminAlerter
@@ -76,6 +77,7 @@ def build_dispatcher(
         alert_settings=deps.alert_settings,
         restore=deps.restore,
         admin=deps.admin,
+        directory=deps.directory,
         broadcast=deps.broadcast,
         admin_chat_id=deps.admin_chat_id,
         clock=deps.clock,
@@ -99,8 +101,8 @@ def build_dispatcher(
     dp.include_router(alerts.build_router())
     dp.include_router(restore.build_router())
     # Админка раньше «любого текста»: иначе текст рассылки уйдёт в запасной handler.
-    dp.include_router(admin.build_router(deps.admin_ids))
-    dp.include_router(emoji_preview.build_router(deps.admin_ids))
+    dp.include_router(build_admin_router(deps.directory))
+    dp.include_router(emoji_preview.build_router(deps.directory))
     # Последним: внутри него handler «любой текст».
     dp.include_router(access.build_router())
     return dp

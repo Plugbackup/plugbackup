@@ -40,12 +40,21 @@ COMMANDS_EN: Menu = (
 # Меню администратора: админские команды плюс команды клиента. Показывается только админам.
 ADMIN_COMMANDS: Menu = (
     ("admin", "панель администратора"),
-    ("stats", "статистика и выручка"),
+    ("stats", "дашборд"),
+    ("clients", "список клиентов"),
+    ("client", "карточка клиента"),
     ("nodes", "ноды и их загрузка"),
     ("invite", "инвайт-коды беты"),
-    ("client", "карточка клиента"),
     ("broadcast", "рассылка"),
     ("emoji_preview", "пак эмодзи и сопоставление"),
+    *COMMANDS,
+)
+
+# Меню помощника (роль support): клиенты, тикеты и заявки доступны из /admin.
+SUPPORT_COMMANDS: Menu = (
+    ("admin", "панель администратора"),
+    ("clients", "список клиентов"),
+    ("client", "карточка клиента"),
     *COMMANDS,
 )
 
@@ -67,8 +76,11 @@ class CommandsReport:
         return not self.general_failed
 
 
-async def set_commands(bot: Bot, admin_ids: Collection[int] = ()) -> CommandsReport:
-    """Общее меню (ru по умолчанию и en) и расширенное меню каждому админу. Не бросает."""
+async def set_commands(
+    bot: Bot, admin_ids: Collection[int] = (), support_ids: Collection[int] = ()
+) -> CommandsReport:
+    """Общее меню (ru по умолчанию и en), расширенное меню владельцам и меню помощникам.
+    Не бросает."""
     report = CommandsReport()
     for language, menu in ((None, COMMANDS), ("en", COMMANDS_EN)):
         try:
@@ -76,12 +88,13 @@ async def set_commands(bot: Bot, admin_ids: Collection[int] = ()) -> CommandsRep
         except Exception:
             log.warning("could not set the bot commands (%s)", language or "default", exc_info=True)
             report.general_failed.append(language or "default")
-    for admin_id in admin_ids:
-        try:
-            await bot.set_my_commands(
-                to_bot_commands(ADMIN_COMMANDS), scope=BotCommandScopeChat(chat_id=admin_id)
-            )
-        except Exception:
-            log.warning("could not set the admin commands for %s", admin_id, exc_info=True)
-            report.admins_without_chat.append(admin_id)
+    for menu, ids in ((ADMIN_COMMANDS, admin_ids), (SUPPORT_COMMANDS, support_ids)):
+        for admin_id in ids:
+            try:
+                await bot.set_my_commands(
+                    to_bot_commands(menu), scope=BotCommandScopeChat(chat_id=admin_id)
+                )
+            except Exception:
+                log.warning("could not set the admin commands for %s", admin_id, exc_info=True)
+                report.admins_without_chat.append(admin_id)
     return report

@@ -22,6 +22,8 @@ class Stats:
     failed_jobs: int
     open_restores: int
     unused_invites: int
+    # Новые клиенты за последние 7 суток.
+    new_week: int = 0
 
 
 def month_bounds(now: int, tz: str) -> tuple[int, int]:
@@ -69,6 +71,10 @@ async def collect(
         async with conn.execute("SELECT COUNT(*) FROM invites WHERE used_by IS NULL") as cur:
             invites = int((await cur.fetchone())[0])  # type: ignore[index]
         revenue = await revenue_stars(conn, start, end)
+        async with conn.execute(
+            "SELECT COUNT(*) FROM clients WHERE created_at >= ?", (now - 7 * 24 * 3600,)
+        ) as cur:
+            new_week = int((await cur.fetchone())[0])  # type: ignore[index]
     return Stats(
         by_plan=by_plan,
         by_state=by_state,
@@ -80,4 +86,5 @@ async def collect(
         failed_jobs=int(jobs[1]) if jobs else 0,
         open_restores=restores,
         unused_invites=invites,
+        new_week=new_week,
     )

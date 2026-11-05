@@ -524,3 +524,192 @@ CONSENT_BODY = (
     "Включайте алерт, только если согласны с этим."
 )
 BTN_CONSENT = "Включить алерт"
+
+# =====================================================================================
+# Админка. Тексты для клиентов, которые администратор отправляет через бота, тоже здесь.
+# =====================================================================================
+
+# --- общее ---
+
+ADM_DENIED = "Недостаточно прав для этого действия."
+ADM_STALE = "Эта кнопка устарела. Откройте /admin заново."
+ADM_CANCELLED = "Отменено."
+ADM_CANCEL_HINT = "Отмена: /cancel."
+ADM_NOT_FOUND = "Не найдено. Возможно, запись уже удалена."
+ADM_STATE_CHANGED = "Состояние изменилось, действие недоступно. Откройте карточку заново."
+ADM_DONE = "Готово."
+ADM_TYPE_ERROR = "Не понял. {hint}"
+ADM_CONFIRM_TITLE = "Подтвердите действие"
+BTN_ADM_CONFIRM = "Подтвердить"
+BTN_ADM_CANCEL = "Отмена"
+BTN_ADM_MENU = "Главное меню"
+BTN_ADM_REFRESH = "Обновить"
+BTN_ADM_CLIENT_MENU = "Меню клиента"
+
+ROLE_NAMES = {"owner": "owner", "support": "support"}
+
+# --- меню ---
+
+ADM_MENU_TITLE = "Админка"
+ADM_MENU_ROLE = "Роль: {role}"
+ADM_MENU_HINT = "Выберите раздел."
+BTN_ADM_DASHBOARD = "Дашборд"
+BTN_ADM_CLIENTS = "Клиенты"
+BTN_ADM_TARIFFS = "Тарифы"
+BTN_ADM_INVITES = "Инвайты"
+BTN_ADM_BROADCASTS = "Рассылки"
+BTN_ADM_NODES = "Ноды"
+BTN_ADM_MAINT = "Техработы"
+BTN_ADM_SUPPORT = "Поддержка"
+BTN_ADM_RESTORE = "Восстановление"
+BTN_ADM_PAYMENTS = "Платежи"
+BTN_ADM_ADMINS = "Админы"
+BTN_ADM_JOURNAL = "Журнал"
+BTN_ADM_EXPORT = "Экспорт"
+BTN_ADM_EMOJI = "Эмодзи"
+ADM_BADGE = "{title} ({count})"
+
+# --- дашборд ---
+
+DASH_TITLE = "Дашборд"
+DASH_CLIENTS = "Клиенты по тарифам"
+DASH_NO_CLIENTS = "пока нет"
+DASH_STATES = "По состояниям: {states}"
+DASH_PAYING = "Платящих: {count}"
+DASH_NEW_WEEK = "Новых за неделю: {count}"
+DASH_REVENUE = "Выручка с {since}: {stars} Stars"
+DASH_SOLD = "Продано: {sold} ГБ из {limit} ГБ ({percent}%)"
+DASH_NODES = "Ноды"
+DASH_NODE_UP = "{name}: онлайн, продано {sold} из {limit} ГБ"
+DASH_NODE_DOWN = "{name}: офлайн с {since}, продано {sold} из {limit} ГБ"
+DASH_NODE_MAINT = "{name}: обслуживание, продано {sold} из {limit} ГБ"
+DASH_NODE_OFF = "{name}: отключена, продано {sold} из {limit} ГБ"
+DASH_QUEUE = "Очередь"
+DASH_JOBS = "Задачи на нодах: ждут {pending}, упали {failed}"
+DASH_RESTORES = "Заявок на восстановление: {count}"
+DASH_TICKETS = "Открытых обращений: {count}"
+DASH_INVITES = "Неиспользованных инвайтов: {count}"
+STATE_LINE = "{name} {count}"
+
+# --- клиенты ---
+
+CLIENTS_TITLE = "Клиенты"
+CLIENTS_SUMMARY = "Всего: {total}. Самые новые сверху."
+CLIENTS_EMPTY = "Клиентов пока нет."
+BTN_CLIENT_SEARCH = "Найти клиента"
+CLIENT_ROW = "{login} · {plan} · {state}"
+CLIENT_ROW_USERNAME = "{login} · @{username} · {plan} · {state}"
+CLIENT_SEARCH_TITLE = "Поиск клиента"
+CLIENT_SEARCH_ASK = "Пришлите логин (u1001), Telegram id или @username."
+CLIENT_NOT_FOUND = "Клиент не найден. Укажите логин (u1001), Telegram id или @username."
+
+CARD_TITLE = "Клиент {login}"
+CARD_TG_ID = "tg_id"
+CARD_USERNAME = "Username"
+CARD_PLAN = "Тариф"
+CARD_PLAN_VALUE = "{name}, лимит {quota}"
+CARD_BONUS = "Бонус"
+CARD_BONUS_VALUE = "+{gb} ГБ к тарифу"
+CARD_STATE = "Состояние"
+CARD_STATE_VALUE = "{state} (с {since})"
+CARD_NODE = "Нода"
+CARD_NODE_MISSING = "не найдена"
+CARD_USED = "Занято"
+CARD_USED_DETAIL = "{used}, данные на {at}"
+CARD_PAID_UNTIL = "Оплачено до"
+CARD_NEXT_QUESTION = "Следующий вопрос «Я ещё пользуюсь»"
+CARD_RENEWAL = "Продление"
+CARD_ON = "включено"
+CARD_OFF = "выключено"
+CARD_HOLD = "Ручная блокировка"
+CARD_YES = "да"
+CARD_NO = "нет"
+CARD_KEY = "Ключ"
+CARD_KEY_HAS = "есть"
+CARD_KEY_NONE = "не прислан"
+CARD_NOTE = "Заметка"
+CARD_PAYMENTS = "Платежи"
+CARD_PAYMENT_LINE = "{stars} Stars, {date}, {plan} ({kind}{refunded})"
+CARD_KIND_RENEWAL = "продление"
+CARD_KIND_FIRST = "оплата"
+CARD_REFUNDED = ", возврат"
+CARD_NOTICES = "Последние уведомления клиенту"
+CARD_NOTICE_LINE = "{title}, {at}"
+CARD_JOBS = "Задачи на ноде"
+CARD_JOB_FAILED = "#{id} {op}: упала, попыток {attempts}{error}"
+CARD_JOB_RETRY = "#{id} {op}: ждёт повтора, попыток {attempts}{error}"
+BTN_CLIENT_EXTEND = "Продлить"
+BTN_CLIENT_PLAN = "Сменить тариф"
+BTN_CLIENT_BONUS = "Бонус ГБ"
+BTN_CLIENT_BLOCK = "Заблокировать"
+BTN_CLIENT_UNBLOCK = "Вернуть доступ"
+BTN_CLIENT_DELETE = "Удалить"
+BTN_CLIENT_NOTE = "Заметка"
+BTN_CLIENT_MESSAGE = "Написать"
+BTN_JOB_RETRY = "Повторить #{id}"
+BTN_OTHER_NUMBER = "Другое число"
+
+EXTEND_TITLE = "Продлить доступ"
+EXTEND_ASK = (
+    "На сколько дней продлить доступ клиенту {login}? "
+    "Выберите или пришлите число от 1 до {max_days}."
+)
+EXTEND_DAYS = "{days} дн."
+EXTEND_RESULT = "Доступ клиента {login} продлён на {days} дн."
+EXTEND_BAD = "Нужно число дней от 1 до {max_days}."
+PLAN_TITLE = "Сменить тариф"
+PLAN_ASK = (
+    "Выберите новый тариф для клиента {login}. Он применится без оплаты, бонусные ГБ остаются. "
+    "Подписка Stars клиента при этом не меняется."
+)
+PLAN_RESULT = "Клиент {login} переведён на тариф {name}."
+PLAN_NO_OTHER = "Других платных тарифов нет."
+PLAN_BETA_NOTE = "Тариф бета-клиента менять нельзя: выдайте бонусные ГБ."
+PLAN_SAME = "У клиента уже этот тариф."
+PLAN_NO_CAPACITY = "На ноде не хватает места под этот тариф."
+PLAN_TOO_MUCH_DATA = "У клиента занято больше, чем помещается в новый объём."
+BONUS_TITLE = "Бонусные ГБ"
+BONUS_ASK = (
+    "Сколько ГБ добавить клиенту {login} сверх тарифа? Сейчас бонус {bonus} ГБ. "
+    "Выберите или пришлите число (отрицательное убавляет бонус), от 1 до {max_gb}."
+)
+BTN_BONUS_ADD = "+{gb} ГБ"
+BTN_BONUS_RESET = "Сбросить бонус"
+BONUS_RESULT = "Бонус клиента {login}: {delta} ГБ, всего {total} ГБ."
+BONUS_BAD = "Нужно ненулевое число ГБ, по модулю не больше {max_gb}."
+BONUS_NEGATIVE = "Бонус не может стать меньше нуля."
+BLOCK_CONFIRM = "Заблокировать клиента {login}? Доступ по SFTP закроется, автоматика его не вернёт."
+DELETE_CONFIRM = (
+    "Удалить клиента {login}? Данные на ноде будут удалены без возможности восстановления."
+)
+CLIENT_BLOCKED = "Клиент {login} заблокирован."
+CLIENT_UNBLOCKED = "Клиенту {login} возвращён доступ."
+CLIENT_DELETED = "Клиент {login} удалён."
+NOTE_TITLE = "Заметка о клиенте"
+NOTE_ASK = "Пришлите заметку о клиенте {login} (до {max_len} знаков). Чтобы очистить, пришлите «-»."
+NOTE_SAVED = "Заметка сохранена."
+NOTE_CLEARED = "Заметка удалена."
+NOTE_BAD = "Заметка не длиннее {max_len} знаков."
+MESSAGE_TITLE = "Сообщение клиенту"
+MESSAGE_ASK = (
+    "Пришлите текст сообщения клиенту {login} (до {max_len} знаков). Он придёт от имени бота."
+)
+MESSAGE_SENT = "Сообщение отправлено."
+MESSAGE_FAILED = "Не удалось доставить: клиент закрыл бота или недоступен."
+MESSAGE_BAD = "Нужен текст до {max_len} знаков."
+CLIENT_MESSAGE = "<b>Сообщение от администратора</b>\n\n{text}"
+
+# Что бот пишет клиенту о действиях администратора.
+CLIENT_NOTICE_SUSPENDED = (
+    "Хранилище заблокировано администратором. Если это ошибка, напишите администратору."
+)
+CLIENT_NOTICE_RESUMED = "Доступ к хранилищу возобновлён."
+CLIENT_NOTICE_DELETED = "Хранилище удалено администратором."
+CLIENT_NOTICE_EXTENDED = "Администратор продлил доступ на {days} дн., до {until}."
+CLIENT_NOTICE_BONUS = (
+    "Администратор изменил лимит хранилища: {delta} ГБ. Новый лимит применится "
+    "в течение нескольких минут."
+)
+CLIENT_NOTICE_PLAN = (
+    "Администратор перевёл вас на тариф {name}. Новый лимит применится в течение нескольких минут."
+)

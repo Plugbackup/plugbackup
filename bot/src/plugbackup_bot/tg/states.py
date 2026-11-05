@@ -12,3 +12,13 @@ class AdminStates(StatesGroup):
     """Администратор пишет текст рассылки."""
 
     broadcast_text = State()
+
+
+class ClientAdminStates(StatesGroup):
+    """Администратор вводит текст или число в карточке клиента."""
+
+    search = State()
+    note = State()
+    message = State()
+    extend_days = State()
+    bonus_gb = State()

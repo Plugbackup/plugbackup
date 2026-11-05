@@ -7,12 +7,31 @@ async def ensure_user(conn: aiosqlite.Connection, tg_id: int, now: int) -> None:
     )
 
 
-async def touch_user(conn: aiosqlite.Connection, tg_id: int, now: int) -> None:
-    """Пользователь написал боту: запоминаем его и снимаем отметку «заблокировал бота»."""
+async def touch_user(
+    conn: aiosqlite.Connection, tg_id: int, now: int, username: str | None = None
+) -> None:
+    """Пользователь написал боту: запоминаем его (и @username для поиска) и снимаем отметку
+    «заблокировал бота»."""
     await ensure_user(conn, tg_id, now)
     await conn.execute(
-        "UPDATE users SET bot_blocked = 0 WHERE tg_id = ? AND bot_blocked = 1", (tg_id,)
+        "UPDATE users SET bot_blocked = 0, last_seen_at = ?, username = ? WHERE tg_id = ?",
+        (now, username.lower() if username else None, tg_id),
     )
+
+
+async def find_by_username(conn: aiosqlite.Connection, username: str) -> int | None:
+    """Telegram id по @username (без @, регистр не важен)."""
+    async with conn.execute(
+        "SELECT tg_id FROM users WHERE username = ?", (username.lstrip("@").lower(),)
+    ) as cur:
+        row = await cur.fetchone()
+    return int(row[0]) if row else None
+
+
+async def get_username(conn: aiosqlite.Connection, tg_id: int) -> str | None:
+    async with conn.execute("SELECT username FROM users WHERE tg_id = ?", (tg_id,)) as cur:
+        row = await cur.fetchone()
+    return row["username"] if row else None
 
 
 async def beta_used(conn: aiosqlite.Connection, tg_id: int) -> bool:

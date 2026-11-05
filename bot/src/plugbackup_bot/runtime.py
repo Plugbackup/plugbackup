@@ -23,6 +23,7 @@ from plugbackup_bot.infra.storectl import SshStorectl, Storectl
 from plugbackup_bot.scheduler import Scheduler, Task
 from plugbackup_bot.services.access import AccessService
 from plugbackup_bot.services.admin import AdminService
+from plugbackup_bot.services.admins import AdminDirectory
 from plugbackup_bot.services.alert_settings import AlertSettingsService
 from plugbackup_bot.services.alerts import AlertEngine
 from plugbackup_bot.services.billing import BillingService
@@ -116,6 +117,8 @@ async def build_runtime(
     await migrate(db)
     async with db.transaction() as conn:
         await sync_nodes(conn, settings.nodes)
+    directory = AdminDirectory(db, clock, settings.admin_ids)
+    await directory.sync()
 
     storectl = storectl or SshStorectl(
         user=settings.ssh_user,
@@ -155,9 +158,9 @@ async def build_runtime(
         lifecycle=lifecycle,
         alert_settings=AlertSettingsService(db, clock, tz),
         restore=RestoreService(db, clock, tz),
-        admin=AdminService(db, clock, billing),
+        admin=AdminService(db, clock, billing, catalog),
         broadcast=BroadcastService(db, clock, notifier),
-        admin_ids=settings.admin_ids,
+        directory=directory,
         admin_chat_id=settings.admin_chat_id,
         messenger=notifier,
         alerter=notifier,
@@ -234,6 +237,8 @@ def _error_handler(notifier: TelegramNotifier):  # type: ignore[no-untyped-def]
     return on_error
 
 
-async def configure_bot(bot: Bot, admin_ids: Collection[int] = ()) -> None:
-    """Меню команд в Telegram: общее и расширенное для админов. Сбой не мешает запуску."""
-    await set_commands(bot, admin_ids)
+async def configure_bot(
+    bot: Bot, admin_ids: Collection[int] = (), support_ids: Collection[int] = ()
+) -> None:
+    """Меню команд в Telegram: общее, для владельцев и для помощников. Сбой не мешает запуску."""
+    await set_commands(bot, admin_ids, support_ids)

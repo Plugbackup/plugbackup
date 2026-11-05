@@ -12,6 +12,8 @@ from aiogram.enums import ParseMode
 from pydantic import ValidationError
 
 from plugbackup_bot.config import Settings, load_settings
+from plugbackup_bot.db.admins import list_admins
+from plugbackup_bot.domain.roles import Role
 from plugbackup_bot.infra.storectl import Storectl
 from plugbackup_bot.logging_setup import setup_logging
 from plugbackup_bot.runtime import build_runtime, check_environment, configure_bot
@@ -60,7 +62,9 @@ async def run(
         default=DefaultBotProperties(parse_mode=ParseMode.HTML, link_preview_is_disabled=True),
     )
     runtime = await build_runtime(settings, bot, storectl=storectl, probe=probe)
-    await configure_bot(bot, settings.admin_ids)
+    async with runtime.db.read() as conn:
+        supports = [a.tg_id for a in await list_admins(conn) if a.role is Role.SUPPORT]
+    await configure_bot(bot, settings.admin_ids, supports)
     scheduler_task = asyncio.create_task(runtime.scheduler.run(), name="scheduler")
     await runtime.notifier.alert("Бот запущен.")
     try:

@@ -34,7 +34,7 @@ from plugbackup_bot.db.risk import has_acked
 from plugbackup_bot.db.usage import latest_sample
 from plugbackup_bot.db.users import ensure_user
 from plugbackup_bot.domain.payload import parse_payload
-from plugbackup_bot.domain.plans import SUBSCRIPTION_PERIOD_S, Plan, PlanCatalog
+from plugbackup_bot.domain.plans import GIB, SUBSCRIPTION_PERIOD_S, Plan, PlanCatalog
 from plugbackup_bot.domain.states import State
 from plugbackup_bot.infra.clock import Clock
 
@@ -168,12 +168,13 @@ class BillingService:
                 return Reject.ADMIN_HOLD
             if _has_active_subscription(live, plan, now):
                 return Reject.ALREADY_SUBSCRIBED
-            delta = plan.gb - live.quota_gb
+            new_quota_gb = plan.gb + live.bonus_gb  # бонусные ГБ остаются при смене тарифа
+            delta = new_quota_gb - live.quota_gb
             if delta > 0 and await free_gb(conn, live.node_id) < delta:
                 return Reject.NO_CAPACITY
             if delta < 0:
                 sample = await latest_sample(conn, live.id)
-                if sample is not None and sample.used_bytes > plan.quota_bytes:
+                if sample is not None and sample.used_bytes > new_quota_gb * GIB:
                     return Reject.TOO_MUCH_DATA
             return None
 
@@ -316,7 +317,7 @@ class BillingService:
             conn,
             client.id,
             plan_id=plan.id,
-            quota_gb=plan.gb,
+            quota_gb=plan.gb + client.bonus_gb,
             expires_at=expires_at,
             confirm_due_at=None,
             sub_charge_id=event.charge_id,
@@ -336,7 +337,7 @@ class BillingService:
             else:
                 await self._wake(conn, client, "payment", now)
                 resumed = True
-        if client.state in _LIVE_ON_NODE and plan.gb != client.quota_gb:
+        if client.state in _LIVE_ON_NODE and plan.gb + client.bonus_gb != client.quota_gb:
             await jobs_repo.enqueue(conn, client.id, Op.RESIZE, now)
         old_charge = client.sub_charge_id
         fresh = await get_client(conn, client.id)

@@ -15,7 +15,7 @@ from plugbackup_bot.db.risk import ack_risk, has_acked
 from plugbackup_bot.db.usage import Sample, latest_sample
 from plugbackup_bot.db.users import beta_used, ensure_user, mark_beta_used
 from plugbackup_bot.domain.payload import make_payload
-from plugbackup_bot.domain.plans import Plan, PlanCatalog
+from plugbackup_bot.domain.plans import GIB, Plan, PlanCatalog
 from plugbackup_bot.domain.policy import BETA_CONFIRM_PERIOD_S
 from plugbackup_bot.domain.states import State
 from plugbackup_bot.infra.clock import Clock
@@ -189,7 +189,11 @@ class AccessService:
         )
         if reject is not None:
             return InvoiceOffer(OfferKind.REJECTED, plan, reject=reject)
-        if live is not None and plan.gb < live.quota_gb and live.state is not State.PENDING:
+        if (
+            live is not None
+            and plan.gb + live.bonus_gb < live.quota_gb
+            and live.state is not State.PENDING
+        ):
             verdict = await self._fresh_usage_fits(live, plan)
             if verdict is not None:
                 return verdict
@@ -217,7 +221,7 @@ class AccessService:
         except StorectlError:
             log.warning("could not check usage of %s before a downgrade", client.login)
             return InvoiceOffer(OfferKind.UNAVAILABLE, plan)
-        if usage.used_bytes > plan.quota_bytes:
+        if usage.used_bytes > (plan.gb + client.bonus_gb) * GIB:
             return InvoiceOffer(OfferKind.REJECTED, plan, reject=Reject.TOO_MUCH_DATA)
         return None
 

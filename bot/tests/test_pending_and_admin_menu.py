@@ -6,14 +6,13 @@ from aiogram.methods import SetMyCommands
 from aiogram.types import BotCommandScopeChat
 
 from fakes import FakeClock, make_bot
-from harness import ADMIN, OTHER, Harness
+from harness import Harness
 from helpers import fake_key_body, plain
 from plugbackup_bot import texts_ru as T
 from plugbackup_bot.commands import ADMIN_COMMANDS, COMMANDS, COMMANDS_EN
 from plugbackup_bot.db import Database
-from plugbackup_bot.db import invites as invites_repo
 from plugbackup_bot.runtime import configure_bot
-from plugbackup_bot.tg import admin_texts, keyboards, texts
+from plugbackup_bot.tg import keyboards, texts
 from plugbackup_bot.tg.states import AccessStates
 
 KEY_LINE = f"ssh-ed25519 {fake_key_body(0)} me@home"
@@ -66,64 +65,6 @@ async def test_status_of_a_client_with_a_key_has_no_such_hint(h: Harness) -> Non
 
 def test_the_second_invite_hint_mentions_the_key() -> None:
     assert "/key" in texts.INVITE_ERRORS["has_client"]  # type: ignore[index]
-
-
-# --- меню администратора ---
-
-
-async def test_admin_command_shows_every_admin_command_and_buttons(h: Harness) -> None:
-    await h.say("/admin", user=ADMIN)
-    text = h.last().text
-    for command in ("/stats", "/nodes", "/invite N", "/client u1001", "/broadcast", "/maint"):
-        assert command in text
-    assert [(label, data) for label, data, _ in h.last_buttons()] == [
-        ("Статистика", admin_texts.ADMIN_STATS),
-        ("Ноды", admin_texts.ADMIN_NODES),
-        ("Инвайт-код", admin_texts.ADMIN_INVITE),
-        ("Рассылка", admin_texts.ADMIN_BROADCAST),
-    ]
-
-
-async def test_admin_menu_is_invisible_to_everyone_else(h: Harness) -> None:
-    await h.say("/admin")
-    await h.say("/admin", user=OTHER)
-    for data in (
-        admin_texts.ADMIN_STATS,
-        admin_texts.ADMIN_NODES,
-        admin_texts.ADMIN_INVITE,
-        admin_texts.ADMIN_BROADCAST,
-    ):
-        await h.press(data)
-        await h.press(data, user=OTHER)
-    assert h.texts() == []
-    async with h.db.read() as conn:
-        assert await invites_repo.count_unused(conn) == 0
-
-
-async def test_admin_buttons_do_what_the_commands_do(h: Harness) -> None:
-    await h.press(admin_texts.ADMIN_STATS, user=ADMIN)
-    assert h.last().text.startswith("Статистика")
-
-    await h.press(admin_texts.ADMIN_NODES, user=ADMIN)
-    assert h.last().text.startswith("Ноды")
-    assert "node1" in h.last().text
-
-    await h.press(admin_texts.ADMIN_INVITE, user=ADMIN)
-    assert h.last().text.count("<code>") == 1
-    async with h.db.read() as conn:
-        assert await invites_repo.count_unused(conn) == 1
-
-    await h.press(admin_texts.ADMIN_BROADCAST, user=ADMIN)
-    assert "Пришлите текст рассылки" in h.last().text
-    assert await h.fsm_state(ADMIN) is not None
-
-
-async def test_an_invite_from_the_button_really_works(h: Harness) -> None:
-    await h.press(admin_texts.ADMIN_INVITE, user=ADMIN)
-    code = h.last().text.split("<code>")[1].split("</code>")[0]
-    await h.press(f"{keyboards.RISK_PREFIX}{keyboards.RISK_BETA}")
-    await h.say(code)
-    assert "Код принят" in plain(h.last().text)
 
 
 # --- меню команд в Telegram ---

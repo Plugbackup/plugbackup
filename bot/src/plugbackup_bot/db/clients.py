@@ -24,6 +24,8 @@ _EDITABLE = frozenset(
         "sub_payload",
         "renewal_on",
         "admin_hold",
+        "admin_note",
+        "bonus_gb",
     }
 )
 
@@ -45,6 +47,9 @@ class Client:
     renewal_on: bool
     admin_hold: bool
     created_at: int
+    # Заметка администратора и бонусные ГБ сверх тарифа (квота = объём тарифа + bonus_gb).
+    admin_note: str | None = None
+    bonus_gb: int = 0
 
     @property
     def login(self) -> str:
@@ -68,6 +73,8 @@ class Client:
             renewal_on=bool(row["renewal_on"]),
             admin_hold=bool(row["admin_hold"]),
             created_at=row["created_at"],
+            admin_note=row["admin_note"],
+            bonus_gb=row["bonus_gb"],
         )
 
 
