@@ -136,7 +136,10 @@ INVITE_ERRORS: dict[RedeemKind, str] = {
         "Бета выдаётся один раз на аккаунт, и вы её уже получали. "
         "Платные тарифы — в разделе «Тарифы»."
     ),
-    RedeemKind.HAS_CLIENT: "У вас уже есть хранилище, его состояние — /status.",
+    RedeemKind.HAS_CLIENT: (
+        "У вас уже есть хранилище, его состояние — /status. "
+        "Если оно ждёт ключ, пришлите ключ сюда, подсказка в /key."
+    ),
     RedeemKind.NO_CAPACITY: "Свободных мест в бете сейчас нет. Попробуйте позже.",
     RedeemKind.NEED_ACK: "Сначала подтвердите, что понимаете риски беты: /start.",
 }
@@ -150,18 +153,28 @@ def beta_accepted(plan: Plan) -> str:
 
 KEY_HELP = (
     "Пришлите публичный ключ ssh-ed25519 одной строкой.\n\n"
-    "Если ключа нет, создайте его на своём устройстве:\n"
+    "Если ключа нет, создайте его на своём устройстве.\n\n"
+    "Linux и macOS:\n"
     "<code>ssh-keygen -t ed25519 -f ~/.ssh/plugbackup</code>\n"
-    "и покажите публичную часть:\n"
     "<code>cat ~/.ssh/plugbackup.pub</code>\n\n"
+    "Windows, PowerShell:\n"
+    "<code>ssh-keygen -t ed25519 -f $env:USERPROFILE\\.ssh\\plugbackup</code>\n"
+    "<code>Get-Content $env:USERPROFILE\\.ssh\\plugbackup.pub</code>\n\n"
+    "Нужна строка, которая начинается с «ssh-ed25519 AAAA». "
+    "Отпечаток (SHA256:…) не подходит.\n"
     "Приватный ключ, файл без .pub, никому не отправляйте."
 )
 
 KEY_REPLACE_HELP = (
     "Пришлите новый публичный ключ ssh-ed25519 одной строкой. "
     "Прежний ключ перестанет работать, когда нода применит замену.\n\n"
-    "Создать ключ: <code>ssh-keygen -t ed25519 -f ~/.ssh/plugbackup</code>"
+    "Создать ключ в Linux и macOS: <code>ssh-keygen -t ed25519 -f ~/.ssh/plugbackup</code>\n"
+    "В Windows, PowerShell: "
+    "<code>ssh-keygen -t ed25519 -f $env:USERPROFILE\\.ssh\\plugbackup</code>\n"
+    "Публичная часть лежит в файле с .pub, она начинается с «ssh-ed25519 AAAA»."
 )
+
+PENDING_KEY_PROMPT = "Хранилище создано, но ключа от вас ещё нет."
 
 KEY_PROBLEMS: dict[KeyProblem, str] = {
     KeyProblem.EMPTY: "Пришлите ключ одной строкой.",
@@ -175,8 +188,8 @@ KEY_PROBLEMS: dict[KeyProblem, str] = {
         "Создайте его командой <code>ssh-keygen -t ed25519</code>."
     ),
     KeyProblem.BAD_FORMAT: (
-        "Не удалось разобрать ключ. Пришлите содержимое файла .pub одной строкой, "
-        "например «ssh-ed25519 AAAA… comment»."
+        "Не удалось разобрать ключ. Пришлите содержимое файла .pub одной строкой: она "
+        "начинается с «ssh-ed25519 AAAAC3». Отпечаток, строка вида SHA256:…, не подходит."
     ),
 }
 
@@ -362,6 +375,12 @@ def status(view: StatusView, tz: str) -> str:
             f"Хост: <code>{esc(view.node.public_host)}</code>, "
             f"логин: <code>{esc(client.login)}</code>"
         )
+    if client.state is State.PENDING and client.ssh_key_body is None:
+        lines += [
+            "",
+            f"{PENDING_KEY_PROMPT} Пришлите публичный ключ ssh-ed25519 одной строкой, "
+            "подсказка в /key.",
+        ]
     return "\n".join(lines)
 
 

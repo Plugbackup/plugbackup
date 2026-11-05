@@ -165,3 +165,33 @@ def confirm_buttons(action: str, client_id: int) -> InlineKeyboardMarkup:
             ]
         ]
     )
+
+
+ADMIN_HELP = (
+    "Админка\n\n"
+    "/stats — клиенты по тарифам, проданное место, выручка\n"
+    "/nodes — ноды и их загрузка\n"
+    "/invite N — инвайт-коды беты, от 1 до 50\n"
+    "/client u1001 — карточка клиента по логину или Telegram id, там блокировка и удаление\n"
+    "/broadcast — рассылка всем пользователям\n"
+    "/maint нода текст — сообщение клиентам о плановых работах, вместо ноды можно all\n"
+    "/maint_end N — завершить плановые работы\n\n"
+    "Кнопки ниже запускают самое частое."
+)
+
+ADMIN_STATS = "adm:stats"
+ADMIN_NODES = "adm:nodes"
+ADMIN_INVITE = "adm:invite"
+ADMIN_BROADCAST = "adm:broadcast"
+
+
+def admin_buttons() -> InlineKeyboardMarkup:
+    def button(text: str, data: str) -> InlineKeyboardButton:
+        return InlineKeyboardButton(text=text, callback_data=data)
+
+    return InlineKeyboardMarkup(
+        inline_keyboard=[
+            [button("Статистика", ADMIN_STATS), button("Ноды", ADMIN_NODES)],
+            [button("Инвайт-код", ADMIN_INVITE), button("Рассылка", ADMIN_BROADCAST)],
+        ]
+    )

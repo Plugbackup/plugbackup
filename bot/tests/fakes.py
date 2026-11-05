@@ -1,12 +1,23 @@
 """Подмены для тестов."""
 
+import re
 from collections.abc import AsyncGenerator, Awaitable, Callable
 from datetime import UTC, datetime
 from typing import Any
 
 from aiogram import Bot
+from aiogram.client.default import Default, DefaultBotProperties
 from aiogram.client.session.base import BaseSession
-from aiogram.methods import CreateInvoiceLink, SendMessage, TelegramMethod
+from aiogram.enums import ParseMode
+from aiogram.exceptions import TelegramBadRequest
+from aiogram.methods import (
+    AnswerCallbackQuery,
+    CreateInvoiceLink,
+    EditMessageReplyMarkup,
+    EditMessageText,
+    SendMessage,
+    TelegramMethod,
+)
 from aiogram.types import Chat, InlineKeyboardMarkup, Message
 
 from plugbackup_bot.db.clients import Client
@@ -88,6 +99,34 @@ class RecordingHooks:
         self.problems.append((job, error, final))
 
 
+_ALLOWED_TAGS = (
+    "b", "strong", "i", "em", "u", "ins", "s", "strike", "del", "a", "code", "pre",
+    "tg-spoiler", "tg-emoji", "blockquote",
+)  # fmt: skip
+_TAG_RE = re.compile(r"<(/?)(" + "|".join(_ALLOWED_TAGS) + r")(\s[^<>]*)?>")
+
+
+def check_telegram_html(text: str) -> None:
+    """Повторяет главное правило разбора HTML в Telegram: каждый «<» открывает или закрывает
+    разрешённый тег, иначе Telegram отвечает «can't parse entities». ValueError при нарушении."""
+    stack: list[str] = []
+    pos = 0
+    while (pos := text.find("<", pos)) != -1:
+        match = _TAG_RE.match(text, pos)
+        if match is None:
+            raise ValueError(f"Unsupported start tag at offset {pos}: {text[pos : pos + 24]!r}")
+        closing, name = match.group(1) == "/", match.group(2)
+        if not closing:
+            stack.append(name)
+        elif not stack or stack.pop() != name:
+            raise ValueError(f"Unexpected end tag {name!r} at offset {pos}")
+        pos = match.end()
+    if stack:
+        raise ValueError(f"Unclosed tag {stack[-1]!r}")
+
+
+MAX_MESSAGE_LENGTH = 4096
+MAX_CALLBACK_ANSWER = 200
 FAKE_TOKEN = "123456789:" + "x" * 35
 
 
@@ -108,6 +147,12 @@ class FakeSession(BaseSession):
         self.requests.append(method)
         if self.errors:
             raise self.errors.pop(0)
+        if isinstance(method, (SendMessage, EditMessageText)):
+            self._validate_text(bot, method)
+        if isinstance(method, (SendMessage, EditMessageText, EditMessageReplyMarkup)):
+            self._validate_markup(method)
+        if isinstance(method, AnswerCallbackQuery) and len(method.text or "") > MAX_CALLBACK_ANSWER:
+            raise TelegramBadRequest(method=method, message="Bad Request: MESSAGE_TOO_LONG")
         if isinstance(method, SendMessage):
             return Message(
                 message_id=len(self.requests),
@@ -118,6 +163,43 @@ class FakeSession(BaseSession):
         if isinstance(method, CreateInvoiceLink):
             return "https://t.me/$fake-invoice"
         return True
+
+    @staticmethod
+    def _validate_markup(method: SendMessage | EditMessageText | EditMessageReplyMarkup) -> None:
+        markup = method.reply_markup
+        if not isinstance(markup, InlineKeyboardMarkup):
+            return
+        for row in markup.inline_keyboard:
+            for button in row:
+                problem = None
+                if not button.text:
+                    problem = "BUTTON_TEXT_EMPTY"
+                elif button.callback_data is not None and len(button.callback_data.encode()) > 64:
+                    problem = "BUTTON_DATA_INVALID: callback_data longer than 64 bytes"
+                elif button.callback_data is None and button.url is None:
+                    problem = "BUTTON_TYPE_INVALID: no action"
+                elif button.url is not None and not button.url.startswith(
+                    ("https://", "http://", "tg://")
+                ):
+                    problem = "BUTTON_URL_INVALID"
+                if problem:
+                    raise TelegramBadRequest(method=method, message=f"Bad Request: {problem}")
+
+    @staticmethod
+    def _validate_text(bot: Bot, method: SendMessage | EditMessageText) -> None:
+        if len(method.text) > MAX_MESSAGE_LENGTH:
+            raise TelegramBadRequest(method=method, message="Bad Request: message is too long")
+        mode = method.parse_mode
+        if isinstance(mode, Default):
+            mode = bot.default.parse_mode
+        if mode != ParseMode.HTML:
+            return
+        try:
+            check_telegram_html(method.text)
+        except ValueError as error:
+            raise TelegramBadRequest(
+                method=method, message=f"Bad Request: can't parse entities: {error}"
+            ) from error
 
     async def stream_content(  # type: ignore[override]
         self,
@@ -138,7 +220,9 @@ class FakeSession(BaseSession):
 
 def make_bot() -> tuple[Bot, FakeSession]:
     session = FakeSession()
-    return Bot(FAKE_TOKEN, session=session), session
+    # Как в боевом запуске: сообщения по умолчанию идут в режиме HTML.
+    bot = Bot(FAKE_TOKEN, session=session, default=DefaultBotProperties(parse_mode=ParseMode.HTML))
+    return bot, session
 
 
 class FakeStars:

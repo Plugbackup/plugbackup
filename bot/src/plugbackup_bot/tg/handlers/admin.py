@@ -22,14 +22,15 @@ from plugbackup_bot.tg import admin_texts as view
 from plugbackup_bot.tg import texts
 from plugbackup_bot.tg.admin_filter import IsAdmin
 from plugbackup_bot.tg.format import fmt_iso_date
+from plugbackup_bot.tg.handlers.common import reply
 from plugbackup_bot.tg.states import AdminStates
 
 log = logging.getLogger(__name__)
 
 _NOT_FOUND = "Клиент не найден. Укажите логин (u1001) или Telegram id."
 _USAGE_INVITE = f"Использование: /invite N, где N от 1 до {MAX_INVITES_AT_ONCE}."
-_USAGE_CLIENT = "Использование: /client u1001 или /client <Telegram id>."
-_USAGE_MAINT = "Использование: /maint <имя ноды|all> <текст для клиентов>."
+_USAGE_CLIENT = "Использование: /client u1001 или /client 123456789 (Telegram id)."
+_USAGE_MAINT = "Использование: /maint имя_ноды текст для клиентов. Вместо имени ноды можно all."
 _BROADCAST_ASK = "Пришлите текст рассылки одним сообщением. Отмена: /cancel."
 
 
@@ -264,12 +265,47 @@ async def cb_request(
         await callback.message.answer(f"Заявка №{resolved.request_id}: {status}, клиент уведомлён.")
 
 
+async def cmd_admin(message: Message) -> None:
+    await message.answer(view.ADMIN_HELP, reply_markup=view.admin_buttons())
+
+
+async def cb_admin_stats(
+    callback: CallbackQuery,
+    db: Database,
+    clock: Clock,
+    admin: AdminService,
+    catalog: PlanCatalog,
+    default_tz: str,
+) -> None:
+    data = await stats_service.collect(db, clock, admin, default_tz, catalog.beta.id)
+    await callback.answer()
+    await reply(callback, view.stats(data, catalog, default_tz))
+
+
+async def cb_admin_nodes(callback: CallbackQuery, admin: AdminService, default_tz: str) -> None:
+    await callback.answer()
+    await reply(callback, view.nodes(await admin.nodes_overview(), default_tz))
+
+
+async def cb_admin_invite(callback: CallbackQuery, admin: AdminService) -> None:
+    codes = await admin.create_invites(1, callback.from_user.id)
+    await callback.answer()
+    await reply(callback, view.invites(codes))
+
+
+async def cb_admin_broadcast(callback: CallbackQuery, state: FSMContext) -> None:
+    await state.set_state(AdminStates.broadcast_text)
+    await callback.answer()
+    await reply(callback, _BROADCAST_ASK)
+
+
 def build_router(admin_ids: Collection[int]) -> Router:
     router = Router(name="admin")
     only_admins = IsAdmin(admin_ids)
     router.message.filter(only_admins)
     router.callback_query.filter(only_admins)
 
+    router.message.register(cmd_admin, Command("admin"))
     router.message.register(cmd_stats, Command("stats"))
     router.message.register(cmd_nodes, Command("nodes"))
     router.message.register(cmd_invite, Command("invite"))
@@ -282,6 +318,10 @@ def build_router(admin_ids: Collection[int]) -> Router:
         msg_broadcast_text, AdminStates.broadcast_text, F.text, ~F.text.startswith("/")
     )
 
+    router.callback_query.register(cb_admin_stats, F.data == view.ADMIN_STATS)
+    router.callback_query.register(cb_admin_nodes, F.data == view.ADMIN_NODES)
+    router.callback_query.register(cb_admin_invite, F.data == view.ADMIN_INVITE)
+    router.callback_query.register(cb_admin_broadcast, F.data == view.ADMIN_BROADCAST)
     router.callback_query.register(cb_ask, F.data.startswith("ac:ask:"))
     router.callback_query.register(cb_do, F.data.startswith("ac:do:"))
     router.callback_query.register(cb_cancel, F.data == "ac:no")

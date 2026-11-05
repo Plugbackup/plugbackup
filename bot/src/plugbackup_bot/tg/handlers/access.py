@@ -10,6 +10,7 @@ from aiogram.fsm.context import FSMContext
 from aiogram.types import CallbackQuery, Message
 
 from plugbackup_bot.domain.keys import InvalidKey, KeyProblem, fingerprint, parse_public_key
+from plugbackup_bot.domain.states import State
 from plugbackup_bot.services.access import AccessService, KeyKind, OfferKind, RedeemKind
 from plugbackup_bot.tg import keyboards, texts
 from plugbackup_bot.tg.handlers.common import reply
@@ -22,9 +23,13 @@ log = logging.getLogger(__name__)
 # --- бета ---
 
 
-async def cb_beta(callback: CallbackQuery, access: AccessService) -> None:
+async def cb_beta(callback: CallbackQuery, state: FSMContext, access: AccessService) -> None:
     client = await access.live_client(callback.from_user.id)
-    if client is not None:
+    if client is not None and client.state is State.PENDING and client.ssh_key_body is None:
+        # Инвайт принят, но ключа ещё нет: ведём дальше, а не отвечаем «хранилище уже есть».
+        await state.set_state(AccessStates.waiting_key)
+        await reply(callback, f"{texts.PENDING_KEY_PROMPT}\n\n{texts.KEY_HELP}")
+    elif client is not None:
         await reply(callback, texts.INVITE_ERRORS[RedeemKind.HAS_CLIENT])
     else:
         await reply(callback, texts.RISK_TEXT, keyboards.risk(keyboards.RISK_BETA))
