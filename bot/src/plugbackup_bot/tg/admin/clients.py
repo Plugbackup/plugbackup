@@ -26,6 +26,7 @@ from plugbackup_bot.tg.admin import core, views
 from plugbackup_bot.tg.admin.core import (
     Adm,
     admin_nav,
+    ask_screen,
     cb,
     confirm_screen,
     notice_screen,
@@ -94,13 +95,6 @@ async def _list_screen(admin: AdminService, catalog: PlanCatalog, number: int) -
     return Screen(cards.card(T.CLIENTS_TITLE, body, icon=E.user), markup)
 
 
-def _ask_screen(title: str, body: str, back: str) -> Screen:
-    return Screen(
-        cards.card(title, body, T.ADM_CANCEL_HINT, icon=E.settings),
-        buttons.markup(admin_nav(back)),
-    )
-
-
 # --- список, поиск, карточка ---
 
 
@@ -144,7 +138,7 @@ async def cmd_client(
 ) -> None:
     query = (command.args or "").strip()
     if not query:
-        await ui.show(message, _ask_screen(T.CLIENT_SEARCH_TITLE, T.CLIENT_SEARCH_ASK, LIST))
+        await ui.show(message, ask_screen(T.CLIENT_SEARCH_TITLE, T.CLIENT_SEARCH_ASK, LIST))
         return
     client = await admin.find_client(query)
     if client is None:
@@ -157,7 +151,7 @@ async def cmd_client(
 async def cb_find(callback: CallbackQuery, state: FSMContext, ui: Ui, actor: Actor) -> None:
     await state.set_state(ClientAdminStates.search)
     await callback.answer()
-    await ui.show(callback, _ask_screen(T.CLIENT_SEARCH_TITLE, T.CLIENT_SEARCH_ASK, LIST))
+    await ui.show(callback, ask_screen(T.CLIENT_SEARCH_TITLE, T.CLIENT_SEARCH_ASK, LIST))
 
 
 @requires(Permission.CLIENTS_VIEW)
@@ -628,7 +622,7 @@ async def cb_note_start(
     await state.set_state(ClientAdminStates.note)
     await state.update_data(client_id=client.id)
     body = fill(T.NOTE_ASK, login=client.login, max_len=MAX_NOTE_LEN)
-    await ui.show(callback, _ask_screen(T.NOTE_TITLE, body, cb(core.CLIENTS, "card", i=client.id)))
+    await ui.show(callback, ask_screen(T.NOTE_TITLE, body, cb(core.CLIENTS, "card", i=client.id)))
 
 
 @requires(Permission.CLIENTS_NOTE)
@@ -675,7 +669,7 @@ async def cb_message_start(
     await state.update_data(client_id=client.id)
     body = fill(T.MESSAGE_ASK, login=client.login, max_len=MAX_MESSAGE_LEN)
     await ui.show(
-        callback, _ask_screen(T.MESSAGE_TITLE, body, cb(core.CLIENTS, "card", i=client.id))
+        callback, ask_screen(T.MESSAGE_TITLE, body, cb(core.CLIENTS, "card", i=client.id))
     )
 
 

@@ -22,3 +22,24 @@ class ClientAdminStates(StatesGroup):
     message = State()
     extend_days = State()
     bonus_gb = State()
+
+
+class TariffStates(StatesGroup):
+    """Администратор вводит новое значение тарифа."""
+
+    stars = State()
+    gb = State()
+    rub = State()
+
+
+class InviteStates(StatesGroup):
+    count = State()
+
+
+class NodeStates(StatesGroup):
+    capacity = State()
+    oversell = State()
+    add_name = State()
+    add_addr = State()
+    add_host = State()
+    add_capacity = State()

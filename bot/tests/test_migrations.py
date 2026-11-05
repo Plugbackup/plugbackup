@@ -105,7 +105,7 @@ async def test_new_tables_exist_after_the_upgrade(old_db: Database) -> None:
     names = {
         row[0] for row in await _all(old_db, "SELECT name FROM sqlite_master WHERE type = 'table'")
     }
-    assert {"admins", "audit_log", "app_settings", "media_cache"} <= names
+    assert {"admins", "audit_log", "app_settings", "media_cache", "plans", "invite_uses"} <= names
 
 
 async def test_the_upgraded_database_is_consistent(old_db: Database) -> None:
@@ -158,3 +158,35 @@ async def test_an_empty_database_gets_the_same_schema_as_an_upgraded_one(
 async def _all(db: Database, sql: str) -> list[tuple]:  # type: ignore[type-arg]
     async with db.read() as conn, conn.execute(sql) as cur:
         return [tuple(row) for row in await cur.fetchall()]
+
+
+async def test_old_invites_become_one_use_codes_with_their_history(old_db: Database) -> None:
+    await migrate(old_db)
+    assert await one(
+        old_db,
+        "SELECT uses, max_uses, expires_at, revoked_at FROM invites WHERE code_hash = 'h-used'",
+    ) == (1, 1, None, None)
+    assert await one(old_db, "SELECT uses, max_uses FROM invites WHERE code_hash = 'h-free'") == (
+        0,
+        1,
+    )
+    assert await one(old_db, "SELECT code_hash, tg_id, used_at FROM invite_uses") == (
+        "h-used",
+        5,
+        NOW,
+    )
+
+
+async def test_old_nodes_stay_env_nodes_out_of_maintenance(old_db: Database) -> None:
+    await migrate(old_db)
+    assert await one(old_db, "SELECT name, enabled, maintenance, source FROM nodes") == (
+        "n1",
+        1,
+        0,
+        "env",
+    )
+
+
+async def test_the_plans_table_starts_empty_and_is_filled_by_the_bot(old_db: Database) -> None:
+    await migrate(old_db)
+    assert await one(old_db, "SELECT COUNT(*) FROM plans") == (0,)  # заполняет бот из plans.json

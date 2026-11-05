@@ -5,6 +5,7 @@ from datetime import datetime
 from zoneinfo import ZoneInfo
 
 from plugbackup_bot.db import Database
+from plugbackup_bot.db.invites import count_unused
 from plugbackup_bot.db.payments import revenue_stars
 from plugbackup_bot.infra.clock import Clock
 from plugbackup_bot.services.admin import AdminService, NodeLoad
@@ -68,8 +69,7 @@ async def collect(
             "SELECT COUNT(*) FROM restore_requests WHERE status = 'new'"
         ) as cur:
             restores = int((await cur.fetchone())[0])  # type: ignore[index]
-        async with conn.execute("SELECT COUNT(*) FROM invites WHERE used_by IS NULL") as cur:
-            invites = int((await cur.fetchone())[0])  # type: ignore[index]
+        invites = await count_unused(conn, now)
         revenue = await revenue_stars(conn, start, end)
         async with conn.execute(
             "SELECT COUNT(*) FROM clients WHERE created_at >= ?", (now - 7 * 24 * 3600,)

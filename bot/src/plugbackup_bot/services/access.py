@@ -29,6 +29,7 @@ class RedeemKind(StrEnum):
     OK = "ok"
     INVALID = "invalid"
     USED = "used"
+    EXPIRED = "expired"
     ALREADY_BETA = "already_beta"
     HAS_CLIENT = "has_client"
     NEED_ACK = "need_ack"
@@ -132,10 +133,12 @@ class AccessService:
             if node is None:
                 return RedeemResult(RedeemKind.NO_CAPACITY)
             status = await invites_repo.redeem(conn, text, tg_id, now)
-            if status is invites_repo.RedeemStatus.INVALID:
-                return RedeemResult(RedeemKind.INVALID)
+            if status in (invites_repo.RedeemStatus.INVALID, invites_repo.RedeemStatus.REVOKED):
+                return RedeemResult(RedeemKind.INVALID)  # отозванный код выглядит как неверный
             if status is invites_repo.RedeemStatus.USED:
                 return RedeemResult(RedeemKind.USED)
+            if status is invites_repo.RedeemStatus.EXPIRED:
+                return RedeemResult(RedeemKind.EXPIRED)
             client = await create_client(
                 conn,
                 tg_id=tg_id,
@@ -180,7 +183,7 @@ class AccessService:
     async def offer_plan(self, tg_id: int, plan_id: str) -> InvoiceOffer:
         """Проверяет, можно ли оформить тариф, и готовит аргументы для createInvoiceLink."""
         plan = self._catalog.find(plan_id)
-        if plan is None or plan.is_beta:
+        if plan is None or plan.is_beta or not plan.visible:
             return InvoiceOffer(OfferKind.REJECTED, reject=Reject.BAD_PLAN)
         live = await self.live_client(tg_id)
         payload = make_payload(plan.id, live.id if live else 0)

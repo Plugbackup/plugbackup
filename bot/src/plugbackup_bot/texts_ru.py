@@ -85,6 +85,7 @@ RULES_BULLETS = (
 
 TARIFFS_TITLE = "Тарифы"
 TARIFF_LINE = "<b>{name}</b> — {price_rub} ₽/мес, {stars} Stars"
+TARIFFS_NONE = "Платные тарифы сейчас недоступны."
 TARIFFS_NOTE = (
     "Оплата в Telegram Stars, сумма в рублях — ориентир. Подписка продлевается каждые "
     "30 дней, продление можно отключить в любой момент.\n\n"
@@ -125,6 +126,7 @@ BETA_ASK_CODE = "Пришлите инвайт-код беты."
 TOO_MANY_CODES = "Слишком много неверных кодов. Попробуйте через несколько минут."
 INVITE_INVALID = "Код не подошёл. Проверьте, что он введён без ошибок."
 INVITE_USED = "Этот код уже использован."
+INVITE_EXPIRED = "Срок действия кода истёк."
 INVITE_ALREADY_BETA = (
     "Бета выдаётся один раз на аккаунт, и вы её уже получали. Платные тарифы — в разделе «Тарифы»."
 )
@@ -712,4 +714,170 @@ CLIENT_NOTICE_BONUS = (
 )
 CLIENT_NOTICE_PLAN = (
     "Администратор перевёл вас на тариф {name}. Новый лимит применится в течение нескольких минут."
+)
+
+# --- админка: тарифы ---
+
+TAR_TITLE = "Тарифы"
+TAR_NOTE = (
+    "Цена и объём действуют на новые покупки. Действующие подписки Stars и квоты клиентов "
+    "остаются прежними, продление идёт по цене подписки."
+)
+TAR_BANNER_NOTE = (
+    "Баннеры приветствия и тарифов собраны из design/data/plans.json: после смены объёма "
+    "пересоберите их (npm run export в design/)."
+)
+TAR_LINE = "<b>{name}</b> — {rub} ₽ · {stars} Stars · {status}"
+TAR_LINE_BETA = "<b>{name}</b> — бесплатно, {gb} ГБ"
+TAR_VISIBLE = "виден"
+TAR_HIDDEN = "скрыт"
+TAR_ALL_HIDDEN = "Все платные тарифы скрыты: клиенты не могут купить тариф."
+TAR_ROW = "{name} · {stars} Stars · {status}"
+TAR_ROW_BETA = "{name} · бета"
+TAR_CARD_TITLE = "Тариф {name}"
+TAR_ID = "Код"
+TAR_GB = "Объём"
+TAR_STARS = "Цена в Stars"
+TAR_RUB = "Ориентир в рублях"
+TAR_STATUS = "Статус"
+TAR_CLIENTS = "Клиентов на тарифе"
+TAR_BETA_NOTE = "Бета бесплатна: у неё меняется только объём для новых клиентов."
+BTN_TAR_STARS = "Цена в Stars"
+BTN_TAR_GB = "Объём"
+BTN_TAR_RUB = "Цена в ₽"
+BTN_TAR_HIDE = "Скрыть"
+BTN_TAR_SHOW = "Показать"
+TAR_ASK_STARS = "Новая цена тарифа {name} в Stars, от 1 до {max}. Сейчас {current}."
+TAR_ASK_GB = "Новый объём тарифа {name} в ГБ, от 1 до {max}. Сейчас {current}."
+TAR_ASK_RUB = "Новый ориентир цены тарифа {name} в рублях, от 1 до {max}. Сейчас {current}."
+TAR_SAVED_STARS = "Цена тарифа {name}: {value} Stars."
+TAR_SAVED_GB = "Объём тарифа {name}: {value} ГБ."
+TAR_SAVED_RUB = "Ориентир цены тарифа {name}: {value} ₽."
+TAR_SAVED_SHOWN = "Тариф {name} снова продаётся."
+TAR_SAVED_HIDDEN = "Тариф {name} скрыт: новые покупки недоступны, у клиентов всё работает."
+TAR_DUPLICATE_GB = "Тариф с таким объёмом уже есть."
+TAR_BETA_REFUSED = "У беты нельзя менять цену и видимость."
+TAR_BAD_NUMBER = "Нужно целое число от {low} до {high}."
+
+# --- админка: инвайты ---
+
+INV_TITLE = "Инвайты"
+INV_SUMMARY = "Всего: {total}, действующих: {active}. Самые новые сверху."
+INV_EMPTY = "Инвайтов пока нет."
+INV_ROW = "{label} · {uses}/{max} · {status}"
+INV_STATUS = {
+    "active": "активен",
+    "used": "исчерпан",
+    "expired": "истёк",
+    "revoked": "отозван",
+}
+BTN_INV_NEW = "Создать коды"
+INV_NEW_TITLE = "Новые инвайты"
+INV_ASK_COUNT = "Сколько кодов создать? Выберите или пришлите число от 1 до {max}."
+INV_ASK_USES = "Создаю {count} шт. Сколько раз можно использовать каждый код?"
+INV_ASK_EXPIRY = "Создаю {count} шт., использований у каждого: {uses}. Какой срок действия?"
+BTN_INV_COUNT = "{n} шт."
+BTN_INV_USES = "{n} раз"
+BTN_INV_NO_EXPIRY = "Без срока"
+BTN_INV_EXPIRY = "{days} дн."
+INV_CREATED_TITLE = "Коды готовы"
+INV_CREATED_BODY = (
+    "{count} шт., использований у каждого: {uses}, {expiry}. Коды показаны один раз: "
+    "в базе хранятся только хеши."
+)
+INV_EXPIRY_NONE = "без срока"
+INV_EXPIRY_UNTIL = "до {date}"
+BTN_INV_COPY_ALL = "Копировать все"
+INV_CARD_TITLE = "Инвайт {label}"
+INV_CREATED = "Создан"
+INV_CREATED_VALUE = "{date}, админ {admin}"
+INV_USES = "Использований"
+INV_USES_VALUE = "{uses} из {max}"
+INV_EXPIRES = "Срок"
+INV_STATUS_FIELD = "Статус"
+INV_USED_BY = "Воспользовались"
+INV_NOBODY = "пока никто"
+INV_USE_LINE = "{who}, {at}"
+BTN_INV_REVOKE = "Отозвать"
+INV_REVOKE_CONFIRM = (
+    "Отозвать инвайт {label}? Он перестанет работать, а клиенты, которые уже им воспользовались, "
+    "останутся."
+)
+INV_REVOKED = "Инвайт {label} отозван."
+INV_REVOKE_ALREADY = "Этот инвайт уже отозван."
+INV_BAD_COUNT = "Нужно число кодов от 1 до {max}."
+
+# --- админка: ноды ---
+
+NODES_TITLE = "Ноды"
+NODES_EMPTY = "Нод пока нет."
+BTN_NODE_ADD = "Добавить ноду"
+NODE_ROW = "{name} · {sold}/{limit} ГБ · {status}"
+NODE_STATUS = {
+    "online": "онлайн",
+    "offline": "офлайн",
+    "maintenance": "обслуживание",
+    "disabled": "отключена",
+}
+NODE_CARD_TITLE = "Нода {name}"
+NODE_ADDR = "Адрес"
+NODE_HOST = "Публичный хост"
+NODE_CAPACITY = "Ёмкость"
+NODE_OVERSELL = "Коэффициент продажи"
+NODE_LIMIT = "Лимит продаж"
+NODE_SOLD = "Продано"
+NODE_FREE = "Свободно"
+NODE_CLIENTS = "Клиентов"
+NODE_STATE = "Статус"
+NODE_SOURCE = "Источник"
+NODE_SOURCE_ENV = ".env"
+NODE_SOURCE_BOT = "добавлена из бота"
+NODE_SINCE_DOWN = "офлайн с {since}"
+NODE_ENV_NOTE = (
+    "Ёмкость и адрес ноды из .env при перезапуске бота возвращаются к значениям из файла."
+)
+NODE_DISABLED_NOTE = (
+    "Нода отключена: клиенты на неё не выдаются. Добавьте её ключ в known_hosts на сервере бота, "
+    "проверьте связь и включите."
+)
+BTN_NODE_CAPACITY = "Ёмкость"
+BTN_NODE_OVERSELL = "Коэффициент"
+BTN_NODE_MAINT_ON = "Обслуживание"
+BTN_NODE_MAINT_OFF = "Завершить обслуживание"
+BTN_NODE_CHECK = "Проверить связь"
+BTN_NODE_ENABLE = "Включить ноду"
+BTN_NODE_DISABLE = "Отключить ноду"
+NODE_ASK_CAPACITY = "Новая ёмкость ноды {name} в ГБ, от 0 до {max}. Сейчас {current}."
+NODE_ASK_OVERSELL = "Новый коэффициент продажи ноды {name}, больше 0 и до 10. Сейчас {current}."
+NODE_SAVED_CAPACITY = "Ёмкость ноды {name}: {value} ГБ."
+NODE_SAVED_OVERSELL = "Коэффициент ноды {name}: {value}."
+NODE_BAD_CAPACITY = "Нужно целое число ГБ от 0 до {max}."
+NODE_BAD_OVERSELL = "Нужно число больше 0 и не больше 10, например 1.5."
+NODE_CHECK_OK = "Нода {name} отвечает на SSH-порту."
+NODE_CHECK_FAIL = "Нода {name} не отвечает на SSH-порту."
+NODE_ENABLED = "Нода {name} включена."
+NODE_DISABLED = "Нода {name} отключена."
+NODE_UNREACHABLE = "Нода не отвечает, включить её нельзя. Проверьте адрес и сеть."
+NODE_MAINT_TEXT = "Плановые работы на ноде {name}: хранилище может быть временно недоступно."
+NODE_MAINT_CONFIRM = (
+    "Включить обслуживание ноды {name}? Новые клиенты на неё выдаваться не будут, "
+    "{count} её клиентам уйдёт уведомление о плановых работах."
+)
+NODE_MAINT_END_CONFIRM = (
+    "Завершить обслуживание ноды {name}? Её клиентам уйдёт сообщение о завершении работ."
+)
+NODE_MAINT_STARTED = "Обслуживание ноды {name} включено, клиенты получат уведомление."
+NODE_MAINT_ENDED = "Обслуживание ноды {name} завершено."
+NODE_STATE_CHANGED = "Состояние ноды изменилось. Откройте карточку заново."
+NODE_ADD_TITLE = "Новая нода"
+NODE_ADD_NAME = "Имя ноды: латиница в нижнем регистре, цифры и дефис, до 32 знаков, например node2."
+NODE_ADD_ADDR = "Адрес ноды для бота: IP-адрес или имя хоста в сети WireGuard."
+NODE_ADD_HOST = "Адрес для клиентов: имя хоста, по которому они подключатся по SFTP."
+NODE_ADD_CAPACITY = "Ёмкость диска в ГБ, от 0 до {max}."
+NODE_ADD_BAD = "Не подошло: {problem} Попробуйте ещё раз."
+NODE_ADD_BAD_NUMBER = "нужно целое число."
+NODE_ADD_EXISTS = "Нода с таким именем уже есть."
+NODE_ADD_DONE = (
+    "Нода {name} добавлена и пока отключена. Добавьте её ключ хоста в known_hosts на сервере бота, "
+    "затем нажмите «Проверить связь» и «Включить ноду»."
 )

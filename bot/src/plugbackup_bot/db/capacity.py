@@ -25,7 +25,7 @@ async def pick_node(conn: aiosqlite.Connection, need_gb: int) -> Node | None:
     sold = await sold_gb(conn)
     best: tuple[int, Node] | None = None
     for node in await list_nodes(conn):
-        if not node.enabled:
+        if not node.enabled or node.maintenance:
             continue
         free = node.limit_gb - sold.get(node.id, 0)
         if free >= need_gb and (best is None or free > best[0]):

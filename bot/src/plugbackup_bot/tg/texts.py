@@ -87,7 +87,7 @@ def tariffs(plans: Sequence[Plan], current: Client | None) -> str:
     ]
     return cards.card(
         T.TARIFFS_TITLE,
-        cards.bullets(lines),
+        cards.bullets(lines) if lines else T.TARIFFS_NONE,
         cards.quote(T.TARIFFS_NOTE),
         fill(T.TARIFFS_CURRENT, quota=gb(current.quota_gb)) if current is not None else None,
         icon=E.payment,
@@ -129,6 +129,7 @@ RISK_TEXT = risk_text()
 INVITE_ERRORS: dict[RedeemKind, str] = {
     RedeemKind.INVALID: T.INVITE_INVALID,
     RedeemKind.USED: T.INVITE_USED,
+    RedeemKind.EXPIRED: T.INVITE_EXPIRED,
     RedeemKind.ALREADY_BETA: T.INVITE_ALREADY_BETA,
     RedeemKind.HAS_CLIENT: T.INVITE_HAS_CLIENT,
     RedeemKind.NO_CAPACITY: T.INVITE_NO_CAPACITY,

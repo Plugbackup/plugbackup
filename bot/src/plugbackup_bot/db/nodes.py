@@ -21,6 +21,10 @@ class Node:
     oversell: float
     enabled: bool
     down_since: int | None
+    # Обслуживание: новые клиенты на ноду не выдаются, действующие работают.
+    maintenance: bool = False
+    # env: запись из .env, bot: добавлена из бота (при старте не отключается).
+    source: str = "env"
 
     @property
     def limit_gb(self) -> int:
@@ -38,6 +42,8 @@ class Node:
             oversell=row["oversell"],
             enabled=bool(row["enabled"]),
             down_since=row["down_since"],
+            maintenance=bool(row["maintenance"]),
+            source=row["source"],
         )
 
 
@@ -60,14 +66,15 @@ async def sync_nodes(conn: aiosqlite.Connection, configs: Sequence[NodeConfig]) 
             " VALUES (?, ?, ?, ?, ?, 1)"
             " ON CONFLICT (name) DO UPDATE SET addr = excluded.addr,"
             " public_host = excluded.public_host, capacity_gb = excluded.capacity_gb,"
-            " oversell = excluded.oversell, enabled = 1",
+            " oversell = excluded.oversell, enabled = 1, source = 'env'",
             (node.name, node.addr, node.public_host, node.capacity_gb, node.oversell),
         )
     names = [node.name for node in configs]
     marks = ", ".join("?" for _ in names)
-    cur = await conn.execute(
-        f"UPDATE nodes SET enabled = 0 WHERE enabled = 1 AND name NOT IN ({marks})",  # noqa: S608
-        names,
+    sql = (
+        "UPDATE nodes SET enabled = 0 WHERE enabled = 1 AND source = 'env'"  # noqa: S608
+        f" AND name NOT IN ({marks})"
     )
+    cur = await conn.execute(sql, names)
     if cur.rowcount:
         log.warning("nodes missing from config were disabled: %s", cur.rowcount)

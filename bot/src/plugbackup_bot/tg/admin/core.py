@@ -148,3 +148,11 @@ def pager(page: Page[Any], section: str, action: str, *, i: int = 0, x: str = ""
     if page.has_next:
         row.append(buttons.plain(T.BTN_PAGE_NEXT, cb(section, action, i=i, p=page.number + 1, x=x)))
     return row
+
+
+def ask_screen(title: str, body: str, back: str) -> Screen:
+    """Просьба прислать текст или число. Отмена: «Назад» или /cancel."""
+    return Screen(
+        cards.card(title, body, T.ADM_CANCEL_HINT, icon=E.settings),
+        buttons.markup(admin_nav(back)),
+    )

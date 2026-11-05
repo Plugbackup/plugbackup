@@ -149,13 +149,21 @@ class BillingService:
         plan = self._catalog.find(parsed.plan_id) if parsed else None
         if parsed is None or plan is None or plan.is_beta or currency != STARS_CURRENCY:
             return Reject.BAD_PLAN
-        if total_amount != plan.stars:
-            return Reject.PRICE_CHANGED
         now = self._clock.now()
         async with self._db.read() as conn:
+            live = await get_live_client(conn, tg_id)
+            if live is not None and await _is_renewal_at_old_price(
+                conn, live, payload, total_amount
+            ):
+                # Продление действующей подписки идёт по цене, с которой она оформлена. Если админ
+                # поменял цену тарифа или скрыл его, подписчик это не затрагивает.
+                return None
+            if not plan.visible:
+                return Reject.BAD_PLAN
+            if total_amount != plan.stars:
+                return Reject.PRICE_CHANGED
             if not await has_acked(conn, tg_id, self._risk_version):
                 return Reject.NO_RISK_ACK
-            live = await get_live_client(conn, tg_id)
             if parsed.client_id == 0:
                 if live is not None:
                     return Reject.HAS_CLIENT
@@ -415,6 +423,21 @@ class BillingService:
         async with self._db.transaction() as conn:
             await set_fields(conn, client.id, renewal_on=enabled)
         return True
+
+
+async def _is_renewal_at_old_price(
+    conn: aiosqlite.Connection, client: Client, payload: str, total_amount: int
+) -> bool:
+    """Платёж той же подписки на ту же сумму, что платили в прошлый раз: это продление."""
+    if client.sub_payload != payload or client.state is State.DELETED:
+        return False
+    async with conn.execute(
+        "SELECT stars FROM payments WHERE client_id = ? AND status = 'paid' AND invoice_payload = ?"
+        " ORDER BY at DESC, id DESC LIMIT 1",
+        (client.id, payload),
+    ) as cur:
+        row = await cur.fetchone()
+    return row is not None and int(row[0]) == total_amount
 
 
 def _has_active_subscription(client: Client, plan: Plan, now: int) -> bool:

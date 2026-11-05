@@ -29,9 +29,12 @@ from plugbackup_bot.services.alerts import AlertEngine
 from plugbackup_bot.services.billing import BillingService
 from plugbackup_bot.services.broadcast import BroadcastService
 from plugbackup_bot.services.health import HealthMonitor, Probe, tcp_probe
+from plugbackup_bot.services.invites import InviteService
 from plugbackup_bot.services.lifecycle import LifecycleService
 from plugbackup_bot.services.maintenance import prune_all
+from plugbackup_bot.services.nodes import NodeService
 from plugbackup_bot.services.notify import TelegramNotifier
+from plugbackup_bot.services.plans import PlanService
 from plugbackup_bot.services.provisioning import Provisioner
 from plugbackup_bot.services.restore import RestoreService
 from plugbackup_bot.services.usage import UsagePoller
@@ -110,7 +113,9 @@ async def build_runtime(
     probe: Probe | None = None,
 ) -> Runtime:
     clock = clock or SystemClock()
-    catalog: PlanCatalog = load_catalog(settings.plans_file, settings.prices_stars)
+    # Тарифы из файлов нужны для первого заполнения базы; дальше источник правды таблица plans.
+    file_catalog = load_catalog(settings.plans_file, settings.prices_stars)
+    catalog: PlanCatalog = file_catalog
     tz = settings.default_tz
 
     db = await Database.open(settings.db_path)
@@ -119,6 +124,9 @@ async def build_runtime(
         await sync_nodes(conn, settings.nodes)
     directory = AdminDirectory(db, clock, settings.admin_ids)
     await directory.sync()
+    plans = PlanService(db, clock, catalog)
+    await plans.seed(file_catalog.plans)
+    await plans.load()
 
     storectl = storectl or SshStorectl(
         user=settings.ssh_user,
@@ -140,7 +148,9 @@ async def build_runtime(
     lifecycle = LifecycleService(db, clock, catalog, billing, notifier, TelegramNoticeRenderer(tz))
     poller = UsagePoller(db, clock, storectl, notifier)
     alert_engine = AlertEngine(db, clock, storectl, notifier, TelegramAlertRenderer(), tz)
-    health = HealthMonitor(db, clock, notifier, probe or tcp_probe(settings.ssh_port))
+    node_probe = probe or tcp_probe(settings.ssh_port)
+    health = HealthMonitor(db, clock, notifier, node_probe)
+    admin_service = AdminService(db, clock, billing, catalog)
 
     background: set[asyncio.Task[object]] = set()
 
@@ -158,9 +168,12 @@ async def build_runtime(
         lifecycle=lifecycle,
         alert_settings=AlertSettingsService(db, clock, tz),
         restore=RestoreService(db, clock, tz),
-        admin=AdminService(db, clock, billing, catalog),
+        admin=admin_service,
         broadcast=BroadcastService(db, clock, notifier),
         directory=directory,
+        plans=plans,
+        invites=InviteService(db, clock),
+        nodes=NodeService(db, clock, admin_service, node_probe),
         admin_chat_id=settings.admin_chat_id,
         messenger=notifier,
         alerter=notifier,

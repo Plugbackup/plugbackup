@@ -18,6 +18,9 @@ from plugbackup_bot.ui.screen import Screen, Ui
 SECTIONS: tuple[tuple[Permission, str, str, Icon], ...] = (
     (Permission.DASHBOARD, T.BTN_ADM_DASHBOARD, core.DASH, E.chart),
     (Permission.CLIENTS_VIEW, T.BTN_ADM_CLIENTS, core.CLIENTS, E.user),
+    (Permission.TARIFFS, T.BTN_ADM_TARIFFS, core.TARIFFS, E.payment),
+    (Permission.INVITES, T.BTN_ADM_INVITES, core.INVITES, E.invite),
+    (Permission.NODES, T.BTN_ADM_NODES, core.NODES, E.disk),
 )
 
 

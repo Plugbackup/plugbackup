@@ -11,11 +11,10 @@ from aiogram.fsm.context import FSMContext
 from aiogram.types import CallbackQuery, InlineKeyboardButton, InlineKeyboardMarkup, Message
 
 from plugbackup_bot.domain.roles import Actor, Permission
-from plugbackup_bot.services.admin import MAX_INVITES_AT_ONCE, AdminService
+from plugbackup_bot.services.admin import AdminService
 from plugbackup_bot.services.broadcast import MAX_TEXT, BroadcastService
 from plugbackup_bot.services.notify import Messenger
 from plugbackup_bot.services.restore import RestoreService
-from plugbackup_bot.tg import admin_texts as view
 from plugbackup_bot.tg import texts
 from plugbackup_bot.tg.admin.core import requires
 from plugbackup_bot.tg.format import fmt_iso_date
@@ -23,26 +22,8 @@ from plugbackup_bot.tg.states import AdminStates
 
 log = logging.getLogger(__name__)
 
-_USAGE_INVITE = f"Использование: /invite N, где N от 1 до {MAX_INVITES_AT_ONCE}."
 _USAGE_MAINT = "Использование: /maint имя_ноды текст для клиентов. Вместо имени ноды можно all."
 _BROADCAST_ASK = "Пришлите текст рассылки одним сообщением. Отмена: /cancel."
-
-
-@requires(Permission.NODES)
-async def cmd_nodes(message: Message, admin: AdminService, default_tz: str, actor: Actor) -> None:
-    await message.answer(view.nodes(await admin.nodes_overview(), default_tz))
-
-
-@requires(Permission.INVITES)
-async def cmd_invite(
-    message: Message, command: CommandObject, admin: AdminService, actor: Actor
-) -> None:
-    raw = (command.args or "").strip()
-    if not raw.isdigit() or not 1 <= int(raw) <= MAX_INVITES_AT_ONCE:
-        await message.answer(_USAGE_INVITE)
-        return
-    codes = await admin.create_invites(int(raw), actor)
-    await message.answer(view.invites(codes))
 
 
 # --- рассылка ---
@@ -167,8 +148,6 @@ async def cb_request(
 
 
 def register(router: Router) -> None:
-    router.message.register(cmd_nodes, Command("nodes"))
-    router.message.register(cmd_invite, Command("invite"))
     router.message.register(cmd_broadcast, Command("broadcast"))
     router.message.register(cmd_maint, Command("maint"))
     router.message.register(cmd_maint_end, Command("maint_end"))

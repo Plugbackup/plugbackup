@@ -24,6 +24,8 @@ class Plan:
     gb: int
     price_rub: int
     stars: int
+    # Скрытый тариф не продаётся, но у клиентов, которые на нём сидят, всё работает.
+    visible: bool = True
 
     @property
     def is_beta(self) -> bool:
@@ -36,7 +38,13 @@ class Plan:
 
 
 class PlanCatalog:
+    """Тарифы. Один объект живёт весь запуск и обновляется на месте (`replace`): правка админа
+    видна всем службам сразу, без перезапуска."""
+
     def __init__(self, plans: Sequence[Plan]) -> None:
+        self.replace(plans)
+
+    def replace(self, plans: Sequence[Plan]) -> None:
         ids = [plan.id for plan in plans]
         if len(set(ids)) != len(ids):
             raise PlanConfigError("идентификаторы тарифов повторяются")
@@ -50,7 +58,14 @@ class PlanCatalog:
             raise PlanConfigError("у платных тарифов должны быть разные объёмы")
         self._by_id = {plan.id: plan for plan in plans}
         self.beta = betas[0]
-        self.paid: tuple[Plan, ...] = tuple(paid)
+        # Все платные, включая скрытые, и только те, что продаются сейчас.
+        self.all_paid: tuple[Plan, ...] = tuple(paid)
+        self.paid: tuple[Plan, ...] = tuple(plan for plan in paid if plan.visible)
+
+    @property
+    def plans(self) -> tuple[Plan, ...]:
+        """Все тарифы: бета первой, дальше платные по объёму."""
+        return (self.beta, *self.all_paid)
 
     def find(self, plan_id: str) -> Plan | None:
         return self._by_id.get(plan_id)

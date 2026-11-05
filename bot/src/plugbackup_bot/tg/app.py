@@ -19,8 +19,11 @@ from plugbackup_bot.services.admins import AdminDirectory
 from plugbackup_bot.services.alert_settings import AlertSettingsService
 from plugbackup_bot.services.billing import BillingService
 from plugbackup_bot.services.broadcast import BroadcastService
+from plugbackup_bot.services.invites import InviteService
 from plugbackup_bot.services.lifecycle import LifecycleService
+from plugbackup_bot.services.nodes import NodeService
 from plugbackup_bot.services.notify import AdminAlerter, Messenger
+from plugbackup_bot.services.plans import PlanService
 from plugbackup_bot.services.restore import RestoreService
 from plugbackup_bot.tg.admin.router import build_router as build_admin_router
 from plugbackup_bot.tg.handlers import (
@@ -50,6 +53,9 @@ class Deps:
     admin: AdminService
     broadcast: BroadcastService
     directory: AdminDirectory
+    plans: PlanService
+    invites: InviteService
+    nodes: NodeService
     admin_chat_id: int
     messenger: Messenger
     alerter: AdminAlerter
@@ -78,6 +84,9 @@ def build_dispatcher(
         restore=deps.restore,
         admin=deps.admin,
         directory=deps.directory,
+        plans=deps.plans,
+        invites=deps.invites,
+        nodes=deps.nodes,
         broadcast=deps.broadcast,
         admin_chat_id=deps.admin_chat_id,
         clock=deps.clock,

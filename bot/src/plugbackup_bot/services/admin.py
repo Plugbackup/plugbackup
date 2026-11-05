@@ -458,6 +458,9 @@ class AdminService:
                 " VALUES ('maintenance', ?, ?, ?)",
                 (node_id, text, now),
             )
+            if node_id is not None:
+                # Нода на обслуживании: новые клиенты на неё не выдаются.
+                await conn.execute("UPDATE nodes SET maintenance = 1 WHERE id = ?", (node_id,))
             await audit.record(
                 conn, actor, "maintenance.start", now=now, target_type="node",
                 target_id=target, event=cur.lastrowid,
@@ -473,6 +476,11 @@ class AdminService:
                 (now, event_id),
             )
             if cur.rowcount == 1:
+                await conn.execute(
+                    "UPDATE nodes SET maintenance = 0 WHERE id ="
+                    " (SELECT node_id FROM service_events WHERE id = ?)",
+                    (event_id,),
+                )
                 await audit.record(
                     conn, actor, "maintenance.end", now=now, target_type="event",
                     target_id=event_id,

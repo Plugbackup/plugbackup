@@ -26,13 +26,17 @@ from fakes import (
 from helpers import CATALOG, add_node
 from plugbackup_bot.db import Database
 from plugbackup_bot.db import invites as invites_repo
+from plugbackup_bot.domain.plans import PlanCatalog
 from plugbackup_bot.services.access import AccessService
 from plugbackup_bot.services.admin import AdminService
 from plugbackup_bot.services.admins import AdminDirectory
 from plugbackup_bot.services.alert_settings import AlertSettingsService
 from plugbackup_bot.services.billing import BillingService
 from plugbackup_bot.services.broadcast import BroadcastService
+from plugbackup_bot.services.invites import InviteService
 from plugbackup_bot.services.lifecycle import LifecycleService
+from plugbackup_bot.services.nodes import NodeService
+from plugbackup_bot.services.plans import PlanService
 from plugbackup_bot.services.provisioning import Provisioner
 from plugbackup_bot.services.restore import RestoreService
 from plugbackup_bot.tg import texts
@@ -82,8 +86,14 @@ class Harness:
     restore: RestoreService
     admin: AdminService
     directory: AdminDirectory
+    catalog: PlanCatalog
+    plans: PlanService
+    invites: InviteService
+    nodes: NodeService
     broadcast: BroadcastService
     kicks: list[int] = field(default_factory=list)
+    # Отвечает ли нода на проверку связи: тест переключает через set_node_up.
+    _probe_state: dict[str, bool] = field(default_factory=dict)
     _update_id: int = 0
 
     @classmethod
@@ -100,28 +110,41 @@ class Harness:
         bot, session = make_bot()
         stars, storectl = FakeStars(), FakeStorectl()
         messenger, alerter = RecordingMessenger(), RecordingAlerter()
-        billing = BillingService(db, clock, CATALOG, stars, texts.RISK_TEXT_VERSION)
-        access = AccessService(db, clock, CATALOG, billing, storectl, texts.RISK_TEXT_VERSION)
+        # У каждого стенда свой каталог тарифов: правки админа не просачиваются в другие тесты.
+        catalog = PlanCatalog(CATALOG.plans)
+        billing = BillingService(db, clock, catalog, stars, texts.RISK_TEXT_VERSION)
+        access = AccessService(db, clock, catalog, billing, storectl, texts.RISK_TEXT_VERSION)
         provisioner = Provisioner(db, storectl, clock, ClientHooks(db, messenger, alerter))
         lifecycle = LifecycleService(
-            db, clock, CATALOG, billing, messenger, TelegramNoticeRenderer("Europe/Moscow")
+            db, clock, catalog, billing, messenger, TelegramNoticeRenderer("Europe/Moscow")
         )
         alert_settings = AlertSettingsService(db, clock, "Europe/Moscow")
         restore = RestoreService(db, clock, "Europe/Moscow")
-        admin = AdminService(db, clock, billing, CATALOG)
+        admin = AdminService(db, clock, billing, catalog)
+        plans = PlanService(db, clock, catalog)
+        await plans.seed(catalog.plans)
+        await plans.load()
+        invites = InviteService(db, clock)
         directory = AdminDirectory(db, clock, [ADMIN.id])
         await directory.sync()
         broadcast = BroadcastService(db, clock, messenger, rate_per_s=1000)
         storage = MemoryStorage()
+        state = {"up": True}
+
+        async def probe(node: object) -> bool:
+            return state["up"]
+
+        nodes = NodeService(db, clock, admin, probe)
         harness = cls(
             db, clock, bot, session, None, storage,  # type: ignore[arg-type]
             stars, storectl, messenger, alerter, billing, access, provisioner, lifecycle,
-            alert_settings, restore, admin, directory, broadcast,
+            alert_settings, restore, admin, directory, catalog, plans, invites, nodes, broadcast,
         )  # fmt: skip
+        harness._probe_state = state
         deps = Deps(
             db=db,
             clock=clock,
-            catalog=CATALOG,
+            catalog=catalog,
             access=access,
             billing=billing,
             lifecycle=lifecycle,
@@ -130,6 +153,9 @@ class Harness:
             admin=admin,
             broadcast=broadcast,
             directory=directory,
+            plans=plans,
+            invites=invites,
+            nodes=nodes,
             admin_chat_id=ADMIN_CHAT,
             messenger=messenger,
             alerter=alerter,
@@ -139,6 +165,13 @@ class Harness:
         )
         harness.dp = build_dispatcher(deps, storage=storage, monotonic=monotonic or StepClock())
         return harness
+
+    @property
+    def node_is_up(self) -> bool:
+        return self._probe_state["up"]
+
+    def set_node_up(self, up: bool) -> None:
+        self._probe_state["up"] = up
 
     # --- входящие события ---
 

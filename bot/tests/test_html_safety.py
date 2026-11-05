@@ -33,7 +33,9 @@ GOOD = [
 MODULES = [
     "plugbackup_bot.texts_ru",
     "plugbackup_bot.tg.texts",
-    "plugbackup_bot.tg.admin_texts",
+    "plugbackup_bot.tg.admin.tariffs",
+    "plugbackup_bot.tg.admin.invites",
+    "plugbackup_bot.tg.admin.nodes",
     "plugbackup_bot.tg.alert_texts",
     "plugbackup_bot.tg.alert_ui",
     "plugbackup_bot.tg.notices",
