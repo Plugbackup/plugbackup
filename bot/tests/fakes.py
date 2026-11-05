@@ -16,6 +16,7 @@ from aiogram.methods import (
     EditMessageReplyMarkup,
     EditMessageText,
     GetMe,
+    GetStickerSet,
     SendMessage,
     SetMyCommands,
     SetMyDescription,
@@ -24,7 +25,7 @@ from aiogram.methods import (
     SetMyShortDescription,
     TelegramMethod,
 )
-from aiogram.types import Chat, InlineKeyboardMarkup, Message, User
+from aiogram.types import Chat, InlineKeyboardMarkup, Message, StickerSet, User
 
 from plugbackup_bot.db.clients import Client
 from plugbackup_bot.db.jobs import Job
@@ -132,6 +133,27 @@ def check_telegram_html(text: str) -> None:
 
 
 MAX_MESSAGE_LENGTH = 4096
+# Больше сущностей (теги форматирования, кастомные эмодзи) в одном сообщении Telegram не берёт.
+MAX_ENTITIES = 100
+BUTTON_STYLES = ("danger", "success", "primary")
+
+
+def _actions(button: Any) -> int:
+    """Сколько действий задано у кнопки: Telegram требует ровно одно."""
+    fields = (
+        button.callback_data,
+        button.url,
+        button.copy_text,
+        button.web_app,
+        button.login_url,
+        button.switch_inline_query,
+        button.switch_inline_query_current_chat,
+        button.switch_inline_query_chosen_chat,
+        button.callback_game,
+    )
+    return sum(value is not None for value in fields) + (1 if button.pay else 0)
+
+
 MAX_CALLBACK_ANSWER = 200
 FAKE_TOKEN = "123456789:" + "x" * 35
 
@@ -144,6 +166,9 @@ class FakeSession(BaseSession):
         self.requests: list[TelegramMethod[Any]] = []
         # Ошибки по очереди на следующие запросы; None пропускает запрос без ошибки.
         self.errors: list[Exception | None] = []
+        # False: владелец бота без Premium, Telegram отклоняет кастомные эмодзи.
+        self.custom_emoji_allowed = True
+        self.sticker_sets: dict[str, StickerSet] = {}
 
     async def close(self) -> None:
         return None
@@ -163,6 +188,11 @@ class FakeSession(BaseSession):
         if isinstance(method, AnswerCallbackQuery) and len(method.text or "") > MAX_CALLBACK_ANSWER:
             raise TelegramBadRequest(method=method, message="Bad Request: MESSAGE_TOO_LONG")
         self._validate_profile(method)
+        self._validate_custom_emoji(method)
+        if isinstance(method, GetStickerSet):
+            if method.name not in self.sticker_sets:
+                raise TelegramBadRequest(method=method, message="Bad Request: STICKERSET_INVALID")
+            return self.sticker_sets[method.name]
         if isinstance(method, GetMe):
             return User(id=1000, is_bot=True, first_name="PlugBackup", username="PlugBackupBot")
         if isinstance(method, SendMessage):
@@ -175,6 +205,19 @@ class FakeSession(BaseSession):
         if isinstance(method, CreateInvoiceLink):
             return "https://t.me/$fake-invoice"
         return True
+
+    def _validate_custom_emoji(self, method: TelegramMethod[Any]) -> None:
+        if self.custom_emoji_allowed:
+            return
+        markup = getattr(method, "reply_markup", None)
+        in_buttons = isinstance(markup, InlineKeyboardMarkup) and any(
+            button.icon_custom_emoji_id for row in markup.inline_keyboard for button in row
+        )
+        in_text = any(
+            "<tg-emoji" in (getattr(method, field, None) or "") for field in ("text", "caption")
+        )
+        if in_buttons or in_text:
+            raise TelegramBadRequest(method=method, message="Bad Request: DOCUMENT_INVALID")
 
     @staticmethod
     def _validate_profile(method: TelegramMethod[Any]) -> None:
@@ -215,8 +258,12 @@ class FakeSession(BaseSession):
                     problem = "BUTTON_TEXT_EMPTY"
                 elif button.callback_data is not None and len(button.callback_data.encode()) > 64:
                     problem = "BUTTON_DATA_INVALID: callback_data longer than 64 bytes"
-                elif button.callback_data is None and button.url is None:
-                    problem = "BUTTON_TYPE_INVALID: no action"
+                elif _actions(button) != 1:
+                    problem = "BUTTON_TYPE_INVALID: a button needs exactly one action"
+                elif button.style is not None and button.style not in BUTTON_STYLES:
+                    problem = f"BUTTON_STYLE_INVALID: {button.style}"
+                elif button.copy_text is not None and not 1 <= len(button.copy_text.text) <= 256:
+                    problem = "BUTTON_COPY_TEXT_INVALID: from 1 to 256 characters"
                 elif button.url is not None and not button.url.startswith(
                     ("https://", "http://", "tg://")
                 ):
@@ -239,6 +286,8 @@ class FakeSession(BaseSession):
             raise TelegramBadRequest(
                 method=method, message=f"Bad Request: can't parse entities: {error}"
             ) from error
+        if len(re.findall(r"<[a-z]", method.text)) > MAX_ENTITIES:
+            raise TelegramBadRequest(method=method, message="Bad Request: too many entities")
 
     async def stream_content(  # type: ignore[override]
         self,

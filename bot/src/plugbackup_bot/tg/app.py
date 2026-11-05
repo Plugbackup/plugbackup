@@ -4,6 +4,7 @@ import asyncio
 import time
 from collections.abc import Callable, Collection
 from dataclasses import dataclass
+from pathlib import Path
 
 from aiogram import Dispatcher
 from aiogram.fsm.storage.base import BaseStorage
@@ -24,6 +25,7 @@ from plugbackup_bot.tg.handlers import (
     access,
     admin,
     alerts,
+    emoji_preview,
     lifecycle,
     payments,
     restore,
@@ -52,6 +54,7 @@ class Deps:
     default_tz: str
     # Просит исполнителя очереди сразу взяться за новые задачи, не дожидаясь планировщика.
     kick_provisioning: Callable[[], None] = lambda: None
+    emoji_pack_file: Path = Path("emoji_pack.json")
 
 
 def build_dispatcher(
@@ -78,6 +81,7 @@ def build_dispatcher(
         alerter=deps.alerter,
         default_tz=deps.default_tz,
         kick_provisioning=deps.kick_provisioning,
+        emoji_pack_file=deps.emoji_pack_file,
         invite_limiter=AttemptLimiter(now=monotonic),
     )
     # Сначала ограничение частоты, потом учёт пользователя.
@@ -92,6 +96,7 @@ def build_dispatcher(
     dp.include_router(restore.build_router())
     # Админка раньше «любого текста»: иначе текст рассылки уйдёт в запасной handler.
     dp.include_router(admin.build_router(deps.admin_ids))
+    dp.include_router(emoji_preview.build_router(deps.admin_ids))
     # Последним: внутри него handler «любой текст».
     dp.include_router(access.build_router())
     return dp

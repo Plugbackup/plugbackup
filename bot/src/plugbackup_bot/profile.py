@@ -12,16 +12,14 @@ import shutil
 from collections.abc import Awaitable, Callable, Sequence
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Annotated
 
 from aiogram import Bot
 from aiogram.exceptions import TelegramAPIError
 from aiogram.types import BufferedInputFile, InputProfilePhotoStatic
-from pydantic import Field, SecretStr, ValidationError, field_validator
-from pydantic_settings import BaseSettings, NoDecode, SettingsConfigDict
+from pydantic import ValidationError
 
 from plugbackup_bot.commands import ADMIN_COMMANDS, COMMANDS, COMMANDS_EN, set_commands
-from plugbackup_bot.config import split_ids
+from plugbackup_bot.tool_settings import ToolSettings
 
 # Лимиты Bot API: имя до 64 знаков, короткое описание до 120, описание до 512.
 NAME_MAX = 64
@@ -244,22 +242,6 @@ async def apply_profile(
 # --- настройки и командная строка ---
 
 
-class ProfileSettings(BaseSettings):
-    """Только то, что нужно скрипту. Читается из того же .env, что и бот."""
-
-    model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8", extra="ignore")
-
-    bot_token: SecretStr = Field(min_length=1)
-    admin_ids: Annotated[list[int], NoDecode] = Field(default_factory=list)
-    plans_file: Path = Path("../design/data/plans.json")
-    assets_dir: Path = Path("../design/graphics/png")
-
-    @field_validator("admin_ids", mode="before")
-    @classmethod
-    def _split(cls, value: object) -> object:
-        return split_ids(value)
-
-
 def read_plans_info(path: Path) -> tuple[int, str]:
     """Объём беты в ГБ и @имя бота из design/data/plans.json."""
     try:
@@ -337,7 +319,7 @@ async def run(
     args = _parser().parse_args(argv)
     steps = tuple(args.only or STEPS)
     try:
-        settings = ProfileSettings()  # type: ignore[call-arg]  # значения из окружения и .env
+        settings = ToolSettings()  # type: ignore[call-arg]  # значения из окружения и .env
     except ValidationError as error:
         names = sorted({str(item["loc"][0]).upper() for item in error.errors() if item["loc"]})
         out(f"В .env не хватает или неверно: {', '.join(names)}.")

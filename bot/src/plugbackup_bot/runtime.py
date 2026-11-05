@@ -16,6 +16,8 @@ from plugbackup_bot.config import Settings
 from plugbackup_bot.db import Database, migrate
 from plugbackup_bot.db.nodes import sync_nodes
 from plugbackup_bot.domain.plans import PlanCatalog, PlanConfigError, load_catalog
+from plugbackup_bot.emoji import E
+from plugbackup_bot.emoji_tools import read_map
 from plugbackup_bot.infra.clock import Clock, SystemClock
 from plugbackup_bot.infra.storectl import SshStorectl, Storectl
 from plugbackup_bot.scheduler import Scheduler, Task
@@ -35,6 +37,7 @@ from plugbackup_bot.services.usage import UsagePoller
 from plugbackup_bot.tg import texts
 from plugbackup_bot.tg.alert_texts import TelegramAlertRenderer
 from plugbackup_bot.tg.app import Deps, build_dispatcher
+from plugbackup_bot.tg.emoji_fallback import EmojiFallback
 from plugbackup_bot.tg.hooks import ClientHooks
 from plugbackup_bot.tg.notices import TelegramNoticeRenderer
 from plugbackup_bot.tg.stars import TelegramStars
@@ -118,6 +121,7 @@ async def build_runtime(
         timeout_s=settings.storectl_timeout_s,
     )
     notifier = TelegramNotifier(bot, db, settings.admin_chat_id)
+    _setup_emoji(settings, bot, notifier)
     risk_version = texts.RISK_TEXT_VERSION
 
     billing = BillingService(db, clock, catalog, TelegramStars(bot), risk_version)
@@ -152,6 +156,7 @@ async def build_runtime(
         alerter=notifier,
         default_tz=tz,
         kick_provisioning=kick_provisioning,
+        emoji_pack_file=settings.emoji_pack_file,
     )
     dp = build_dispatcher(deps)
     dp.errors.register(_error_handler(notifier))
@@ -177,6 +182,29 @@ async def build_runtime(
         ]
     )
     return Runtime(settings, db, bot, dp, scheduler, notifier, provisioner, background)
+
+
+_EMOJI_ALERT = (
+    "Telegram отклонил кастомные эмодзи: {reason}. Бот перешёл на обычные эмодзи, сообщения "
+    "доставляются. Обычно так бывает, когда у владельца бота нет Telegram Premium. Чтобы не "
+    "получать это сообщение после каждого перезапуска, поставьте USE_CUSTOM_EMOJI=false. "
+    "Проверить пак: /emoji_preview."
+)
+
+
+def _setup_emoji(settings: Settings, bot: Bot, notifier: TelegramNotifier) -> None:
+    """Загружает сопоставление эмодзи и ставит запасной вид на случай отказа Telegram."""
+    mapping = read_map(settings.emoji_map_file)
+    E.configure(mapping, enabled=settings.use_custom_emoji)
+    if settings.use_custom_emoji and not any(mapping.values()):
+        log.warning(
+            "USE_CUSTOM_EMOJI is on but %s has no ids: plain emoji", settings.emoji_map_file
+        )
+
+    async def report(reason: str) -> None:
+        await notifier.alert(_EMOJI_ALERT.format(reason=reason))
+
+    bot.session.middleware(EmojiFallback(E, report))
 
 
 def _error_handler(notifier: TelegramNotifier):  # type: ignore[no-untyped-def]

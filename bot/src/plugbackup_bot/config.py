@@ -12,6 +12,8 @@ from pydantic_settings import BaseSettings, NoDecode, SettingsConfigDict
 _LABEL = r"[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?"
 HOSTNAME_RE = re.compile(rf"^(?=.{{1,253}}$){_LABEL}(\.{_LABEL})*$")
 NODE_NAME_RE = re.compile(r"^[a-z0-9][a-z0-9-]{0,31}$")
+# Короткое имя набора стикеров или эмодзи в Telegram.
+EMOJI_SET_RE = re.compile(r"^[A-Za-z0-9_]{1,64}$")
 
 # Верхний предел цены подписки в Telegram Stars из Bot API.
 MAX_PRICE_STARS = 10_000
@@ -94,6 +96,13 @@ class Settings(BaseSettings):
     ssh_known_hosts_path: Path
     storectl_timeout_s: int = Field(default=20, ge=1, le=300)
 
+    # Кастомные эмодзи из пака. Telegram принимает их только если у владельца бота есть Premium;
+    # при отказе бот сам переходит на обычные эмодзи.
+    use_custom_emoji: bool = True
+    emoji_set: str = "RestrictedEmoji"
+    emoji_pack_file: Path = Path("emoji_pack.json")
+    emoji_map_file: Path = Path("emoji_map.json")
+
     default_tz: str = "Europe/Moscow"
     log_level: Literal["DEBUG", "INFO", "WARNING", "ERROR"] = "INFO"
 
@@ -108,6 +117,13 @@ class Settings(BaseSettings):
         for plan_id, price in value.items():
             if not 1 <= price <= MAX_PRICE_STARS:
                 raise ValueError(f"цена {plan_id}: от 1 до {MAX_PRICE_STARS} Stars")
+        return value
+
+    @field_validator("emoji_set")
+    @classmethod
+    def _check_emoji_set(cls, value: str) -> str:
+        if not EMOJI_SET_RE.fullmatch(value):
+            raise ValueError("имя набора: латиница, цифры и «_»")
         return value
 
     @field_validator("default_tz")

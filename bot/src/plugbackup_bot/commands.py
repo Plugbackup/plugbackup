@@ -45,6 +45,7 @@ ADMIN_COMMANDS: Menu = (
     ("invite", "инвайт-коды беты"),
     ("client", "карточка клиента"),
     ("broadcast", "рассылка"),
+    ("emoji_preview", "пак эмодзи и сопоставление"),
     *COMMANDS,
 )
 

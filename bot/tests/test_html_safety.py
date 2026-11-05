@@ -133,7 +133,7 @@ async def test_the_fake_telegram_enforces_message_and_button_limits() -> None:
     with pytest.raises(TelegramBadRequest, match="callback_data"):
         await bot.send_message(1, "текст", reply_markup=keyboard(callback_data="я" * 33))  # 66 байт
     await bot.send_message(1, "текст", reply_markup=keyboard(callback_data="я" * 32))  # 64 байта
-    with pytest.raises(TelegramBadRequest, match="no action"):
+    with pytest.raises(TelegramBadRequest, match="exactly one action"):
         await bot.send_message(1, "текст", reply_markup=keyboard())
     with pytest.raises(TelegramBadRequest, match="BUTTON_URL_INVALID"):
         await bot.send_message(1, "текст", reply_markup=keyboard(url="ftp://example.org"))
