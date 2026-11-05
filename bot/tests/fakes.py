@@ -2,6 +2,7 @@
 
 import re
 from collections.abc import AsyncGenerator, Awaitable, Callable
+from dataclasses import dataclass
 from datetime import UTC, datetime
 from typing import Any
 
@@ -13,11 +14,15 @@ from aiogram.exceptions import TelegramBadRequest
 from aiogram.methods import (
     AnswerCallbackQuery,
     CreateInvoiceLink,
+    DeleteMessage,
+    EditMessageCaption,
+    EditMessageMedia,
     EditMessageReplyMarkup,
     EditMessageText,
     GetMe,
     GetStickerSet,
     SendMessage,
+    SendPhoto,
     SetMyCommands,
     SetMyDescription,
     SetMyName,
@@ -25,7 +30,7 @@ from aiogram.methods import (
     SetMyShortDescription,
     TelegramMethod,
 )
-from aiogram.types import Chat, InlineKeyboardMarkup, Message, StickerSet, User
+from aiogram.types import Chat, InlineKeyboardMarkup, Message, PhotoSize, StickerSet, User
 
 from plugbackup_bot.db.clients import Client
 from plugbackup_bot.db.jobs import Job
@@ -155,11 +160,23 @@ def _actions(button: Any) -> int:
 
 
 MAX_CALLBACK_ANSWER = 200
+MAX_CAPTION_LENGTH = 1024
 FAKE_TOKEN = "123456789:" + "x" * 35
 
 
+@dataclass(frozen=True)
+class Output:
+    """Всё, что бот показал пользователю: новое сообщение или правка."""
+
+    text: str
+    reply_markup: InlineKeyboardMarkup | None
+    edited: bool
+    photo: bool
+    chat_id: int | str | None = None
+
+
 class FakeSession(BaseSession):
-    """Сессия aiogram без сети: записывает методы и возвращает заготовленные ответы."""
+    """Сессия aiogram без сети: записывает методы, повторяет ограничения Telegram и отвечает."""
 
     def __init__(self) -> None:
         super().__init__()
@@ -168,10 +185,23 @@ class FakeSession(BaseSession):
         self.errors: list[Exception | None] = []
         # False: владелец бота без Premium, Telegram отклоняет кастомные эмодзи.
         self.custom_emoji_allowed = True
+        # False: Telegram не знает id эффекта сообщения.
+        self.effects_allowed = True
         self.sticker_sets: dict[str, StickerSet] = {}
+        # (чат, id сообщения) -> "text" или "photo": текст нельзя править как фото и наоборот.
+        self.message_kinds: dict[tuple[int, int], str] = {}
+        # Последнее сообщение бота в чате: (id, вид). По нему тестовый стенд «нажимает» кнопки.
+        self.last_message: dict[int, tuple[int, str]] = {}
+        self._next_id = 5000
 
     async def close(self) -> None:
         return None
+
+    def _new_message(self, chat_id: int, kind: str) -> int:
+        self._next_id += 1
+        self.message_kinds[(chat_id, self._next_id)] = kind
+        self.last_message[chat_id] = (self._next_id, kind)
+        return self._next_id
 
     async def make_request(  # type: ignore[no-untyped-def,override]
         self, bot: Bot, method: TelegramMethod[Any], timeout: int | None = None
@@ -181,10 +211,7 @@ class FakeSession(BaseSession):
             error = self.errors.pop(0)
             if error is not None:
                 raise error
-        if isinstance(method, (SendMessage, EditMessageText)):
-            self._validate_text(bot, method)
-        if isinstance(method, (SendMessage, EditMessageText, EditMessageReplyMarkup)):
-            self._validate_markup(method)
+        self._validate_message(bot, method)
         if isinstance(method, AnswerCallbackQuery) and len(method.text or "") > MAX_CALLBACK_ANSWER:
             raise TelegramBadRequest(method=method, message="Bad Request: MESSAGE_TOO_LONG")
         self._validate_profile(method)
@@ -196,15 +223,86 @@ class FakeSession(BaseSession):
         if isinstance(method, GetMe):
             return User(id=1000, is_bot=True, first_name="PlugBackup", username="PlugBackupBot")
         if isinstance(method, SendMessage):
+            chat_id = int(method.chat_id)
             return Message(
-                message_id=len(self.requests),
+                message_id=self._new_message(chat_id, "text"),
                 date=datetime.now(UTC),
-                chat=Chat(id=int(method.chat_id), type="private"),
+                chat=Chat(id=chat_id, type="private"),
                 text=method.text,
             )
+        if isinstance(method, SendPhoto):
+            chat_id = int(method.chat_id)
+            return self._photo_message(chat_id, self._new_message(chat_id, "photo"), method.caption)
+        if isinstance(method, EditMessageMedia) and method.chat_id is not None:
+            chat_id = int(method.chat_id)
+            return self._photo_message(chat_id, int(method.message_id or 0), method.media.caption)
+        if isinstance(method, DeleteMessage):
+            self.message_kinds.pop((int(method.chat_id), method.message_id), None)
+            return True
         if isinstance(method, CreateInvoiceLink):
             return "https://t.me/$fake-invoice"
         return True
+
+    def _photo_message(self, chat_id: int, message_id: int, caption: str | None) -> Message:
+        return Message(
+            message_id=message_id,
+            date=datetime.now(UTC),
+            chat=Chat(id=chat_id, type="private"),
+            photo=[
+                PhotoSize(
+                    file_id=f"fid-{message_id}", file_unique_id=f"u-{message_id}", width=1280,
+                    height=720,
+                )
+            ],
+            caption=caption,
+        )  # fmt: skip
+
+    # --- проверки, как у настоящего Telegram ---
+
+    def _validate_message(self, bot: Bot, method: TelegramMethod[Any]) -> None:
+        """Текст, подпись, кнопки, эффект и вид правимого сообщения."""
+        text: str | None = None
+        limit = MAX_MESSAGE_LENGTH
+        parse_mode: Any = getattr(method, "parse_mode", None)
+        photo_ref: Any = None
+        if isinstance(method, (SendMessage, EditMessageText)):
+            text = method.text
+        elif isinstance(method, (SendPhoto, EditMessageCaption)):
+            text, limit = method.caption or "", MAX_CAPTION_LENGTH
+            photo_ref = getattr(method, "photo", None)
+        elif isinstance(method, EditMessageMedia):
+            text, limit = method.media.caption or "", MAX_CAPTION_LENGTH
+            parse_mode = getattr(method.media, "parse_mode", None)
+            photo_ref = method.media.media
+        if isinstance(photo_ref, str) and photo_ref.startswith("bad:"):
+            raise TelegramBadRequest(
+                method=method, message="Bad Request: wrong file identifier/HTTP URL specified"
+            )
+        if text is not None:
+            self._validate_text(bot, method, text, limit, parse_mode)
+        if isinstance(
+            method,
+            (SendMessage, SendPhoto, EditMessageText, EditMessageCaption, EditMessageMedia,
+             EditMessageReplyMarkup),
+        ):  # fmt: skip
+            self._validate_markup(method)
+        if getattr(method, "message_effect_id", None) and not self.effects_allowed:
+            raise TelegramBadRequest(method=method, message="Bad Request: EFFECT_ID_INVALID")
+        self._validate_edit_kind(method)
+
+    def _validate_edit_kind(self, method: TelegramMethod[Any]) -> None:
+        if not isinstance(method, (EditMessageText, EditMessageCaption, EditMessageMedia)):
+            return
+        if method.chat_id is None or method.message_id is None:
+            return
+        kind = self.message_kinds.get((int(method.chat_id), method.message_id))
+        problem = None
+        if isinstance(method, EditMessageText) and kind == "photo":
+            problem = "there is no text in the message to edit"
+        elif isinstance(method, (EditMessageCaption, EditMessageMedia)) and kind == "text":
+            problem = "there is no media in the message to edit"
+        if problem:
+            raise TelegramBadRequest(method=method, message=f"Bad Request: {problem}")
 
     def _validate_custom_emoji(self, method: TelegramMethod[Any]) -> None:
         if self.custom_emoji_allowed:
@@ -215,7 +313,7 @@ class FakeSession(BaseSession):
         )
         in_text = any(
             "<tg-emoji" in (getattr(method, field, None) or "") for field in ("text", "caption")
-        )
+        ) or "<tg-emoji" in (getattr(getattr(method, "media", None), "caption", None) or "")
         if in_buttons or in_text:
             raise TelegramBadRequest(method=method, message="Bad Request: DOCUMENT_INVALID")
 
@@ -247,7 +345,7 @@ class FakeSession(BaseSession):
             raise TelegramBadRequest(method=method, message=f"Bad Request: {problem}")
 
     @staticmethod
-    def _validate_markup(method: SendMessage | EditMessageText | EditMessageReplyMarkup) -> None:
+    def _validate_markup(method: Any) -> None:
         markup = method.reply_markup
         if not isinstance(markup, InlineKeyboardMarkup):
             return
@@ -272,21 +370,23 @@ class FakeSession(BaseSession):
                     raise TelegramBadRequest(method=method, message=f"Bad Request: {problem}")
 
     @staticmethod
-    def _validate_text(bot: Bot, method: SendMessage | EditMessageText) -> None:
-        if len(method.text) > MAX_MESSAGE_LENGTH:
-            raise TelegramBadRequest(method=method, message="Bad Request: message is too long")
-        mode = method.parse_mode
+    def _validate_text(
+        bot: Bot, method: TelegramMethod[Any], text: str, limit: int, mode: Any
+    ) -> None:
+        if len(text) > limit:
+            what = "message" if limit == MAX_MESSAGE_LENGTH else "message caption"
+            raise TelegramBadRequest(method=method, message=f"Bad Request: {what} is too long")
         if isinstance(mode, Default):
             mode = bot.default.parse_mode
         if mode != ParseMode.HTML:
             return
         try:
-            check_telegram_html(method.text)
+            check_telegram_html(text)
         except ValueError as error:
             raise TelegramBadRequest(
                 method=method, message=f"Bad Request: can't parse entities: {error}"
             ) from error
-        if len(re.findall(r"<[a-z]", method.text)) > MAX_ENTITIES:
+        if len(re.findall(r"<[a-z]", text)) > MAX_ENTITIES:
             raise TelegramBadRequest(method=method, message="Bad Request: too many entities")
 
     async def stream_content(  # type: ignore[override]
@@ -304,6 +404,30 @@ class FakeSession(BaseSession):
 
     def texts(self) -> list[str]:
         return [m.text for m in self.of(SendMessage)]
+
+    def outputs(self) -> list[Output]:
+        """Всё показанное пользователю по порядку: сообщения, фото с подписью и правки."""
+        shown: list[Output] = []
+        for method in self.requests:
+            if isinstance(method, SendMessage):
+                shown.append(Output(method.text, method.reply_markup, False, False, method.chat_id))  # type: ignore[arg-type]
+            elif isinstance(method, EditMessageText):
+                shown.append(Output(method.text, method.reply_markup, True, False, method.chat_id))  # type: ignore[arg-type]
+            elif isinstance(method, SendPhoto):
+                shown.append(
+                    Output(method.caption or "", method.reply_markup, False, True, method.chat_id)
+                )  # type: ignore[arg-type]
+            elif isinstance(method, EditMessageCaption):
+                shown.append(
+                    Output(method.caption or "", method.reply_markup, True, True, method.chat_id)
+                )  # type: ignore[arg-type]
+            elif isinstance(method, EditMessageMedia):
+                shown.append(
+                    Output(
+                        method.media.caption or "", method.reply_markup, True, True, method.chat_id
+                    )
+                )  # type: ignore[arg-type]
+        return shown
 
 
 def make_bot() -> tuple[Bot, FakeSession]:

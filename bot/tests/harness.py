@@ -8,14 +8,15 @@ from typing import Any
 from aiogram import Bot, Dispatcher
 from aiogram.fsm.storage.base import StorageKey
 from aiogram.fsm.storage.memory import MemoryStorage
-from aiogram.methods import AnswerCallbackQuery, DeleteMessage, SendMessage
-from aiogram.types import CallbackQuery, Chat, Message, Update, User
+from aiogram.methods import AnswerCallbackQuery, DeleteMessage
+from aiogram.types import CallbackQuery, Chat, Message, PhotoSize, Update, User
 
 from fakes import (
     FakeClock,
     FakeSession,
     FakeStars,
     FakeStorectl,
+    Output,
     RecordingAlerter,
     RecordingMessenger,
     make_bot,
@@ -145,13 +146,29 @@ class Harness:
     async def say(self, text: str, user: User = USER, chat_type: str = "private") -> None:
         await self._feed(message=self._message(text, user, chat_type))
 
-    async def press(self, data: str, user: User = USER) -> None:
+    async def press(self, data: str, user: User = USER, kind: str | None = None) -> None:
+        """Нажатие кнопки. Сообщение с кнопкой — последнее сообщение бота в этом чате
+        (kind задаёт его вид: «text» или «photo», по умолчанию как было на самом деле)."""
+        message_id, last_kind = self.session.last_message.get(
+            user.id, (self._update_id + 1000, "text")
+        )
+        kind = kind or last_kind
+        self.session.message_kinds[(user.id, message_id)] = kind
+        source = self._message("меню", user)
+        updates: dict[str, Any] = {"message_id": message_id}
+        if kind == "photo":
+            updates.update(
+                text=None,
+                caption="меню",
+                photo=[PhotoSize(file_id="f", file_unique_id="u", width=1, height=1)],
+            )
+        source = source.model_copy(update=updates)
         query = CallbackQuery(
             id=str(self._update_id + 1),
             from_user=user,
             chat_instance="test",
             data=data,
-            message=self._message("меню", user),
+            message=source,
         )
         await self._feed(callback_query=query)
 
@@ -162,10 +179,11 @@ class Harness:
         return await self.storage.get_state(key)
 
     def texts(self) -> list[str]:
-        return self.session.texts()
+        """Тексты всего показанного: и новых сообщений, и правок."""
+        return [output.text for output in self.session.outputs()]
 
-    def last(self) -> SendMessage:
-        return self.session.of(SendMessage)[-1]
+    def last(self) -> Output:
+        return self.session.outputs()[-1]
 
     def last_buttons(self) -> list[tuple[str, str | None, str | None]]:
         """Кнопки последнего сообщения: (текст, callback_data, url)."""

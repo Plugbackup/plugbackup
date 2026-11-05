@@ -50,3 +50,17 @@ def fmt_iso_date(value: str) -> str:
     """'2026-11-02' -> '2 ноября'."""
     _, month, day = (int(part) for part in value.split("-"))
     return f"{day} {_MONTHS[month - 1]}"
+
+
+def quota_bar(used: int, quota: int, width: int = 10) -> str:
+    """Полоска заполнения квоты: «▰▰▰▱▱▱▱▱▱▱ 30%».
+
+    Если что-то занято, закрашено хотя бы одно деление, а полная полоска только при 100%.
+    """
+    percent = round(used * 100 / quota) if quota > 0 else 0
+    filled = min(width, round(width * percent / 100))
+    if used > 0:
+        filled = max(filled, 1)
+    if percent < 100:
+        filled = min(filled, width - 1)
+    return "▰" * filled + "▱" * (width - filled) + f" {percent}%"

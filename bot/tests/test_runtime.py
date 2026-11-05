@@ -10,6 +10,7 @@ from aiogram.types import ErrorEvent, Update
 from fakes import FakeClock, FakeStorectl, make_bot
 from plugbackup_bot.__main__ import main
 from plugbackup_bot.config import Settings
+from plugbackup_bot.db.migrate import load_migrations
 from plugbackup_bot.db.nodes import Node, list_nodes
 from plugbackup_bot.runtime import (
     ERROR_ALERT_GAP_S,
@@ -90,7 +91,8 @@ def test_a_world_readable_key_is_reported(env: Path) -> None:
 
 def test_check_mode(env: Path, capsys: pytest.CaptureFixture[str]) -> None:
     assert main(["--check"]) == 0
-    assert "Проверка пройдена. Схема базы: v1" in capsys.readouterr().out
+    version = load_migrations()[-1][0]
+    assert f"Проверка пройдена. Схема базы: v{version}" in capsys.readouterr().out
     (env / "known_hosts").unlink()
     assert main(["--check"]) == 1
     assert "known_hosts" in capsys.readouterr().err
@@ -119,7 +121,7 @@ async def test_runtime_assembly(env: Path) -> None:
         async with runtime.db.read() as conn:
             [node] = await list_nodes(conn)
         assert (node.name, node.addr, node.capacity_gb) == ("node1", "192.0.2.10", 1000)
-        assert await runtime.db.user_version() == 1
+        assert await runtime.db.user_version() == load_migrations()[-1][0]
         names = {task.name for task in runtime.scheduler._tasks}
         assert names == {
             "provisioning",

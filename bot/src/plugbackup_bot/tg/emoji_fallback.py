@@ -32,7 +32,7 @@ _probe: ContextVar[bool] = ContextVar("emoji_probe", default=False)
 
 # Отказы по другим причинам: повтор без эмодзи их не лечит, а если проходит (например, правка
 # «без изменений»), это не повод отключать кастомные эмодзи.
-_UNRELATED = (
+UNRELATED_REFUSALS = (
     "message is not modified",
     "message to edit not found",
     "message to delete not found",
@@ -115,7 +115,7 @@ class EmojiFallback(BaseRequestMiddleware):
             return await make_request(bot, method)
         except TelegramBadRequest as error:
             reason = error.message
-            if _probe.get() or any(text in reason.lower() for text in _UNRELATED):
+            if _probe.get() or any(text in reason.lower() for text in UNRELATED_REFUSALS):
                 raise
             updates = plain_updates(method, self._registry)
             if not updates:
