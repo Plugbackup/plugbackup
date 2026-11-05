@@ -9,10 +9,10 @@ from aiogram import BaseMiddleware
 from aiogram.exceptions import TelegramAPIError
 from aiogram.types import CallbackQuery, Message, TelegramObject
 
+from plugbackup_bot import texts_ru as T
 from plugbackup_bot.db import Database
 from plugbackup_bot.db.users import touch_user
 from plugbackup_bot.infra.clock import Clock
-from plugbackup_bot.tg import texts
 
 log = logging.getLogger(__name__)
 
@@ -69,12 +69,12 @@ class ThrottleMiddleware(BaseMiddleware):
     async def _warn(self, event: TelegramObject, user_id: int) -> None:
         try:
             if isinstance(event, CallbackQuery):
-                await event.answer(texts.THROTTLED)
+                await event.answer(T.THROTTLED)
             elif isinstance(event, Message):
                 now = self._now()
                 if now - self._last_notice.get(user_id, -self._notice_gap_s) >= self._notice_gap_s:
                     self._last_notice[user_id] = now
-                    await event.answer(texts.THROTTLED)
+                    await event.answer(T.THROTTLED)
         except TelegramAPIError:
             log.debug("could not send the throttle notice", exc_info=True)
 

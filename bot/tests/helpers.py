@@ -1,6 +1,8 @@
 """Заготовки строк в базе для тестов. Пишут напрямую SQL, в обход кода бота."""
 
 import base64
+import html
+import re
 
 from plugbackup_bot.db import Database
 from plugbackup_bot.domain.plans import Plan, PlanCatalog
@@ -64,3 +66,18 @@ def fake_key_body(seed: int = 0) -> str:
     """Тело публичного ключа ed25519 для тестов. Строится на лету, чтобы в исходниках не
     лежали длинные base64-строки, которые сканеры секретов принимают за ключи."""
     return base64.b64encode(_KEY_PREFIX + bytes(range(seed, seed + 32))).decode("ascii")
+
+
+def plain(text: str) -> str:
+    """Сообщение так, как его читает человек: без тегов, с обычными пробелами."""
+    return html.unescape(re.sub(r"<[^>]+>", "", text)).replace("\u00a0", " ")
+
+
+def body(text: str) -> str:
+    """Тело карточки без заголовка: всё после первой пустой строки."""
+    return plain(text).split("\n\n", 1)[-1]
+
+
+def label(text: str) -> str:
+    """Подпись кнопки без значка в начале: «🔄 Обновить» -> «Обновить»."""
+    return re.sub(r"^[^\w]+", "", text)

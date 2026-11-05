@@ -82,3 +82,23 @@ async def test_alert_keeps_text(db: Database, text: str) -> None:
     bot, session = make_bot()
     await TelegramNotifier(bot, db, ADMIN_CHAT).alert(text)
     assert session.texts() == [text]
+
+
+async def test_the_effect_is_added_only_when_asked_for_and_enabled(db: Database) -> None:
+    from plugbackup_bot.ui.effects import EFFECT_CONFETTI, Effects
+
+    bot, session = make_bot()
+    notifier = TelegramNotifier(bot, db, ADMIN_CHAT, Effects())
+    await notifier.send(5, "с эффектом", effect=True)
+    await notifier.send(5, "без эффекта")
+    with_effect, without = session.of(SendMessage)
+    assert with_effect.message_effect_id == EFFECT_CONFETTI and without.message_effect_id is None
+
+    silent_bot, silent_session = make_bot()
+    off = TelegramNotifier(silent_bot, db, ADMIN_CHAT, Effects(enabled=False))
+    await off.send(5, "эффекты выключены", effect=True)
+    assert silent_session.of(SendMessage)[0].message_effect_id is None
+
+    plain_bot, plain_session = make_bot()  # без Effects вообще: как раньше
+    await TelegramNotifier(plain_bot, db, ADMIN_CHAT).send(5, "x", effect=True)
+    assert plain_session.of(SendMessage)[0].message_effect_id is None

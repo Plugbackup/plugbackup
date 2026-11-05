@@ -454,12 +454,19 @@ class RecordingMessenger:
     def __init__(self) -> None:
         self.sent: list[tuple[int, str]] = []
         self.markups: list[InlineKeyboardMarkup | None] = []
+        self.effects: list[bool] = []
 
     async def send(
-        self, tg_id: int, text: str, *, reply_markup: InlineKeyboardMarkup | None = None
+        self,
+        tg_id: int,
+        text: str,
+        *,
+        reply_markup: InlineKeyboardMarkup | None = None,
+        effect: bool = False,
     ) -> bool:
         self.sent.append((tg_id, text))
         self.markups.append(reply_markup)
+        self.effects.append(effect)
         return True
 
 

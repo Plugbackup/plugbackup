@@ -1,12 +1,13 @@
 """Реакции на результат операций storectl: сообщения клиенту и алерты админу."""
 
+from plugbackup_bot import texts_ru as T
 from plugbackup_bot.db import Database
 from plugbackup_bot.db.clients import Client
 from plugbackup_bot.db.jobs import Job, Op
 from plugbackup_bot.db.nodes import get_node
 from plugbackup_bot.infra.storectl import StorectlError
 from plugbackup_bot.services.notify import AdminAlerter, Messenger
-from plugbackup_bot.tg import texts
+from plugbackup_bot.tg import keyboards, texts
 
 
 class ClientHooks:
@@ -19,12 +20,17 @@ class ClientHooks:
         if job.op is not Op.ADD:
             return
         if job.params.get("replace"):
-            await self._messenger.send(client.tg_id, texts.KEY_CHANGED_NOTICE)
+            await self._messenger.send(client.tg_id, T.KEY_CHANGED_NOTICE)
             return
         async with self._db.read() as conn:
             node = await get_node(conn, client.node_id)
         if node is not None:
-            await self._messenger.send(client.tg_id, texts.access_ready(client, node))
+            await self._messenger.send(
+                client.tg_id,
+                texts.access_ready(client, node),
+                reply_markup=keyboards.access_ready(client.login, node.public_host),
+                effect=True,
+            )
 
     async def job_problem(
         self, job: Job, client: Client | None, error: StorectlError, *, final: bool
@@ -35,6 +41,6 @@ class ClientHooks:
         first_access = job.op is Op.ADD and not job.params.get("replace") and client is not None
         if first_access and client is not None:
             if final:
-                await self._messenger.send(client.tg_id, texts.ACCESS_FAILED)
+                await self._messenger.send(client.tg_id, T.ACCESS_FAILED)
             elif job.attempts == 0:
-                await self._messenger.send(client.tg_id, texts.ACCESS_DELAYED)
+                await self._messenger.send(client.tg_id, T.ACCESS_DELAYED)

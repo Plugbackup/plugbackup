@@ -3,7 +3,7 @@
 import asyncio
 import time
 from collections.abc import Callable, Collection
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pathlib import Path
 
 from aiogram import Dispatcher
@@ -33,6 +33,7 @@ from plugbackup_bot.tg.handlers import (
     status,
 )
 from plugbackup_bot.tg.middlewares import AttemptLimiter, ThrottleMiddleware, UserMiddleware
+from plugbackup_bot.ui.screen import Ui
 
 
 @dataclass
@@ -55,6 +56,8 @@ class Deps:
     # Просит исполнителя очереди сразу взяться за новые задачи, не дожидаясь планировщика.
     kick_provisioning: Callable[[], None] = lambda: None
     emoji_pack_file: Path = Path("emoji_pack.json")
+    # Показ экранов: правка текущего сообщения, баннеры, эффекты.
+    ui: Ui = field(default_factory=Ui)
 
 
 def build_dispatcher(
@@ -82,6 +85,7 @@ def build_dispatcher(
         default_tz=deps.default_tz,
         kick_provisioning=deps.kick_provisioning,
         emoji_pack_file=deps.emoji_pack_file,
+        ui=deps.ui,
         invite_limiter=AttemptLimiter(now=monotonic),
     )
     # Сначала ограничение частоты, потом учёт пользователя.

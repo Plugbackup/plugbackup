@@ -2,6 +2,7 @@
 
 from plugbackup_bot.domain.keys import KeyProblem
 from plugbackup_bot.domain.lifecycle import Notice, NoticeKind
+from plugbackup_bot.emoji import GLYPHS
 from plugbackup_bot.services.access import RedeemKind
 from plugbackup_bot.services.billing import Reject
 from plugbackup_bot.tg import texts
@@ -44,4 +45,8 @@ def test_texts_follow_the_brand_rules() -> None:
     samples += list(texts.REJECTIONS.values()) + list(texts.KEY_PROBLEMS.values())
     for text in samples:
         assert "!" not in text
-        assert not any(ord(ch) > 0x1F000 for ch in text)  # эмодзи нет
+        # Эмодзи разрешены только как значки из пака в заголовках, см. design/brand.md.
+        stripped = text
+        for glyph in GLYPHS.values():
+            stripped = stripped.replace(glyph, "")
+        assert not any(ord(ch) > 0x1F000 for ch in stripped)

@@ -2,7 +2,8 @@ import pytest_asyncio
 
 from fakes import FakeClock
 from harness import USER, Harness
-from helpers import NOW, add_client, add_user, fake_key_body
+from helpers import NOW, add_client, add_user, body, fake_key_body, plain
+from plugbackup_bot import texts_ru as T
 from plugbackup_bot.db import Database
 from plugbackup_bot.db import jobs as jobs_repo
 from plugbackup_bot.db.clients import Client, get_client, transition
@@ -11,7 +12,7 @@ from plugbackup_bot.domain.lifecycle import Notice, NoticeKind, Step
 from plugbackup_bot.domain.policy import DAY
 from plugbackup_bot.domain.states import State
 from plugbackup_bot.services.lifecycle import AliveKind, LifecycleService, TickReport
-from plugbackup_bot.tg import keyboards, texts
+from plugbackup_bot.tg import keyboards
 from plugbackup_bot.tg.notices import TelegramNoticeRenderer
 
 KEY = fake_key_body(0)
@@ -87,7 +88,7 @@ async def test_beta_timeline(h: Harness) -> None:
     assert report.transitions == {"expiring": 1}
     assert (await fetch(h, client.id)).state is State.EXPIRING
     text = messages(h)[-1]
-    assert text.startswith("Вы ещё пользуетесь хранилищем?")
+    assert body(text).startswith("Вы ещё пользуетесь хранилищем?")
     assert h.messenger.sent[-1][0] == USER.id
 
     # Повторный проход в ту же секунду ничего не шлёт.
@@ -96,18 +97,19 @@ async def test_beta_timeline(h: Harness) -> None:
 
     h.clock.advance(4 * DAY)  # осталось 3 дня
     await h.lifecycle.tick()
-    assert messages(h)[-1].startswith("Напоминание: нажмите «Я ещё пользуюсь»")
+    assert "Напоминание" in plain(messages(h)[-1])
+    assert body(messages(h)[-1]).startswith("Нажмите «Я ещё пользуюсь»")
 
     h.clock.advance(2 * DAY)  # остался 1 день
     await h.lifecycle.tick()
-    assert messages(h)[-1].startswith("Завтра")
+    assert body(messages(h)[-1]).startswith("Завтра")
     assert "будет заблокировано" in messages(h)[-1]
 
     # День 37: блокировка и задача suspend.
     h.clock.advance(DAY)
     await h.lifecycle.tick()
     assert (await fetch(h, client.id)).state is State.SUSPENDED
-    assert messages(h)[-1].startswith("Хранилище заблокировано")
+    assert "Хранилище заблокировано" in plain(messages(h)[-1])
     assert await open_jobs(h, client.id) == [(Op.SUSPEND, JobStatus.PENDING)]
     await h.provisioner.run_due()
     assert h.storectl.calls == [("suspend", "192.0.2.10", client.login)]
@@ -119,7 +121,7 @@ async def test_beta_timeline(h: Harness) -> None:
     h.clock.advance(DAY)
     await h.lifecycle.tick()
     assert (await fetch(h, client.id)).state is State.DELETED
-    assert messages(h)[-1].startswith("Хранилище удалено")
+    assert "Хранилище удалено" in plain(messages(h)[-1])
     await h.provisioner.run_due()
     assert [call[0] for call in h.storectl.calls] == ["suspend", "delete"]
 
@@ -137,7 +139,7 @@ async def test_the_question_has_a_working_button(h: Harness) -> None:
     _, markup = renderer.render(Notice(NoticeKind.BETA_PROMPT, "1", True, at=NOW), client)
     assert markup is not None
     assert markup.inline_keyboard[0][0].callback_data == f"alive:{client.id}"
-    assert markup.inline_keyboard[0][0].text == texts.BTN_ALIVE
+    assert markup.inline_keyboard[0][0].text.endswith(T.BTN_ALIVE)
 
 
 # --- кнопка «Я ещё пользуюсь» ---
@@ -175,9 +177,9 @@ async def test_alive_button_refusals(h: Harness) -> None:
     assert (await h.lifecycle.confirm_alive(999, beta.id)).kind is AliveKind.NO_CLIENT
 
     await h.press(f"alive:{beta.id}")
-    assert h.last().text == texts.ALIVE_BLOCKED
+    assert h.last().text == T.ALIVE_BLOCKED
     await h.press("alive:abc")
-    assert h.last().text == texts.ALIVE_NO_CLIENT
+    assert h.last().text == T.ALIVE_NO_CLIENT
 
 
 async def test_alive_button_is_for_beta_only(h: Harness) -> None:
@@ -195,12 +197,12 @@ async def test_cancelled_subscription_warns_then_blocks(h: Harness) -> None:
     h.clock.advance(7 * DAY)  # осталось 3 дня
     await h.lifecycle.tick()
     assert (await fetch(h, client.id)).state is State.EXPIRING
-    assert messages(h)[-1].startswith("Доступ закончится")
+    assert body(messages(h)[-1]).startswith("Доступ закончится")
     assert "продление отключено" in messages(h)[-1]
 
     h.clock.advance(2 * DAY)  # остался 1 день
     await h.lifecycle.tick()
-    assert messages(h)[-1].startswith("Доступ закончится завтра")
+    assert body(messages(h)[-1]).startswith("Доступ закончится завтра")
 
     h.clock.advance(4 * DAY)  # день 13: период закончился на 10-й, плюс 3 дня льготы
     await h.lifecycle.tick()
@@ -248,7 +250,7 @@ async def test_late_renewal_is_suspended_only_after_the_grace(h: Harness) -> Non
     h.clock.advance(DAY + 60)
     await h.lifecycle.tick()
     assert (await fetch(h, client.id)).state is State.EXPIRING
-    assert messages(h)[-1].startswith("Продление ещё не прошло")
+    assert body(messages(h)[-1]).startswith("Продление ещё не прошло")
 
     h.clock.advance(2 * DAY)
     await h.lifecycle.tick()

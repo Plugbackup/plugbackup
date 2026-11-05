@@ -28,7 +28,8 @@ from fakes import (
     RecordingMessenger,
     make_bot,
 )
-from helpers import CATALOG, add_node
+from helpers import CATALOG, add_node, plain
+from plugbackup_bot import texts_ru as T
 from plugbackup_bot.db import Database
 from plugbackup_bot.db.clients import get_live_client
 from plugbackup_bot.db.risk import ack_risk
@@ -37,6 +38,7 @@ from plugbackup_bot.services.billing import BillingService
 from plugbackup_bot.tg import texts
 from plugbackup_bot.tg.handlers.payments import build_router
 from plugbackup_bot.tg.states import AccessStates
+from plugbackup_bot.ui.screen import Ui
 
 USER = User(id=5, is_bot=False, first_name="Тест")
 RISK_VERSION = 1
@@ -107,6 +109,7 @@ async def env(db: Database, clock: FakeClock) -> Env:
         alerter=alerter,
         messenger=messenger,
         default_tz="Europe/Moscow",
+        ui=Ui(),
     )
     dp.include_router(build_router())
     async with db.transaction() as conn:
@@ -135,7 +138,7 @@ async def test_pre_checkout_failure_is_answered_not_dropped(
     monkeypatch.setattr(BillingService, "check_pre_checkout", broken)
     await env.pre_checkout(make_payload("gb50"))
     [answer] = env.answers()
-    assert (answer.ok, answer.error_message) == (False, texts.TRY_LATER)
+    assert (answer.ok, answer.error_message) == (False, T.TRY_LATER)
 
 
 async def test_successful_payment_creates_a_client_and_asks_for_the_key(env: Env) -> None:
@@ -145,9 +148,9 @@ async def test_successful_payment_creates_a_client_and_asks_for_the_key(env: Env
         client = await get_live_client(conn, USER.id)
     assert client is not None
     assert client.plan_id == "gb50"
-    [reply] = env.session.texts()
-    assert "Оплата получена" in reply
-    assert "ssh-keygen -t ed25519" in reply
+    card, key_help = env.session.texts()  # карточка об оплате и отдельно подсказка про ключ
+    assert "Оплата получена" in plain(card)
+    assert "ssh-keygen -t ed25519" in key_help
     assert await env.fsm_state() == AccessStates.waiting_key.state
     assert env.alerter.alerts == []
 
@@ -161,13 +164,13 @@ async def test_redelivered_payment_reasks_for_the_key_without_a_second_client(en
         row = await cur.fetchone()
     assert row is not None
     assert row[0] == 1
-    assert len(env.session.texts()) == 2
-    assert env.session.texts()[1] == texts.KEY_HELP
+    assert len(env.session.texts()) == 3  # карточка, подсказка и повторная подсказка
+    assert env.session.texts()[2] == texts.KEY_HELP
 
 
 async def test_unknown_invoice_alerts_the_admin_and_tells_the_client(env: Env) -> None:
     await env.pay("something-else")
-    assert env.session.texts() == [texts.PAYMENT_MANUAL]
+    assert env.session.texts() == [T.PAYMENT_MANUAL]
     [alert] = env.alerter.alerts
     assert "ch-1" in alert
     assert await env.fsm_state() is None
@@ -182,10 +185,9 @@ async def test_plan_change_cancels_the_previous_subscription(env: Env) -> None:
 
     assert env.stars.calls == [(USER.id, "ch-old", True)]
     assert env.alerter.alerts == []
-    assert (
-        "Тариф изменён на 100 ГБ" in env.session.texts()[-1]
-        or "100 ГБ" in (env.session.texts()[-1])
-    )
+    changed = plain(env.session.texts()[-2])  # дальше идёт подсказка про ключ
+    assert "Тариф изменён" in changed
+    assert "Тариф: 100 ГБ" in changed
 
 
 async def test_failed_cancellation_of_the_old_subscription_alerts_the_admin(env: Env) -> None:
@@ -206,7 +208,8 @@ async def test_renewal_is_confirmed_in_one_line(env: Env) -> None:
     env.session.requests.clear()
     await env.pay(payload, charge="ch-r", is_first_recurring=None)
     [reply] = env.session.texts()
-    assert reply.startswith("Продление принято, доступ действует до")
+    assert "Продление принято" in plain(reply)
+    assert "Доступ действует до" in plain(reply)
 
 
 async def test_subscription_events_reach_the_client(env: Env) -> None:
@@ -225,7 +228,7 @@ async def test_subscription_events_reach_the_client(env: Env) -> None:
 
     sent = [text for _, text in env.messenger.sent]
     assert sent[0].startswith("Автопродление отключено")
-    assert sent[1] == texts.RENEWAL_ENABLED
+    assert sent[1] == T.RENEWAL_ENABLED
     assert sent[2].startswith("Не удалось списать оплату")
     [alert] = env.alerter.alerts
     assert alert.startswith("Сбой списания подписки")

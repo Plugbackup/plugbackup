@@ -99,6 +99,9 @@ class Settings(BaseSettings):
     # Кастомные эмодзи из пака. Telegram принимает их только если у владельца бота есть Premium;
     # при отказе бот сам переходит на обычные эмодзи.
     use_custom_emoji: bool = True
+    # Баннеры экранов (приветствие, тарифы, оплата) и эффект сообщения при оплате и выдаче доступа.
+    assets_dir: Path = Path("../design/graphics/png")
+    message_effects: bool = True
     emoji_set: str = "RestrictedEmoji"
     emoji_pack_file: Path = Path("emoji_pack.json")
     emoji_map_file: Path = Path("emoji_map.json")

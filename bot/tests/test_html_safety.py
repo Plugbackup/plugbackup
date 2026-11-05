@@ -32,6 +32,7 @@ GOOD = [
 ]
 
 MODULES = [
+    "plugbackup_bot.texts_ru",
     "plugbackup_bot.tg.texts",
     "plugbackup_bot.tg.admin_texts",
     "plugbackup_bot.tg.alert_texts",

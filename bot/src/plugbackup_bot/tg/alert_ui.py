@@ -1,7 +1,8 @@
 """Экраны настройки алертов (/alerts)."""
 
-from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
+from aiogram.types import InlineKeyboardButton
 
+from plugbackup_bot import texts_ru as T
 from plugbackup_bot.domain.alerts import (
     ALERTS,
     BY_KEY,
@@ -11,9 +12,12 @@ from plugbackup_bot.domain.alerts import (
     TIMEZONES,
     threshold_label,
 )
+from plugbackup_bot.emoji import E
 from plugbackup_bot.services.alert_settings import SettingsView
-
-Screen = tuple[str, InlineKeyboardMarkup]
+from plugbackup_bot.ui import buttons, cards
+from plugbackup_bot.ui.buttons import markup
+from plugbackup_bot.ui.markup import fill
+from plugbackup_bot.ui.screen import Screen
 
 BACK = "al:back"
 TOGGLE = "al:t:"
@@ -27,24 +31,18 @@ SET_TZ = "al:tzs:"
 COOLDOWN = "al:cd"
 SET_COOLDOWN = "al:cds:"
 OFF = "al:off:"
-
-
-def _button(text: str, data: str) -> InlineKeyboardButton:
-    return InlineKeyboardButton(text=text, callback_data=data)
-
-
-def _markup(rows: list[list[InlineKeyboardButton]]) -> InlineKeyboardMarkup:
-    return InlineKeyboardMarkup(inline_keyboard=rows)
+# Откуда пришли на экран уведомлений: «Назад» с главного экрана ведёт в статус.
+STATUS = "menu:status"
 
 
 def _back_row() -> list[InlineKeyboardButton]:
-    return [_button("Назад", BACK)]
+    return buttons.nav(BACK)
 
 
 def _quiet_label(quiet_from: int, quiet_to: int) -> str:
     if quiet_from == quiet_to:
-        return "выключены"
-    return f"{quiet_from:02d}:00–{quiet_to:02d}:00"
+        return T.QUIET_OFF
+    return T.QUIET_RANGE.format(start=quiet_from, end=quiet_to)
 
 
 def _tz_label(name: str) -> str:
@@ -52,81 +50,91 @@ def _tz_label(name: str) -> str:
 
 
 def main_screen(view: SettingsView) -> Screen:
-    lines = [
-        "Уведомления",
-        "",
-        "Всегда включены, отключить их нельзя: " + ", ".join(MANDATORY_NOTICES) + ".",
-        "",
-    ]
+    lines: list[str] = []
     rows: list[list[InlineKeyboardButton]] = []
     for alert in ALERTS:
         setting = view.settings[alert.key]
-        state = "вкл" if setting.enabled else "выкл"
+        state = T.ALERT_STATE_ON if setting.enabled else T.ALERT_STATE_OFF
         detail = threshold_label(alert.key, setting.threshold) if alert.options else ""
         suffix = f", {detail}" if detail and setting.enabled else ""
-        marker = " (приходит и в тихие часы)" if alert.critical else ""
-        lines.append(f"• {alert.title} — {state}{suffix}: {alert.description}{marker}")
-        row = [_button(f"{state.capitalize()} · {alert.title}", f"{TOGGLE}{alert.key}")]
+        marker = T.ALERT_CRITICAL_MARKER if alert.critical else ""
+        lines.append(
+            fill(
+                T.ALERT_LINE,
+                title=alert.title,
+                state=state,
+                suffix=suffix,
+                description=alert.description,
+                marker=marker,
+            )
+        )
+        row = [
+            buttons.plain(
+                T.ALERT_TOGGLE_BUTTON.format(state=state.capitalize(), title=alert.title),
+                f"{TOGGLE}{alert.key}",
+            )
+        ]
         if alert.options:
-            row.append(_button("Порог", f"{THRESHOLD}{alert.key}"))
+            row.append(buttons.plain(T.BTN_THRESHOLD, f"{THRESHOLD}{alert.key}"))
         rows.append(row)
 
     prefs = view.prefs
-    lines += [
-        "",
-        f"Тихие часы: {_quiet_label(prefs.quiet_from, prefs.quiet_to)}, "
-        f"пояс: {_tz_label(prefs.tz)}. Критичные алерты приходят всегда.",
-        f"Один и тот же алерт — не чаще раза в {prefs.cooldown_hours} ч.",
-    ]
-    rows.append([_button("Тихие часы", QUIET), _button("Пояс", TZ), _button("Повторы", COOLDOWN)])
-    return "\n".join(lines), _markup(rows)
+    text = cards.card(
+        T.ALERTS_TITLE,
+        fill(T.ALERTS_MANDATORY, items=", ".join(MANDATORY_NOTICES)),
+        cards.bullets(lines),
+        cards.lines(
+            fill(
+                T.ALERTS_QUIET,
+                quiet=_quiet_label(prefs.quiet_from, prefs.quiet_to),
+                tz=_tz_label(prefs.tz),
+            ),
+            fill(T.ALERTS_COOLDOWN, hours=prefs.cooldown_hours),
+        ),
+        icon=E.bell,
+    )
+    rows.append(
+        [
+            buttons.plain(T.BTN_QUIET, QUIET),
+            buttons.plain(T.BTN_TZ, TZ),
+            buttons.plain(T.BTN_COOLDOWN, COOLDOWN),
+        ]
+    )
+    return Screen(text, markup(*rows, buttons.nav(STATUS)))
 
 
 def threshold_screen(key: str, current: int | None) -> Screen:
     alert = BY_KEY[key]
-    now = threshold_label(key, current) or "не задан"
-    text = f"{alert.title}: выберите порог. Сейчас: {now}."
-    rows = [[_button(threshold_label(key, value), f"{SET_THRESHOLD}{key}:{value}")]
-            for value in alert.options]  # fmt: skip
-    rows.append(_back_row())
-    return text, _markup(rows)
+    now = threshold_label(key, current) or T.THRESHOLD_NOT_SET
+    text = fill(T.THRESHOLD_PICK, title=alert.title, now=now)
+    rows = [
+        [buttons.plain(threshold_label(key, value), f"{SET_THRESHOLD}{key}:{value}")]
+        for value in alert.options
+    ]
+    return Screen(text, markup(*rows, _back_row()))
 
 
 def quiet_screen() -> Screen:
-    text = "Тихие часы: в это время приходят только критичные алерты, остальные ждут утра."
     rows = [
-        [_button(_quiet_label(*option).capitalize(), f"{SET_QUIET}{i}")]
+        [buttons.plain(_quiet_label(*option).capitalize(), f"{SET_QUIET}{i}")]
         for i, option in enumerate(QUIET_OPTIONS)
     ]
-    rows.append(_back_row())
-    return text, _markup(rows)
+    return Screen(T.QUIET_SCREEN, markup(*rows, _back_row()))
 
 
 def timezone_screen() -> Screen:
-    text = "Часовой пояс для тихих часов и сводки."
-    rows = [[_button(label, f"{SET_TZ}{i}")] for i, (label, _) in enumerate(TIMEZONES)]
-    rows.append(_back_row())
-    return text, _markup(rows)
+    rows = [[buttons.plain(label, f"{SET_TZ}{i}")] for i, (label, _) in enumerate(TIMEZONES)]
+    return Screen(T.TZ_SCREEN, markup(*rows, _back_row()))
 
 
 def cooldown_screen() -> Screen:
-    text = "Как часто может повторяться один и тот же алерт."
-    rows = [[_button(f"Раз в {hours} ч", f"{SET_COOLDOWN}{hours}")] for hours in COOLDOWN_OPTIONS]
-    rows.append(_back_row())
-    return text, _markup(rows)
+    rows = [
+        [buttons.plain(T.BTN_COOLDOWN_OPTION.format(hours=hours), f"{SET_COOLDOWN}{hours}")]
+        for hours in COOLDOWN_OPTIONS
+    ]
+    return Screen(T.COOLDOWN_SCREEN, markup(*rows, _back_row()))
 
 
 def consent_screen() -> Screen:
-    text = (
-        "Алерт о подключении с нового IP-адреса\n\n"
-        "Чтобы он работал, нода считает HMAC-хеш IP-адреса каждого подключения. Секрет для "
-        "хеша хранится только на ноде. Бот получает хеши, а не адреса: сырые IP ноду не "
-        "покидают.\n\n"
-        "Бот хранит не больше 20 последних хешей на клиента и не дольше 30 дней. Если "
-        "отключить алерт, хеши удаляются сразу.\n\n"
-        "PlugBackup не скрывает ваш адрес от ноды: при подключении нода видит IP. Если это "
-        "важно, подключайтесь через свой VPN.\n\n"
-        "Включайте алерт, только если согласны с этим."
-    )
-    rows = [[_button("Включить алерт", CONSENT_YES)], _back_row()]
-    return text, _markup(rows)
+    text = cards.card(T.CONSENT_TITLE, cards.quote(T.CONSENT_BODY), icon=E.lock)
+    return Screen(text, markup([buttons.success(T.BTN_CONSENT, CONSENT_YES)], _back_row()))

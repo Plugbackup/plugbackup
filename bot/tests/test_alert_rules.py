@@ -65,9 +65,9 @@ def test_threshold_options_from_the_spec() -> None:
 @pytest.mark.parametrize(
     ("key", "value", "label"),
     [
-        ("stale", 3, "3 дн."),
+        ("stale", 3, "3\u00a0дн."),
         ("drop", 50, "больше 50%"),
-        ("spike", 20, "больше 20 ГБ"),
+        ("spike", 20, "больше 20\u00a0ГБ"),
         ("spike", -25, "больше 25% квоты"),
         ("fails", 20, "больше 20 в час"),
         ("new_ip", None, ""),

@@ -10,6 +10,7 @@ from dataclasses import dataclass, field
 from datetime import datetime
 from zoneinfo import ZoneInfo
 
+from plugbackup_bot import texts_ru as T
 from plugbackup_bot.db.usage import Sample
 from plugbackup_bot.domain.plans import GIB
 
@@ -27,12 +28,7 @@ IP_HASH_LIMIT = 20
 IP_HASH_RETENTION_S = 30 * DAY
 
 # Обязательные уведомления: отключить нельзя, на экране /alerts они показаны отдельно.
-MANDATORY_NOTICES = (
-    "окончание подписки",
-    "блокировка хранилища",
-    "удаление хранилища",
-    "смена SSH-ключа",
-)
+MANDATORY_NOTICES = T.MANDATORY_NOTICES
 
 
 @dataclass(frozen=True, slots=True)
@@ -48,36 +44,31 @@ class AlertDef:
     critical: bool = False
 
 
+def _alert(
+    key: str,
+    default_enabled: bool,
+    default_threshold: int | None = None,
+    options: tuple[int, ...] = (),
+    *,
+    critical: bool = False,
+) -> AlertDef:
+    """Название и описание алерта лежат в texts_ru.ALERT_CATALOG."""
+    title, description = T.ALERT_CATALOG[key]
+    return AlertDef(key, title, description, default_enabled, default_threshold, options, critical)
+
+
 ALERTS: tuple[AlertDef, ...] = (
-    AlertDef(
-        "stale", "Нет бэкапов", "занятое место не менялось несколько дней",
-        True, 3, (1, 3, 7),
-    ),
-    AlertDef(
-        "drop", "Резкое уменьшение", "занятое место за сутки резко упало: так бывает, "
-        "когда бэкапы удаляют, возможно вирус",
-        True, 50, (25, 50, 75), critical=True,
-    ),
-    AlertDef(
-        "spike", "Большая загрузка", "за сутки загружено больше заданного объёма",
-        False, 20, (5, 20, 50, -10, -25, -50),
-    ),
-    AlertDef("fill_80", "Заполнено на 80%", "квота заполнена на 80%", False),
-    AlertDef("fill_90", "Заполнено на 90%", "квота заполнена на 90%", True),
-    AlertDef("fill_100", "Заполнено на 100%", "квота заполнена полностью", True, critical=True),
-    AlertDef(
-        "fails", "Неудачные входы", "много неудачных попыток входа под вашим логином за час",
-        False, 20, (5, 20, 50), critical=True,
-    ),
-    AlertDef(
-        "new_ip", "Новый IP-адрес", "подключение с адреса, которого раньше не было",
-        False, None, (), critical=True,
-    ),
-    AlertDef("service", "Состояние сервиса", "недоступность ноды, плановые работы", True),
-    AlertDef(
-        "weekly", "Сводка за неделю", "раз в неделю: занято, изменение, последний бэкап", False
-    ),
-)  # fmt: skip
+    _alert("stale", True, 3, (1, 3, 7)),
+    _alert("drop", True, 50, (25, 50, 75), critical=True),
+    _alert("spike", False, 20, (5, 20, 50, -10, -25, -50)),
+    _alert("fill_80", False),
+    _alert("fill_90", True),
+    _alert("fill_100", True, critical=True),
+    _alert("fails", False, 20, (5, 20, 50), critical=True),
+    _alert("new_ip", False, critical=True),
+    _alert("service", True),
+    _alert("weekly", False),
+)
 
 BY_KEY: dict[str, AlertDef] = {alert.key: alert for alert in ALERTS}
 
@@ -85,14 +76,7 @@ COOLDOWN_OPTIONS = (6, 12, 24, 72)
 # Варианты «тихих часов»: (с, до). Одинаковые значения отключают тихие часы.
 QUIET_OPTIONS = ((23, 8), (22, 7), (0, 6), (0, 0))
 # Часовые пояса на выбор: (подпись, имя IANA).
-TIMEZONES = (
-    ("Калининград (UTC+2)", "Europe/Kaliningrad"),
-    ("Москва (UTC+3)", "Europe/Moscow"),
-    ("Екатеринбург (UTC+5)", "Asia/Yekaterinburg"),
-    ("Новосибирск (UTC+7)", "Asia/Novosibirsk"),
-    ("Владивосток (UTC+10)", "Asia/Vladivostok"),
-    ("UTC", "UTC"),
-)
+TIMEZONES = tuple((label, name) for name, label in T.TIMEZONE_LABELS.items())
 
 
 @dataclass(frozen=True, slots=True)
@@ -106,13 +90,15 @@ def threshold_label(key: str, value: int | None) -> str:
     if value is None:
         return ""
     if key == "stale":
-        return f"{value} дн."
+        return T.THRESHOLD_STALE.format(value=value)
     if key == "drop":
-        return f"больше {value}%"
+        return T.THRESHOLD_DROP.format(value=value)
     if key == "spike":
-        return f"больше {value} ГБ" if value > 0 else f"больше {-value}% квоты"
+        if value > 0:
+            return T.THRESHOLD_SPIKE_GB.format(value=value)
+        return T.THRESHOLD_SPIKE_PERCENT.format(value=-value)
     if key == "fails":
-        return f"больше {value} в час"
+        return T.THRESHOLD_FAILS.format(value=value)
     return str(value)
 
 

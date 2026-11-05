@@ -2,7 +2,8 @@ import pytest_asyncio
 
 from fakes import FakeClock
 from harness import OTHER, USER, Harness, StepClock
-from helpers import CATALOG
+from helpers import CATALOG, plain
+from plugbackup_bot import texts_ru as T
 from plugbackup_bot.db import Database
 from plugbackup_bot.domain.payload import make_payload
 from plugbackup_bot.tg import texts
@@ -34,7 +35,7 @@ async def test_burst_then_throttle_with_a_single_notice(
     await h.say("/help")
     await h.say("/help")
     assert h.texts().count(texts.HELP) == 6
-    assert h.texts().count(texts.THROTTLED) == 1  # предупреждение не чаще раза в 10 секунд
+    assert h.texts().count(T.THROTTLED) == 1  # предупреждение не чаще раза в 10 секунд
 
     mono.now += 11
     await h.say("/help")
@@ -48,7 +49,7 @@ async def test_buttons_are_throttled_and_answered(frozen: tuple[Harness, ManualC
     await h.press("menu:how")
     answers = h.callback_answers()
     assert len(answers) == 7  # крутилка на кнопке гаснет и при отказе
-    assert answers[-1].text == texts.THROTTLED
+    assert answers[-1].text == T.THROTTLED
     assert h.texts().count(texts.HOW_IT_WORKS) == 6
 
 
@@ -90,7 +91,7 @@ async def test_payments_are_never_throttled(frozen: tuple[Harness, ManualClock])
     )
     await h._feed(message=message)
     assert await h.access.live_client(USER.id) is not None
-    assert h.last().text.startswith("Оплата получена")
+    assert "Оплата получена" in plain(h.texts()[-2])
 
 
 async def test_group_chats_are_ignored(frozen: tuple[Harness, ManualClock]) -> None:

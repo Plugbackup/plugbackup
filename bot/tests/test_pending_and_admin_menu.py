@@ -7,7 +7,8 @@ from aiogram.types import BotCommandScopeChat
 
 from fakes import FakeClock, make_bot
 from harness import ADMIN, OTHER, Harness
-from helpers import fake_key_body
+from helpers import fake_key_body, plain
+from plugbackup_bot import texts_ru as T
 from plugbackup_bot.commands import ADMIN_COMMANDS, COMMANDS, COMMANDS_EN
 from plugbackup_bot.db import Database
 from plugbackup_bot.db import invites as invites_repo
@@ -39,12 +40,12 @@ async def test_the_beta_button_leads_on_instead_of_saying_there_is_a_storage(h: 
     h.storage.storage.clear()  # перезапуск бота или потерянное состояние
 
     await h.press(keyboards.MENU_BETA)
-    assert h.last().text.startswith(texts.PENDING_KEY_PROMPT)
+    assert T.PENDING_KEY_PROMPT in plain(h.last().text)
     assert "ssh-keygen -t ed25519" in h.last().text
     assert await h.fsm_state() == AccessStates.waiting_key.state
 
     await h.say(KEY_LINE)
-    assert h.last().text.startswith("Ключ принят")
+    assert "Ключ принят" in plain(h.last().text)
 
 
 async def test_status_tells_a_client_without_a_key_what_to_do(h: Harness) -> None:
@@ -52,15 +53,15 @@ async def test_status_tells_a_client_without_a_key_what_to_do(h: Harness) -> Non
     await h.say("/status")
     text = h.last().text
     assert "Состояние: ожидает ключ" in text
-    assert texts.PENDING_KEY_PROMPT in text
-    assert "подсказка в /key" in text
+    assert T.PENDING_KEY_PROMPT in text
+    assert "Пришлите публичный ключ" in text
 
 
 async def test_status_of_a_client_with_a_key_has_no_such_hint(h: Harness) -> None:
     await waiting_for_key(h)
     await h.say(KEY_LINE)
     await h.say("/status")
-    assert texts.PENDING_KEY_PROMPT not in h.last().text
+    assert T.PENDING_KEY_PROMPT not in h.last().text
 
 
 def test_the_second_invite_hint_mentions_the_key() -> None:
@@ -122,7 +123,7 @@ async def test_an_invite_from_the_button_really_works(h: Harness) -> None:
     code = h.last().text.split("<code>")[1].split("</code>")[0]
     await h.press(f"{keyboards.RISK_PREFIX}{keyboards.RISK_BETA}")
     await h.say(code)
-    assert h.last().text.startswith("Код принят")
+    assert "Код принят" in plain(h.last().text)
 
 
 # --- меню команд в Telegram ---

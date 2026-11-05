@@ -19,13 +19,12 @@ log = logging.getLogger(__name__)
 
 _KEY_RE = re.compile(r"^[a-z0-9][a-z0-9-]{0,63}$")
 
-# Ключи баннеров на экранах. Для оплаты ключ собирается из тарифа: banner-plan-<id тарифа>.
+# Баннеры экранов: приветствие, тарифы, оплата. Файлы лежат в design/graphics/png. Первые два
+# собраны из design/data/plans.json вместе с объёмами тарифов: после смены объёмов в админке
+# пересоберите их (npm run export в design/). У баннера оплаты цифр нет.
 WELCOME = "banner-announce"
 TARIFFS = "banner-update"
-
-
-def plan_banner(plan_id: str) -> str:
-    return f"banner-plan-{plan_id.replace('_', '-')}"
+PAID = "banner-paid"
 
 
 class BannerStore:

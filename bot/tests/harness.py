@@ -1,8 +1,10 @@
 """Стенд для сценариев бота: настоящий Dispatcher, поддельные Telegram и storectl."""
 
+import re
 from collections.abc import Callable
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
+from pathlib import Path
 from typing import Any
 
 from aiogram import Bot, Dispatcher
@@ -36,6 +38,9 @@ from plugbackup_bot.tg import texts
 from plugbackup_bot.tg.app import Deps, build_dispatcher
 from plugbackup_bot.tg.hooks import ClientHooks
 from plugbackup_bot.tg.notices import TelegramNoticeRenderer
+from plugbackup_bot.ui.banners import BannerStore
+from plugbackup_bot.ui.effects import Effects
+from plugbackup_bot.ui.screen import Ui
 
 USER = User(id=5, is_bot=False, first_name="Тест")
 OTHER = User(id=6, is_bot=False, first_name="Другой")
@@ -86,6 +91,7 @@ class Harness:
         *,
         monotonic: Callable[[], float] | None = None,
         node_capacity_gb: int = 1000,
+        assets_dir: Path | None = None,
     ) -> "Harness":
         await add_node(db, capacity_gb=node_capacity_gb)
         bot, session = make_bot()
@@ -124,6 +130,7 @@ class Harness:
             alerter=alerter,
             default_tz="Europe/Moscow",
             kick_provisioning=lambda: harness.kicks.append(1),
+            ui=Ui(BannerStore(db, assets_dir, clock) if assets_dir else None, Effects()),
         )
         harness.dp = build_dispatcher(deps, storage=storage, monotonic=monotonic or StepClock())
         return harness
@@ -185,14 +192,25 @@ class Harness:
     def last(self) -> Output:
         return self.session.outputs()[-1]
 
-    def last_buttons(self) -> list[tuple[str, str | None, str | None]]:
-        """Кнопки последнего сообщения: (текст, callback_data, url)."""
+    def last_buttons(
+        self, *, nav: bool = False, icons: bool = False
+    ) -> list[tuple[str, str | None, str | None]]:
+        """Кнопки последнего сообщения: (текст, callback_data, url).
+
+        Без nav кнопки «Назад» и «Главное меню» не попадают в список, без icons у текста
+        кнопки убран обычный эмодзи-значок в начале.
+        """
         markup = self.last().reply_markup
         if markup is None:
             return []
-        return [  # type: ignore[union-attr]
-            (b.text, b.callback_data, b.url) for row in markup.inline_keyboard for b in row
-        ]
+        found = []
+        for row in markup.inline_keyboard:  # type: ignore[union-attr]
+            for button in row:
+                text = button.text if icons else re.sub(r"^[^\w]+", "", button.text)
+                if not nav and (button.callback_data == "m:home" or text == "Назад"):
+                    continue
+                found.append((text, button.callback_data, button.url))
+        return found
 
     def callback_answers(self) -> list[AnswerCallbackQuery]:
         return self.session.of(AnswerCallbackQuery)

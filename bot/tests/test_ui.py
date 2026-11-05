@@ -20,8 +20,9 @@ from plugbackup_bot.db import Database
 from plugbackup_bot.emoji import E
 from plugbackup_bot.tg.effect_fallback import EffectFallback
 from plugbackup_bot.tg.format import quota_bar
+from plugbackup_bot.ui import banners as banner_keys
 from plugbackup_bot.ui import buttons, cards, pagination
-from plugbackup_bot.ui.banners import BannerStore, plan_banner
+from plugbackup_bot.ui.banners import BannerStore
 from plugbackup_bot.ui.effects import EFFECT_CONFETTI, Effects
 from plugbackup_bot.ui.markup import Raw, esc, fill
 from plugbackup_bot.ui.screen import Screen, Ui
@@ -183,13 +184,14 @@ def assets(tmp_path: Path) -> Path:
     directory.mkdir()
     (directory / "banner-announce.png").write_bytes(PNG)
     (directory / "banner-update.png").write_bytes(PNG + b"2")
-    (directory / "banner-plan-gb50.png").write_bytes(PNG + b"3")
+    (directory / "banner-paid.png").write_bytes(PNG + b"3")
     return directory
 
 
-def test_banner_key_for_a_plan() -> None:
-    assert plan_banner("gb50") == "banner-plan-gb50"
-    assert plan_banner("gb_100") == "banner-plan-gb-100"
+def test_banner_keys_match_the_design_files() -> None:
+    design = Path(__file__).resolve().parents[2] / "design" / "graphics" / "png"
+    for key in (banner_keys.WELCOME, banner_keys.TARIFFS, banner_keys.PAID):
+        assert (design / f"{key}.png").is_file(), key
 
 
 async def test_a_banner_is_uploaded_first_then_sent_by_file_id(db: Database, assets: Path) -> None:
@@ -420,7 +422,7 @@ async def test_a_caption_over_1024_is_refused_by_telegram(ui_env) -> None:  # ty
 async def test_the_effect_goes_only_on_new_messages(ui_env) -> None:  # type: ignore[no-untyped-def]
     bot, session, ui, _ = ui_env
     await ui.send(bot, CHAT, a_screen(effect=True))
-    await ui.send(bot, CHAT, a_screen(effect=True, banner="banner-plan-gb50"))
+    await ui.send(bot, CHAT, a_screen(effect=True, banner="banner-paid"))
     await ui.send(bot, CHAT, a_screen())
     await ui.show(press(bot, message(session, "text")), a_screen(effect=True))
     sent, photo, plain = (

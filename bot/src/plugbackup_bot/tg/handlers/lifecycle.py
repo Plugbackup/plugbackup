@@ -3,13 +3,16 @@
 from aiogram import F, Router
 from aiogram.types import CallbackQuery
 
+from plugbackup_bot import texts_ru as T
 from plugbackup_bot.services.lifecycle import AliveKind, LifecycleService
-from plugbackup_bot.tg import keyboards, texts
+from plugbackup_bot.tg import keyboards
 from plugbackup_bot.tg.format import fmt_date
-from plugbackup_bot.tg.handlers.common import reply
+from plugbackup_bot.ui.screen import Screen, Ui
 
 
-async def cb_alive(callback: CallbackQuery, lifecycle: LifecycleService, default_tz: str) -> None:
+async def cb_alive(
+    callback: CallbackQuery, lifecycle: LifecycleService, default_tz: str, ui: Ui
+) -> None:
     raw = (callback.data or "").removeprefix(keyboards.ALIVE_PREFIX)
     client_id = int(raw) if raw.isdigit() else 0
     result = await lifecycle.confirm_alive(callback.from_user.id, client_id)
@@ -17,12 +20,13 @@ async def cb_alive(callback: CallbackQuery, lifecycle: LifecycleService, default
     match result.kind:
         case AliveKind.OK if result.client and result.client.confirm_due_at:
             date = fmt_date(result.client.confirm_due_at, default_tz)
-            template = texts.ALIVE_RESUMED if result.resumed else texts.ALIVE_THANKS
-            await reply(callback, template.format(date=date))
+            template = T.ALIVE_RESUMED if result.resumed else T.ALIVE_THANKS
+            text = template.format(date=date)
         case AliveKind.BLOCKED:
-            await reply(callback, texts.ALIVE_BLOCKED)
+            text = T.ALIVE_BLOCKED
         case _:
-            await reply(callback, texts.ALIVE_NO_CLIENT)
+            text = T.ALIVE_NO_CLIENT
+    await ui.show(callback, Screen(text, keyboards.only_home()))
 
 
 def build_router() -> Router:

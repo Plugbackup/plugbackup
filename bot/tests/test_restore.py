@@ -4,6 +4,7 @@ import pytest_asyncio
 from fakes import FakeClock
 from harness import ADMIN, ADMIN_CHAT, OTHER, USER, Harness
 from helpers import add_client, add_user, fake_key_body
+from plugbackup_bot import texts_ru as T
 from plugbackup_bot.db import Database
 from plugbackup_bot.services.restore import RestoreKind
 from plugbackup_bot.tg import texts
@@ -102,19 +103,19 @@ async def test_resolving(h: Harness) -> None:
 async def test_restore_without_storage(db: Database, clock: FakeClock) -> None:
     h = await Harness.build(db, clock)
     await h.say("/restore")
-    assert h.texts() == [texts.RESTORE_NO_CLIENT]
+    assert h.texts() == [T.RESTORE_NO_CLIENT]
 
 
 async def test_restore_flow_from_date_to_admin_decision(h: Harness) -> None:
     await h.say("/restore")
-    assert h.last().text == texts.RESTORE_INTRO
+    assert h.last().text == texts.restore_intro()
     buttons = h.last_buttons()
     assert [label for label, _, _ in buttons][:2] == ["9 октября", "8 октября"]
     assert len(buttons) == 7
     assert buttons[1][1] == "restore:d:2025-10-08"
 
     await h.press("restore:d:2025-10-08")
-    assert "снимка за 8 октября" in h.last().text
+    assert "Снимок за 8 октября" in h.last().text
     assert [data for _, data, _ in h.last_buttons()] == ["restore:ok:2025-10-08", "restore:no"]
 
     await h.press("restore:ok:2025-10-08")
@@ -162,15 +163,15 @@ async def test_a_request_is_resolved_once(h: Harness) -> None:
 
 async def test_the_alert_button_opens_the_same_screen(h: Harness) -> None:
     await h.press("restore:start")
-    assert h.last().text == texts.RESTORE_INTRO
+    assert h.last().text == texts.restore_intro()
 
 
 async def test_repeated_and_invalid_confirmations(h: Harness) -> None:
     await h.press("restore:ok:2025-10-08")
     await h.press("restore:ok:2025-10-08")
-    assert h.last().text == texts.RESTORE_OPEN
+    assert h.last().text == T.RESTORE_OPEN
     await h.press("restore:d:1999-01-01")
-    assert h.last().text == texts.RESTORE_BAD_DATE
+    assert h.last().text == T.RESTORE_BAD_DATE
     await h.press("restore:no")
-    assert h.last().text == texts.RESTORE_CANCELLED
+    assert h.last().text == T.RESTORE_CANCELLED
     assert len(await requests(h)) == 1

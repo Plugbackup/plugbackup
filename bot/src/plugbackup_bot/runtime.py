@@ -37,10 +37,14 @@ from plugbackup_bot.services.usage import UsagePoller
 from plugbackup_bot.tg import texts
 from plugbackup_bot.tg.alert_texts import TelegramAlertRenderer
 from plugbackup_bot.tg.app import Deps, build_dispatcher
+from plugbackup_bot.tg.effect_fallback import EffectFallback
 from plugbackup_bot.tg.emoji_fallback import EmojiFallback
 from plugbackup_bot.tg.hooks import ClientHooks
 from plugbackup_bot.tg.notices import TelegramNoticeRenderer
 from plugbackup_bot.tg.stars import TelegramStars
+from plugbackup_bot.ui.banners import BannerStore
+from plugbackup_bot.ui.effects import Effects
+from plugbackup_bot.ui.screen import Ui
 
 log = logging.getLogger(__name__)
 
@@ -120,8 +124,11 @@ async def build_runtime(
         port=settings.ssh_port,
         timeout_s=settings.storectl_timeout_s,
     )
-    notifier = TelegramNotifier(bot, db, settings.admin_chat_id)
+    effects = Effects(enabled=settings.message_effects)
+    notifier = TelegramNotifier(bot, db, settings.admin_chat_id, effects)
     _setup_emoji(settings, bot, notifier)
+    bot.session.middleware(EffectFallback(effects))
+    ui = Ui(BannerStore(db, settings.assets_dir, clock), effects)
     risk_version = texts.RISK_TEXT_VERSION
 
     billing = BillingService(db, clock, catalog, TelegramStars(bot), risk_version)
@@ -157,6 +164,7 @@ async def build_runtime(
         default_tz=tz,
         kick_provisioning=kick_provisioning,
         emoji_pack_file=settings.emoji_pack_file,
+        ui=ui,
     )
     dp = build_dispatcher(deps)
     dp.errors.register(_error_handler(notifier))

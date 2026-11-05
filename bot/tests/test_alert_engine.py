@@ -4,7 +4,7 @@ import pytest
 import pytest_asyncio
 
 from fakes import FakeClock, FakeStorectl, RecordingMessenger
-from helpers import add_client, add_node, add_user
+from helpers import add_client, add_node, add_user, body, label, plain
 from plugbackup_bot.db import Database
 from plugbackup_bot.db import alerts as alerts_repo
 from plugbackup_bot.db.usage import record_sample
@@ -93,7 +93,7 @@ async def test_stale_backup_is_reported(env: Env) -> None:
     await env.flat(4)
     await env.engine.evaluate_all()
     [text] = env.texts()
-    assert text.startswith("Занятое место не менялось 3 дн.")
+    assert body(text).startswith("Занятое место не менялось 3 дн.")
     assert env.messenger.sent[0][0] == 5
 
 
@@ -105,7 +105,7 @@ async def test_stale_threshold_follows_the_setting(env: Env) -> None:
     assert env.messenger.sent == []  # данных за семь суток ещё нет
     await env.flat(8)
     await env.engine.evaluate_all()
-    assert env.texts()[0].startswith("Занятое место не менялось 7 дн.")
+    assert body(env.texts()[0]).startswith("Занятое место не менялось 7 дн.")
 
 
 async def test_sharp_drop_is_reported_with_a_restore_button(env: Env) -> None:
@@ -116,7 +116,7 @@ async def test_sharp_drop_is_reported_with_a_restore_button(env: Env) -> None:
     assert "запросите восстановление" in text
     markup = env.messenger.markups[0]
     assert markup is not None
-    pairs = [(b.text, b.callback_data) for row in markup.inline_keyboard for b in row]
+    pairs = [(label(b.text), b.callback_data) for row in markup.inline_keyboard for b in row]
     assert pairs == [
         ("Запросить восстановление", "restore:start"),
         ("Отключить этот алерт", "al:off:drop"),
@@ -128,19 +128,19 @@ async def test_every_alert_has_a_disable_button(env: Env) -> None:
     await env.engine.evaluate_all()
     markup = env.messenger.markups[0]
     assert markup is not None
-    pairs = [(b.text, b.callback_data) for row in markup.inline_keyboard for b in row]
+    pairs = [(label(b.text), b.callback_data) for row in markup.inline_keyboard for b in row]
     assert pairs == [("Отключить этот алерт", "al:off:stale")]
 
 
 async def test_quota_fill_levels(env: Env) -> None:
     await env.samples((0, 46))
     await env.engine.evaluate_all()
-    assert env.texts()[-1].startswith("Хранилище заполнено на 90%")
+    assert "Хранилище заполнено на 90%" in plain(env.texts()[-1])
 
     env.clock.advance(DAY)
     await env.samples((0, 50))
     await env.engine.evaluate_all()
-    assert env.texts()[-1].startswith("Хранилище заполнено на 100%")
+    assert "Хранилище заполнено на 100%" in plain(env.texts()[-1])
     assert "/upgrade" in env.texts()[-1]
     assert len(env.messenger.sent) == 2  # на 100% не приходит ещё и «90%»
 
@@ -242,7 +242,7 @@ async def test_growing_usage_is_not_stale(env: Env) -> None:
     await env.samples(*[(h, 5 + (100 - h) * 0.42) for h in range(100, -1, -1)])  # к концу 47 ГиБ
     await env.engine.evaluate_all()
     [text] = env.texts()
-    assert text.startswith("Хранилище заполнено на 90%")
+    assert "Хранилище заполнено на 90%" in plain(text)
 
 
 # --- 5. неудачные входы ---
@@ -439,7 +439,9 @@ async def test_maintenance_notice_reaches_the_node_once(env: Env) -> None:
     assert await env.engine.process_service_events() == 1
     assert await env.engine.process_service_events() == 0
     [text] = env.texts()
-    assert text == "Плановые работы: перезагрузка &lt;ноды&gt; в 03:00"
+    assert "Плановые работы" in plain(text)
+    assert body(text) == "перезагрузка <ноды> в 03:00"
+    assert "&lt;ноды&gt;" in text  # в самом сообщении текст администратора экранирован
 
 
 async def test_service_notice_respects_the_setting_and_the_node(env: Env) -> None:
@@ -461,7 +463,8 @@ async def test_global_notice_reaches_every_node(env: Env) -> None:
     await add_client(env.db, 6, other_node)
     await add_event(env, "restore", "восстановление после сбоя", node_id=None)
     assert await env.engine.process_service_events() == 2
-    assert all(text.startswith("Восстановление:") for text in env.texts())
+    assert all("Восстановление" in plain(text) for text in env.texts())
+    assert all("восстановление после сбоя" in body(text) for text in env.texts())
 
 
 async def test_service_notice_waits_out_quiet_hours(env: Env) -> None:
@@ -475,13 +478,13 @@ async def test_service_notice_waits_out_quiet_hours(env: Env) -> None:
 async def test_outage_has_a_start_and_an_end_message(env: Env) -> None:
     await add_event(env, "node_down", "", starts=-1800)
     await env.engine.process_service_events()
-    assert "недоступна больше 15 минут" in env.texts()[-1]
+    assert "недоступна больше 15 минут" in body(env.texts()[-1])
 
     env.clock.advance(1200)
     async with env.db.transaction() as conn:
         await conn.execute("UPDATE service_events SET ends_at = ?", (env.clock.now() - 10,))
     assert await env.engine.process_service_events() == 1
-    assert env.texts()[-1] == "Нода хранения снова доступна."
+    assert body(env.texts()[-1]) == "Нода хранения снова доступна."
     assert await env.engine.process_service_events() == 0
 
 
@@ -502,7 +505,7 @@ async def test_finished_event_sends_start_and_end_together(env: Env) -> None:
     await env.enable("service")
     assert await env.engine.process_service_events() == 2
     assert "недоступна" in env.texts()[0]
-    assert env.texts()[1] == "Нода хранения снова доступна."
+    assert body(env.texts()[1]) == "Нода хранения снова доступна."
     assert await env.engine.process_service_events() == 0
 
 
@@ -515,7 +518,7 @@ async def test_weekly_digest_once_a_week_on_monday(env: Env) -> None:
     assert await env.engine.weekly_digest() == 1
     assert await env.engine.weekly_digest() == 0
     [text] = env.texts()
-    assert text.startswith("Сводка за неделю")
+    assert "Сводка за неделю" in plain(text)
     assert "Занято: 7,0 ГБ из 50,0 ГБ" in text
     assert "За неделю: +3,0 ГБ" in text
     assert "Последнее изменение размера:" in text

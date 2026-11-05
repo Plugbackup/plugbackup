@@ -1,23 +1,25 @@
-"""Тексты алертов безопасности и кнопки под ними."""
+"""Сообщения об алертах безопасности, сводка и служебные сообщения с кнопками."""
 
 from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 
+from plugbackup_bot import texts_ru as T
 from plugbackup_bot.db.clients import Client
 from plugbackup_bot.domain.alerts import BY_KEY, Finding, threshold_label
+from plugbackup_bot.emoji import E
 from plugbackup_bot.tg.format import fmt_bytes, fmt_datetime, gb
-from plugbackup_bot.tg.texts import esc
+from plugbackup_bot.ui import buttons, cards
+from plugbackup_bot.ui.buttons import markup
+from plugbackup_bot.ui.markup import esc, fill
 
-BTN_ALERT_OFF = "Отключить этот алерт"
-BTN_RESTORE = "Запросить восстановление"
+BTN_ALERT_OFF = T.BTN_ALERT_OFF
+BTN_RESTORE = T.BTN_ALERT_RESTORE
 CB_ALERT_OFF = "al:off:"
 CB_RESTORE = "restore:start"
 
-_CHANGE_KEY = "замените SSH-ключ: /key"
-
 
 def _markup(key: str, *extra: InlineKeyboardButton) -> InlineKeyboardMarkup:
-    off = InlineKeyboardButton(text=BTN_ALERT_OFF, callback_data=f"{CB_ALERT_OFF}{key}")
-    return InlineKeyboardMarkup(inline_keyboard=[[button] for button in (*extra, off)])
+    off = buttons.plain(BTN_ALERT_OFF, f"{CB_ALERT_OFF}{key}", E.bell)
+    return markup(*([button] for button in (*extra, off)))
 
 
 class TelegramAlertRenderer:
@@ -29,50 +31,49 @@ class TelegramAlertRenderer:
         data = finding.data
         key = finding.key
         extra: tuple[InlineKeyboardButton, ...] = ()
+        title, body = "", ""
+        change_key = T.ALERT_CHANGE_KEY
         match key:
             case "stale":
-                text = (
-                    f"Занятое место не менялось {data['days']} дн.: новые данные не поступали. "
-                    "Проверьте, запускаются ли бэкапы."
-                )
+                title, template = T.ALERT_STALE
+                body = fill(template, days=data["days"])
             case "drop":
-                text = (
-                    f"Занятое место за сутки уменьшилось на {data['percent']}%: "
-                    f"было {fmt_bytes(int(data['from']))}, стало {fmt_bytes(int(data['to']))}. "
-                    "Так бывает, если бэкапы удаляют, в том числе вредоносная программа. "
-                    "Если это были не вы, запросите восстановление из снимка: "
-                    "снимки хранятся 7 дней."
+                title, template = T.ALERT_DROP
+                body = fill(
+                    template,
+                    percent=data["percent"],
+                    before=fmt_bytes(int(data["from"])),
+                    after=fmt_bytes(int(data["to"])),
                 )
-                extra = (InlineKeyboardButton(text=BTN_RESTORE, callback_data=CB_RESTORE),)
+                extra = (buttons.primary(BTN_RESTORE, CB_RESTORE, E.refresh),)
             case "spike":
+                title, template = T.ALERT_SPIKE
                 label = threshold_label("spike", int(data["threshold"]))
-                text = f"За сутки загружено около {fmt_bytes(int(data['rise']))}, это {label}."
+                body = fill(template, rise=fmt_bytes(int(data["rise"])), label=label)
             case "fails":
-                text = (
-                    f"За последний час {data['count']} неудачных попыток входа под вашим "
-                    f"логином. Если это были не вы, {_CHANGE_KEY}."
-                )
+                title, template = T.ALERT_FAILS
+                body = fill(template, count=data["count"], change_key=change_key)
             case "new_ip":
+                title, template = T.ALERT_NEW_IP
                 count = int(data["count"])
-                what = (
-                    f"с IP-адреса, которого нет в вашей истории за 30 дней (метка {data['label']})"
-                    if count == 1
-                    else f"с {count} новых IP-адресов (первая метка {data['label']})"
+                what = fill(
+                    T.ALERT_NEW_IP_ONE if count == 1 else T.ALERT_NEW_IP_MANY,
+                    label=data["label"],
+                    count=count,
                 )
-                text = f"К хранилищу подключились {what}. Если это были не вы, {_CHANGE_KEY}."
+                body = fill(template, what=what, change_key=change_key)
             case _ if key.startswith("fill_"):
-                text = (
-                    f"Хранилище заполнено на {data['percent']}%: занято "
-                    f"{fmt_bytes(int(data['used']))} из {fmt_bytes(int(data['quota']))}."
+                title = T.ALERT_FILL_TITLE.format(percent=data["percent"])
+                body = fill(
+                    T.ALERT_FILL_BODY,
+                    used=fmt_bytes(int(data["used"])),
+                    quota=fmt_bytes(int(data["quota"])),
                 )
                 if data["percent"] == 100:
-                    text += (
-                        " Новые копии не запишутся, пока вы не освободите место "
-                        "или не смените тариф: /upgrade."
-                    )
+                    body = body + T.ALERT_FILL_FULL
             case _:
-                text = BY_KEY[key].description
-        return text, _markup(key, *extra)
+                title, body = BY_KEY[key].title, BY_KEY[key].description
+        return cards.card(title, body, icon=E.warning), _markup(key, *extra)
 
     def digest(
         self,
@@ -84,32 +85,29 @@ class TelegramAlertRenderer:
         week_delta: int | None,
         last_change: int | None,
     ) -> tuple[str, InlineKeyboardMarkup | None]:
-        lines = ["Сводка за неделю"]
+        rows: list[str] = []
         if used is None:
-            lines.append(f"Занято: данных пока нет, лимит {gb(client.quota_gb)}.")
+            rows.append(fill(T.DIGEST_NO_DATA, quota=gb(client.quota_gb)))
         else:
-            lines.append(f"Занято: {fmt_bytes(used)} из {fmt_bytes(quota)}.")
+            rows.append(fill(T.DIGEST_USED, used=fmt_bytes(used), quota=fmt_bytes(quota)))
         if week_delta is not None:
             sign = "+" if week_delta >= 0 else "−"
-            lines.append(f"За неделю: {sign}{fmt_bytes(abs(week_delta))}.")
+            rows.append(fill(T.DIGEST_WEEK, sign=sign, delta=fmt_bytes(abs(week_delta))))
         if last_change is not None:
-            lines.append(f"Последнее изменение размера: {fmt_datetime(last_change, tz)}.")
+            rows.append(fill(T.DIGEST_LAST_CHANGE, at=fmt_datetime(last_change, tz)))
         else:
-            lines.append("Размер не менялся за всё время наблюдения.")
-        return "\n".join(lines), _markup("weekly")
+            rows.append(T.DIGEST_NO_CHANGE)
+        return cards.card(T.DIGEST_TITLE, cards.lines(*rows), icon=E.chart), _markup("weekly")
 
     def service(
         self, kind: str, text: str, phase: str, client: Client
     ) -> tuple[str, InlineKeyboardMarkup | None]:
-        titles = {"maintenance": "Плановые работы", "restore": "Восстановление"}
         if kind == "node_down":
-            body = (
-                "Нода хранения недоступна больше 15 минут. Резервные копии сейчас не запишутся."
-                " Как только нода заработает, пришлём сообщение."
-                if phase == "start"
-                else "Нода хранения снова доступна."
-            )
+            if phase == "start":
+                title, body = T.SERVICE_NODE_TITLE, T.SERVICE_NODE_DOWN
+            else:
+                title, body = T.SERVICE_NODE_UP_TITLE, T.SERVICE_NODE_UP
         else:
-            title = titles.get(kind, "Состояние сервиса")
-            body = f"{title}: {esc(text)}" if phase == "start" else f"{title} завершены."
-        return body, _markup("service")
+            title = T.SERVICE_TITLES.get(kind, T.SERVICE_DEFAULT_TITLE)
+            body = esc(text) if phase == "start" else fill(T.SERVICE_END, title=title)
+        return cards.card(title, body, icon=E.warning), _markup("service")

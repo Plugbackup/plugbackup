@@ -6,11 +6,11 @@ from aiogram.methods import EditMessageReplyMarkup, EditMessageText
 
 from fakes import FakeClock
 from harness import USER, Harness
-from helpers import NOW, add_client, add_user
+from helpers import NOW, add_client, add_user, label, plain
+from plugbackup_bot import texts_ru as T
 from plugbackup_bot.db import Database
 from plugbackup_bot.db import alerts as alerts_repo
 from plugbackup_bot.tg import alert_ui as ui
-from plugbackup_bot.tg import texts
 
 
 @pytest_asyncio.fixture
@@ -28,7 +28,7 @@ def edit(h: Harness) -> EditMessageText:
 def edit_buttons(h: Harness) -> list[tuple[str, str | None]]:
     markup = edit(h).reply_markup
     assert markup is not None
-    return [(b.text, b.callback_data) for row in markup.inline_keyboard for b in row]
+    return [(label(b.text), b.callback_data) for row in markup.inline_keyboard for b in row]
 
 
 async def settings(h: Harness):  # type: ignore[no-untyped-def]
@@ -44,13 +44,13 @@ async def prefs(h: Harness):  # type: ignore[no-untyped-def]
 async def test_needs_a_storage(db: Database, clock: FakeClock) -> None:
     empty = await Harness.build(db, clock)
     await empty.say("/alerts")
-    assert empty.texts() == [texts.NO_STORAGE]
+    assert empty.texts() == [T.NO_STORAGE]
 
 
 async def test_main_screen(h: Harness) -> None:
     await h.say("/alerts")
-    text = h.last().text
-    assert text.startswith("Уведомления")
+    text = plain(h.last().text)
+    assert text.splitlines()[0].endswith("Уведомления")
     assert (
         "Всегда включены, отключить их нельзя: окончание подписки, блокировка хранилища, "
         "удаление хранилища, смена SSH-ключа." in text
@@ -100,11 +100,17 @@ async def test_default_state_is_not_stored_until_changed(h: Harness) -> None:
 async def test_threshold_selection(h: Harness) -> None:
     await h.press("al:th:stale")
     assert "выберите порог" in edit(h).text
-    assert [label for label, _ in edit_buttons(h)] == ["1 дн.", "3 дн.", "7 дн.", "Назад"]
+    assert [name.replace("\u00a0", " ") for name, _ in edit_buttons(h)] == [
+        "1 дн.",
+        "3 дн.",
+        "7 дн.",
+        "Назад",
+        "Главное меню",
+    ]
 
     await h.press("al:sv:stale:7")
     assert (await settings(h))["stale"].threshold == 7
-    assert "• Нет бэкапов — вкл, 7 дн." in edit(h).text
+    assert "• Нет бэкапов — вкл, 7 дн." in plain(edit(h).text)
 
 
 @pytest.mark.parametrize(
@@ -123,7 +129,7 @@ async def test_alerts_without_thresholds_have_no_threshold_screen(h: Harness) ->
 
 async def test_new_ip_needs_a_consent_screen(h: Harness) -> None:
     await h.press("al:t:new_ip")
-    text = edit(h).text
+    text = plain(edit(h).text)
     assert "HMAC-хеш" in text
     assert "сырые IP ноду не покидают" in text
     assert "не больше 20 последних хешей" in text
@@ -159,24 +165,25 @@ async def test_quiet_hours_timezone_and_cooldown(h: Harness) -> None:
         "00:00–06:00",
         "Выключены",
         "Назад",
+        "Главное меню",
     ]
     await h.press(f"{ui.SET_QUIET}1")
     assert (await prefs(h)).quiet_from == 22
-    assert "Тихие часы: 22:00–07:00" in edit(h).text
+    assert "Тихие часы: 22:00–07:00" in plain(edit(h).text)
 
     await h.press(f"{ui.SET_QUIET}3")
-    assert "Тихие часы: выключены" in edit(h).text
+    assert "Тихие часы: выключены" in plain(edit(h).text)
 
     await h.press(ui.TZ)
-    assert len(edit_buttons(h)) == 7
+    assert len(edit_buttons(h)) == 8  # шесть поясов, «Назад» и «Главное меню»
     await h.press(f"{ui.SET_TZ}2")
     assert (await prefs(h)).tz == "Asia/Yekaterinburg"
-    assert "пояс: Екатеринбург (UTC+5)" in edit(h).text
+    assert "пояс: Екатеринбург (UTC+5)" in plain(edit(h).text)
 
     await h.press(ui.COOLDOWN)
     await h.press(f"{ui.SET_COOLDOWN}12")
     assert (await prefs(h)).cooldown_hours == 12
-    assert "не чаще раза в 12 ч" in edit(h).text
+    assert "не чаще раза в 12 ч" in plain(edit(h).text)
 
 
 @pytest.mark.parametrize(
@@ -199,7 +206,7 @@ async def test_preferences_survive_a_toggle(h: Harness) -> None:
 async def test_disable_button_under_an_alert_message(h: Harness) -> None:
     await h.press("al:off:drop")
     assert (await settings(h))["drop"].enabled is False
-    assert h.callback_answers()[-1].text == "Алерт отключён. Вернуть его можно в /alerts."
+    assert h.callback_answers()[-1].text == T.ALERT_OFF_DONE
     assert len(h.session.of(EditMessageReplyMarkup)) == 1
 
 
@@ -213,4 +220,4 @@ async def test_disable_button_with_an_unknown_key_changes_nothing(h: Harness) ->
 async def test_back_returns_to_the_main_screen(h: Harness) -> None:
     await h.press(ui.QUIET)
     await h.press(ui.BACK)
-    assert edit(h).text.startswith("Уведомления")
+    assert plain(edit(h).text).splitlines()[0].endswith("Уведомления")
