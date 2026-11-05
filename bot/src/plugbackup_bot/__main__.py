@@ -12,8 +12,10 @@ from aiogram.enums import ParseMode
 from pydantic import ValidationError
 
 from plugbackup_bot.config import Settings, load_settings
+from plugbackup_bot.infra.storectl import Storectl
 from plugbackup_bot.logging_setup import setup_logging
 from plugbackup_bot.runtime import build_runtime, check_environment, configure_bot
+from plugbackup_bot.services.health import Probe
 
 log = logging.getLogger("plugbackup_bot")
 
@@ -49,13 +51,16 @@ async def check(settings: Settings) -> int:
     return 1
 
 
-async def run(settings: Settings) -> None:
+async def run(
+    settings: Settings, *, storectl: Storectl | None = None, probe: Probe | None = None
+) -> None:
+    """Боевой запуск. storectl и probe подставляются только в devrun."""
     bot = Bot(
         token=settings.bot_token.get_secret_value(),
         default=DefaultBotProperties(parse_mode=ParseMode.HTML, link_preview_is_disabled=True),
     )
-    runtime = await build_runtime(settings, bot)
-    await configure_bot(bot)
+    runtime = await build_runtime(settings, bot, storectl=storectl, probe=probe)
+    await configure_bot(bot, settings.admin_ids)
     scheduler_task = asyncio.create_task(runtime.scheduler.run(), name="scheduler")
     await runtime.notifier.alert("Бот запущен.")
     try:

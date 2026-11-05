@@ -59,6 +59,12 @@ def test_missing_token_fails(env: pytest.MonkeyPatch) -> None:
         load()
 
 
+def test_empty_token_fails(env: pytest.MonkeyPatch) -> None:
+    env.setenv("BOT_TOKEN", "")
+    with pytest.raises(ValidationError, match="bot_token"):
+        load()
+
+
 def test_empty_admin_ids_fail(env: pytest.MonkeyPatch) -> None:
     env.setenv("ADMIN_IDS", " , ")
     with pytest.raises(ValidationError):

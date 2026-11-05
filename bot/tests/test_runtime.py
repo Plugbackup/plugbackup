@@ -28,6 +28,8 @@ pytestmark = pytest.mark.skipif(not REPO_PLANS.exists(), reason="нет design/d
 
 @pytest.fixture
 def env(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> Path:
+    # В рабочей папке не должно быть настоящего .env: тесты задают настройки через окружение.
+    monkeypatch.chdir(tmp_path)
     key = tmp_path / "provision_key"
     key.write_text("placeholder", encoding="utf-8")
     if os.name == "posix":

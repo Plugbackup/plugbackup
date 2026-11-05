@@ -72,7 +72,7 @@ class NodeConfig(BaseModel):
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8", extra="ignore")
 
-    bot_token: SecretStr
+    bot_token: SecretStr = Field(min_length=1)
     admin_ids: Annotated[list[int], NoDecode] = Field(min_length=1)
     admin_chat_id: int
 

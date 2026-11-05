@@ -5,6 +5,7 @@ import logging
 import os
 import stat
 import time
+from collections.abc import Collection
 from dataclasses import dataclass, field
 
 from aiogram import Bot, Dispatcher
@@ -65,6 +66,17 @@ COMMANDS = (
     ("restore", "запросить восстановление"),
     ("rules", "правила"),
     ("help", "справка"),
+)
+
+# Меню администратора: те же команды клиента плюс админские. Показывается только админам.
+ADMIN_COMMANDS = (
+    ("admin", "панель администратора"),
+    ("stats", "статистика и выручка"),
+    ("nodes", "ноды и их загрузка"),
+    ("invite", "инвайт-коды беты"),
+    ("client", "карточка клиента"),
+    ("broadcast", "рассылка"),
+    *COMMANDS,
 )
 
 
@@ -207,11 +219,20 @@ def _error_handler(notifier: TelegramNotifier):  # type: ignore[no-untyped-def]
     return on_error
 
 
-async def configure_bot(bot: Bot) -> None:
-    """Меню команд в Telegram. Сбой здесь не мешает запуску."""
-    from aiogram.types import BotCommand
+async def configure_bot(bot: Bot, admin_ids: Collection[int] = ()) -> None:
+    """Меню команд в Telegram: общее и расширенное для админов. Сбой не мешает запуску."""
+    from aiogram.types import BotCommand, BotCommandScopeChat
 
     try:
         await bot.set_my_commands([BotCommand(command=c, description=d) for c, d in COMMANDS])
     except Exception:
         log.warning("could not set the bot commands", exc_info=True)
+    for admin_id in admin_ids:
+        try:
+            await bot.set_my_commands(
+                [BotCommand(command=c, description=d) for c, d in ADMIN_COMMANDS],
+                scope=BotCommandScopeChat(chat_id=admin_id),
+            )
+        except Exception:
+            # Пока админ не написал боту, у Telegram нет такого чата: меню появится после /start.
+            log.warning("could not set the admin commands for %s", admin_id, exc_info=True)
