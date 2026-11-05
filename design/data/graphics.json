@@ -19,6 +19,11 @@
     "title": "Тарифы на {{plans.gb50.gb}},\n{{plans.gb100.gb}} и {{plans.gb200.size}}",
     "subtitle": "Оплата в {{payment}}.\nПодробности в {{bot.handle}}."
   },
+  "banner-paid": {
+    "label": "Оплата",
+    "title": "Оплата\nполучена",
+    "subtitle": "Следующий шаг: публичный ключ.\nПришлите его в этом чате."
+  },
   "banner-plan": {
     "label": "Тариф",
     "plan": "gb50",

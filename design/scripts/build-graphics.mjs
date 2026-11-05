@@ -16,6 +16,7 @@ export const jobs = [
   { name: 'banner-announce', png: [{ file: 'banner-announce', width: 1280 }] },
   { name: 'banner-update', png: [{ file: 'banner-update', width: 1280 }] },
   { name: 'banner-plan', png: [{ file: 'banner-plan', width: 1280 }] },
+  { name: 'banner-paid', png: [{ file: 'banner-paid', width: 1280 }] },
   { name: 'og-image', png: [{ file: 'og-image', width: 1200 }] },
   { name: 'favicon', png: [{ file: 'favicon-32', width: 32 }] },
   { name: 'apple-touch-icon', png: [{ file: 'apple-touch-icon', width: 180 }] },
