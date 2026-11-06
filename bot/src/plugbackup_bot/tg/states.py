@@ -8,10 +8,18 @@ class AccessStates(StatesGroup):
     waiting_key = State()
 
 
-class AdminStates(StatesGroup):
-    """Администратор пишет текст рассылки."""
+class BroadcastStates(StatesGroup):
+    """Администратор собирает рассылку: текст, кнопки, время."""
 
-    broadcast_text = State()
+    text = State()
+    buttons = State()
+    when = State()
+
+
+class MaintenanceStates(StatesGroup):
+    """Администратор пишет текст для клиентов перед включением техработ."""
+
+    text = State()
 
 
 class ClientAdminStates(StatesGroup):

@@ -6,7 +6,8 @@
 """
 
 import logging
-from dataclasses import dataclass
+from collections.abc import Awaitable, Callable
+from dataclasses import dataclass, replace
 
 from aiogram import Bot
 from aiogram.exceptions import TelegramAPIError, TelegramBadRequest
@@ -32,6 +33,12 @@ _GONE = (
 _BAD_FILE_ID = ("wrong file identifier", "wrong remote file identifier", "file identifier")
 
 Media = tuple[str, str | BufferedInputFile]
+# Плашка для пользователя (режим техработ): HTML-текст над экраном или None.
+Notice = Callable[[int], Awaitable[str | None]]
+
+# Пределы Telegram: подпись к фото и обычное сообщение.
+_CAPTION_LIMIT = 1024
+_TEXT_LIMIT = 4096
 
 
 @dataclass(frozen=True, slots=True)
@@ -49,9 +56,30 @@ def _is_bad_file_id(error: TelegramBadRequest) -> bool:
 
 
 class Ui:
-    def __init__(self, banners: BannerStore | None = None, effects: Effects | None = None) -> None:
+    def __init__(
+        self,
+        banners: BannerStore | None = None,
+        effects: Effects | None = None,
+        notice: Notice | None = None,
+    ) -> None:
         self._banners = banners
         self._effects = effects
+        self._notice = notice
+
+    async def _with_notice(self, chat_id: int, screen: Screen) -> Screen:
+        """Плашка над экраном. Только в личных чатах. Не влезла в подпись к баннеру: баннер
+        убираем, текст важнее картинки."""
+        if self._notice is None or chat_id <= 0:
+            return screen
+        notice = await self._notice(chat_id)
+        if not notice:
+            return screen
+        text = f"{notice}\n\n{screen.text}"
+        if screen.banner is not None and len(text) > _CAPTION_LIMIT:
+            screen = replace(screen, banner=None)
+        if len(text) > _TEXT_LIMIT:
+            return screen
+        return replace(screen, text=text)
 
     # --- показать экран ---
 
@@ -64,14 +92,19 @@ class Ui:
         if isinstance(event, CallbackQuery):
             message = event.message
             chat_id = message.chat.id if message is not None else event.from_user.id
+            screen = await self._with_notice(chat_id, screen)
             if isinstance(message, Message) and not new and await self._edit(bot, message, screen):
                 return
         else:
             chat_id = event.chat.id
-        await self.send(bot, chat_id, screen)
+            screen = await self._with_notice(chat_id, screen)
+        await self._send(bot, chat_id, screen)
 
     async def send(self, bot: Bot, chat_id: int, screen: Screen) -> Message:
         """Новое сообщение: фото с подписью, если у экрана есть баннер, иначе текст."""
+        return await self._send(bot, chat_id, await self._with_notice(chat_id, screen))
+
+    async def _send(self, bot: Bot, chat_id: int, screen: Screen) -> Message:
         effect = self._effects.pick(screen.effect) if self._effects else None
         media = await self._media(screen)
         if media is None:
@@ -89,7 +122,7 @@ class Ui:
                 raise
             # Telegram забыл файл: загружаем заново.
             await self._forget(digest)
-            return await self.send(bot, chat_id, screen)
+            return await self._send(bot, chat_id, screen)
         if not isinstance(source, str):
             await self._remember(digest, sent)
         return sent
@@ -131,7 +164,7 @@ class Ui:
                 return False
             raise
         # Вид сообщения не совпал с видом экрана: новое сообщение, старое убираем.
-        await self.send(bot, message.chat.id, screen)
+        await self._send(bot, message.chat.id, screen)
         try:
             await bot.delete_message(message.chat.id, message.message_id)
         except TelegramAPIError:

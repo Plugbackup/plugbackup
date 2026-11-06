@@ -21,6 +21,7 @@ from plugbackup_bot.services.billing import BillingService
 from plugbackup_bot.services.broadcast import BroadcastService
 from plugbackup_bot.services.invites import InviteService
 from plugbackup_bot.services.lifecycle import LifecycleService
+from plugbackup_bot.services.maintenance_mode import MaintenanceMode
 from plugbackup_bot.services.nodes import NodeService
 from plugbackup_bot.services.notify import AdminAlerter, Messenger
 from plugbackup_bot.services.plans import PlanService
@@ -56,12 +57,15 @@ class Deps:
     plans: PlanService
     invites: InviteService
     nodes: NodeService
+    maintenance: MaintenanceMode
     admin_chat_id: int
     messenger: Messenger
     alerter: AdminAlerter
     default_tz: str
     # Просит исполнителя очереди сразу взяться за новые задачи, не дожидаясь планировщика.
     kick_provisioning: Callable[[], None] = lambda: None
+    # То же для рассылок: свежесозданная рассылка уходит сразу, а не по таймеру.
+    kick_broadcasts: Callable[[], None] = lambda: None
     emoji_pack_file: Path = Path("emoji_pack.json")
     # Показ экранов: правка текущего сообщения, баннеры, эффекты.
     ui: Ui = field(default_factory=Ui)
@@ -88,6 +92,7 @@ def build_dispatcher(
         invites=deps.invites,
         nodes=deps.nodes,
         broadcast=deps.broadcast,
+        maintenance=deps.maintenance,
         admin_chat_id=deps.admin_chat_id,
         clock=deps.clock,
         background_tasks=set[asyncio.Task[None]](),
@@ -95,6 +100,7 @@ def build_dispatcher(
         alerter=deps.alerter,
         default_tz=deps.default_tz,
         kick_provisioning=deps.kick_provisioning,
+        kick_broadcasts=deps.kick_broadcasts,
         emoji_pack_file=deps.emoji_pack_file,
         ui=deps.ui,
         invite_limiter=AttemptLimiter(now=monotonic),

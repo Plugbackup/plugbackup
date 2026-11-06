@@ -32,6 +32,7 @@ from plugbackup_bot.services.health import HealthMonitor, Probe, tcp_probe
 from plugbackup_bot.services.invites import InviteService
 from plugbackup_bot.services.lifecycle import LifecycleService
 from plugbackup_bot.services.maintenance import prune_all
+from plugbackup_bot.services.maintenance_mode import MaintenanceMode
 from plugbackup_bot.services.nodes import NodeService
 from plugbackup_bot.services.notify import TelegramNotifier
 from plugbackup_bot.services.plans import PlanService
@@ -44,6 +45,7 @@ from plugbackup_bot.tg.app import Deps, build_dispatcher
 from plugbackup_bot.tg.effect_fallback import EffectFallback
 from plugbackup_bot.tg.emoji_fallback import EmojiFallback
 from plugbackup_bot.tg.hooks import ClientHooks
+from plugbackup_bot.tg.maint_banner import MaintenanceBanner
 from plugbackup_bot.tg.notices import TelegramNoticeRenderer
 from plugbackup_bot.tg.stars import TelegramStars
 from plugbackup_bot.ui.banners import BannerStore
@@ -55,6 +57,7 @@ log = logging.getLogger(__name__)
 # Интервалы задач, секунды. Платежи и ключи обрабатываются сразу в handlers,
 # планировщик нужен для повторов и всего, что зависит от времени.
 PROVISIONING_EVERY_S = 30
+BROADCASTS_EVERY_S = 30
 LIFECYCLE_EVERY_S = 60
 # После старта даём накопившимся платежам дойти до базы, прежде чем кого-то блокировать.
 LIFECYCLE_STARTUP_DELAY_S = 300
@@ -139,7 +142,10 @@ async def build_runtime(
     notifier = TelegramNotifier(bot, db, settings.admin_chat_id, effects)
     _setup_emoji(settings, bot, notifier)
     bot.session.middleware(EffectFallback(effects))
-    ui = Ui(BannerStore(db, settings.assets_dir, clock), effects)
+    broadcasts = BroadcastService(db, clock, notifier, catalog)
+    maintenance = MaintenanceMode(db, clock, broadcasts, directory)
+    await maintenance.load()
+    ui = Ui(BannerStore(db, settings.assets_dir, clock), effects, MaintenanceBanner(maintenance))
     risk_version = texts.RISK_TEXT_VERSION
 
     billing = BillingService(db, clock, catalog, TelegramStars(bot), risk_version)
@@ -159,6 +165,11 @@ async def build_runtime(
         background.add(task)
         task.add_done_callback(background.discard)
 
+    def kick_broadcasts() -> None:
+        task = asyncio.get_running_loop().create_task(broadcasts.run_due())
+        background.add(task)
+        task.add_done_callback(background.discard)
+
     deps = Deps(
         db=db,
         clock=clock,
@@ -169,16 +180,18 @@ async def build_runtime(
         alert_settings=AlertSettingsService(db, clock, tz),
         restore=RestoreService(db, clock, tz),
         admin=admin_service,
-        broadcast=BroadcastService(db, clock, notifier),
+        broadcast=broadcasts,
         directory=directory,
         plans=plans,
         invites=InviteService(db, clock),
         nodes=NodeService(db, clock, admin_service, node_probe),
+        maintenance=maintenance,
         admin_chat_id=settings.admin_chat_id,
         messenger=notifier,
         alerter=notifier,
         default_tz=tz,
         kick_provisioning=kick_provisioning,
+        kick_broadcasts=kick_broadcasts,
         emoji_pack_file=settings.emoji_pack_file,
         ui=ui,
     )
@@ -192,6 +205,7 @@ async def build_runtime(
     scheduler = Scheduler(
         [
             Task("provisioning", PROVISIONING_EVERY_S, provisioner.run_due),
+            Task("broadcasts", BROADCASTS_EVERY_S, broadcasts.run_due),
             Task("lifecycle", LIFECYCLE_EVERY_S, lifecycle.tick, LIFECYCLE_STARTUP_DELAY_S),
             Task("usage", USAGE_EVERY_S, usage_cycle, USAGE_STARTUP_DELAY_S),
             Task("service_events", SERVICE_EVENTS_EVERY_S, alert_engine.process_service_events),

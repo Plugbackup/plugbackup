@@ -42,7 +42,7 @@ async def test_blocked_user_is_remembered(db: Database) -> None:
     assert await blocked(db, 5) is True
 
 
-async def test_flood_wait_is_retried_once(db: Database) -> None:
+async def test_flood_wait_is_retried_a_few_times_then_given_up(db: Database) -> None:
     bot, session = make_bot()
     notifier = TelegramNotifier(bot, db, ADMIN_CHAT)
     session.errors.append(TelegramRetryAfter(method(), "Too Many Requests", retry_after=0))
@@ -50,9 +50,9 @@ async def test_flood_wait_is_retried_once(db: Database) -> None:
     assert len(session.requests) == 2
 
     session.requests.clear()
-    session.errors.extend([TelegramRetryAfter(method(), "Too Many Requests", retry_after=0)] * 2)
+    session.errors.extend([TelegramRetryAfter(method(), "Too Many Requests", retry_after=0)] * 3)
     assert await notifier.send(5, "текст") is False
-    assert len(session.requests) == 2
+    assert len(session.requests) == 3  # три попытки, дальше отказ
 
 
 async def test_other_api_errors_do_not_raise(db: Database) -> None:
@@ -102,3 +102,19 @@ async def test_the_effect_is_added_only_when_asked_for_and_enabled(db: Database)
     plain_bot, plain_session = make_bot()  # без Effects вообще: как раньше
     await TelegramNotifier(plain_bot, db, ADMIN_CHAT).send(5, "x", effect=True)
     assert plain_session.of(SendMessage)[0].message_effect_id is None
+
+
+async def test_delivery_tells_blocked_from_failed(db: Database) -> None:
+    from plugbackup_bot.services.notify import Delivery
+
+    await add_user(db, 5)
+    bot, session = make_bot()
+    notifier = TelegramNotifier(bot, db, ADMIN_CHAT)
+    assert await notifier.deliver(5, "x") is Delivery.SENT
+    session.errors.append(
+        TelegramForbiddenError(method(), "Forbidden: bot was blocked by the user")
+    )
+    assert await notifier.deliver(5, "x") is Delivery.BLOCKED
+    assert await blocked(db, 5) is True
+    session.errors.append(TelegramAPIError(method(), "Bad Request: chat not found"))
+    assert await notifier.deliver(6, "x") is Delivery.FAILED

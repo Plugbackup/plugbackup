@@ -35,6 +35,7 @@ from plugbackup_bot.services.billing import BillingService
 from plugbackup_bot.services.broadcast import BroadcastService
 from plugbackup_bot.services.invites import InviteService
 from plugbackup_bot.services.lifecycle import LifecycleService
+from plugbackup_bot.services.maintenance_mode import MaintenanceMode
 from plugbackup_bot.services.nodes import NodeService
 from plugbackup_bot.services.plans import PlanService
 from plugbackup_bot.services.provisioning import Provisioner
@@ -42,6 +43,7 @@ from plugbackup_bot.services.restore import RestoreService
 from plugbackup_bot.tg import texts
 from plugbackup_bot.tg.app import Deps, build_dispatcher
 from plugbackup_bot.tg.hooks import ClientHooks
+from plugbackup_bot.tg.maint_banner import MaintenanceBanner
 from plugbackup_bot.tg.notices import TelegramNoticeRenderer
 from plugbackup_bot.ui.banners import BannerStore
 from plugbackup_bot.ui.effects import Effects
@@ -91,7 +93,9 @@ class Harness:
     invites: InviteService
     nodes: NodeService
     broadcast: BroadcastService
+    maintenance: MaintenanceMode
     kicks: list[int] = field(default_factory=list)
+    broadcast_kicks: list[int] = field(default_factory=list)
     # Отвечает ли нода на проверку связи: тест переключает через set_node_up.
     _probe_state: dict[str, bool] = field(default_factory=dict)
     _update_id: int = 0
@@ -127,7 +131,8 @@ class Harness:
         invites = InviteService(db, clock)
         directory = AdminDirectory(db, clock, [ADMIN.id])
         await directory.sync()
-        broadcast = BroadcastService(db, clock, messenger, rate_per_s=1000)
+        broadcast = BroadcastService(db, clock, messenger, catalog, rate_per_s=1000)
+        maintenance = MaintenanceMode(db, clock, broadcast, directory)
         storage = MemoryStorage()
         state = {"up": True}
 
@@ -139,6 +144,7 @@ class Harness:
             db, clock, bot, session, None, storage,  # type: ignore[arg-type]
             stars, storectl, messenger, alerter, billing, access, provisioner, lifecycle,
             alert_settings, restore, admin, directory, catalog, plans, invites, nodes, broadcast,
+            maintenance,
         )  # fmt: skip
         harness._probe_state = state
         deps = Deps(
@@ -156,12 +162,18 @@ class Harness:
             plans=plans,
             invites=invites,
             nodes=nodes,
+            maintenance=maintenance,
             admin_chat_id=ADMIN_CHAT,
             messenger=messenger,
             alerter=alerter,
             default_tz="Europe/Moscow",
             kick_provisioning=lambda: harness.kicks.append(1),
-            ui=Ui(BannerStore(db, assets_dir, clock) if assets_dir else None, Effects()),
+            kick_broadcasts=lambda: harness.broadcast_kicks.append(1),
+            ui=Ui(
+                BannerStore(db, assets_dir, clock) if assets_dir else None,
+                Effects(),
+                MaintenanceBanner(maintenance),
+            ),
         )
         harness.dp = build_dispatcher(deps, storage=storage, monotonic=monotonic or StepClock())
         return harness

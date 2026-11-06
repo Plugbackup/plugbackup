@@ -3,6 +3,7 @@
 import asyncio
 import html
 import logging
+from enum import StrEnum
 from typing import Protocol
 
 from aiogram import Bot
@@ -15,10 +16,26 @@ from plugbackup_bot.ui.effects import Effects
 log = logging.getLogger(__name__)
 
 _MAX_RETRY_WAIT_S = 30
+# Попыток отправки при ограничении частоты (flood wait).
+_SEND_ATTEMPTS = 3
 _ALERT_LIMIT = 3900
 
 
+class Delivery(StrEnum):
+    """Чем закончилась отправка: для статистики рассылок важно отличать блокировку бота от сбоя."""
+
+    SENT = "sent"
+    BLOCKED = "blocked"
+    FAILED = "failed"
+
+
 class Messenger(Protocol):
+    async def deliver(
+        self, tg_id: int, text: str, *, reply_markup: InlineKeyboardMarkup | None = None
+    ) -> Delivery:
+        """Отправляет HTML-текст и сообщает исход. Исключений не бросает."""
+        ...
+
     async def send(
         self,
         tg_id: int,
@@ -55,8 +72,19 @@ class TelegramNotifier:
         reply_markup: InlineKeyboardMarkup | None = None,
         effect: bool = False,
     ) -> bool:
+        outcome = await self.deliver(tg_id, text, reply_markup=reply_markup, effect=effect)
+        return outcome is Delivery.SENT
+
+    async def deliver(
+        self,
+        tg_id: int,
+        text: str,
+        *,
+        reply_markup: InlineKeyboardMarkup | None = None,
+        effect: bool = False,
+    ) -> Delivery:
         effect_id = self._effects.pick(effect) if self._effects is not None else None
-        for attempt in (1, 2):
+        for attempt in range(1, _SEND_ATTEMPTS + 1):
             try:
                 await self._bot.send_message(
                     tg_id, text, reply_markup=reply_markup, message_effect_id=effect_id
@@ -64,17 +92,17 @@ class TelegramNotifier:
             except TelegramForbiddenError:
                 log.info("user %s blocked the bot", tg_id)
                 await self._mark_blocked(tg_id)
-                return False
+                return Delivery.BLOCKED
             except TelegramRetryAfter as exc:
-                if attempt == 2:
-                    return False
+                if attempt == _SEND_ATTEMPTS:
+                    return Delivery.FAILED
                 await asyncio.sleep(min(exc.retry_after, _MAX_RETRY_WAIT_S))
             except TelegramAPIError:
                 log.warning("could not send a message to %s", tg_id, exc_info=True)
-                return False
+                return Delivery.FAILED
             else:
-                return True
-        return False
+                return Delivery.SENT
+        return Delivery.FAILED
 
     async def alert(self, text: str) -> None:
         try:

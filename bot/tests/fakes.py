@@ -35,6 +35,7 @@ from aiogram.types import Chat, InlineKeyboardMarkup, Message, PhotoSize, Sticke
 from plugbackup_bot.db.clients import Client
 from plugbackup_bot.db.jobs import Job
 from plugbackup_bot.infra.storectl import LoginEvent, StorectlError, Usage
+from plugbackup_bot.services.notify import Delivery
 
 
 class FakeClock:
@@ -455,6 +456,9 @@ class RecordingMessenger:
         self.sent: list[tuple[int, str]] = []
         self.markups: list[InlineKeyboardMarkup | None] = []
         self.effects: list[bool] = []
+        self.undeliverable: set[int] = set()
+        self.blocked: set[int] = set()
+        self.failing: set[int] = set()
 
     async def send(
         self,
@@ -467,7 +471,17 @@ class RecordingMessenger:
         self.sent.append((tg_id, text))
         self.markups.append(reply_markup)
         self.effects.append(effect)
-        return True
+        return tg_id not in self.undeliverable
+
+    async def deliver(
+        self, tg_id: int, text: str, *, reply_markup: InlineKeyboardMarkup | None = None
+    ) -> Delivery:
+        if tg_id in self.blocked:
+            return Delivery.BLOCKED
+        if tg_id in self.failing:
+            return Delivery.FAILED
+        await self.send(tg_id, text, reply_markup=reply_markup)
+        return Delivery.SENT
 
 
 class RecordingAlerter:

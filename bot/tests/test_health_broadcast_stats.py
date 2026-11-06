@@ -2,16 +2,14 @@ import asyncio
 from datetime import datetime
 from zoneinfo import ZoneInfo
 
-import pytest
 import pytest_asyncio
 
-from fakes import FakeClock, RecordingAlerter, RecordingMessenger
+from fakes import FakeClock, RecordingAlerter
 from harness import Harness
 from helpers import NOW, add_client, add_node, add_user, plain
 from plugbackup_bot.db import Database
 from plugbackup_bot.db import invites as invites_repo
 from plugbackup_bot.db.nodes import Node, list_nodes
-from plugbackup_bot.services.broadcast import MAX_TEXT, BroadcastService
 from plugbackup_bot.services.health import HealthMonitor, tcp_probe
 from plugbackup_bot.services.stats import collect, month_bounds
 from plugbackup_bot.tg.admin import views
@@ -142,56 +140,6 @@ async def test_tcp_probe_against_a_real_socket() -> None:
     server.close()
     await server.wait_closed()
     assert await tcp_probe(port, timeout_s=2)(node) is False
-
-
-# --- рассылка ---
-
-
-class Messenger(RecordingMessenger):
-    def __init__(self, refuse: set[int], crash: set[int]) -> None:
-        super().__init__()
-        self.refuse, self.crash = refuse, crash
-
-    async def send(self, tg_id, text, *, reply_markup=None) -> bool:  # type: ignore[no-untyped-def,override]
-        if tg_id in self.crash:
-            raise RuntimeError("telegram")
-        if tg_id in self.refuse:
-            return False
-        return await super().send(tg_id, text, reply_markup=reply_markup)
-
-
-async def test_broadcast_counts_and_pacing(db: Database, clock: FakeClock) -> None:
-    for tg_id in (1, 2, 3, 4):
-        await add_user(db, tg_id)
-    async with db.transaction() as conn:
-        await conn.execute("UPDATE users SET bot_blocked = 1 WHERE tg_id = 4")
-    messenger = Messenger(refuse={2}, crash={3})
-    delays: list[float] = []
-
-    async def sleep(seconds: float) -> None:
-        delays.append(seconds)
-
-    service = BroadcastService(db, clock, messenger, rate_per_s=20, sleep=sleep)
-    assert await service.recipients() == [1, 2, 3]
-    broadcast_id = await service.create(9, "Привет <всем> & каждому")
-
-    assert await service.run(broadcast_id) == (1, 2)
-    assert messenger.sent == [(1, "Привет &lt;всем&gt; &amp; каждому")]
-    assert delays == [0.05, 0.05, 0.05]
-    async with db.read() as conn, conn.execute("SELECT sent, failed FROM broadcasts") as cur:
-        row = await cur.fetchone()
-    assert row is not None
-    assert (row[0], row[1]) == (1, 2)
-
-
-async def test_broadcast_validation(db: Database, clock: FakeClock) -> None:
-    service = BroadcastService(db, clock, RecordingMessenger())
-    with pytest.raises(ValueError):
-        await service.create(1, "   ")
-    with pytest.raises(ValueError):
-        await service.create(1, "x" * (MAX_TEXT + 1))
-    with pytest.raises(LookupError):
-        await service.run(99)
 
 
 # --- статистика ---

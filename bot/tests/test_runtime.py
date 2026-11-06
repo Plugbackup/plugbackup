@@ -4,7 +4,7 @@ from pathlib import Path
 
 import pytest
 from aiogram.exceptions import TelegramAPIError
-from aiogram.methods import SetMyCommands
+from aiogram.methods import SendMessage, SetMyCommands
 from aiogram.types import ErrorEvent, Update
 
 from fakes import FakeClock, FakeStorectl, make_bot
@@ -12,6 +12,7 @@ from plugbackup_bot.__main__ import main
 from plugbackup_bot.config import Settings
 from plugbackup_bot.db.migrate import load_migrations
 from plugbackup_bot.db.nodes import Node, list_nodes
+from plugbackup_bot.domain.roles import Actor, Role
 from plugbackup_bot.runtime import (
     ERROR_ALERT_GAP_S,
     _error_handler,
@@ -19,6 +20,7 @@ from plugbackup_bot.runtime import (
     check_environment,
     configure_bot,
 )
+from plugbackup_bot.services.broadcast import Segment
 
 REPO_PLANS = Path(__file__).resolve().parents[2] / "design" / "data" / "plans.json"
 TOKEN = "123456789:" + "x" * 35
@@ -125,6 +127,7 @@ async def test_runtime_assembly(env: Path) -> None:
         names = {task.name for task in runtime.scheduler._tasks}
         assert names == {
             "provisioning",
+            "broadcasts",
             "lifecycle",
             "usage",
             "service_events",
@@ -165,6 +168,38 @@ async def test_kicking_the_provisioner_runs_it_in_the_background(env: Path) -> N
         await asyncio.gather(*runtime.background)
         await asyncio.sleep(0)
         assert runtime.background == set()
+    finally:
+        await runtime.close()
+
+
+async def test_kicking_broadcasts_sends_a_queued_one_in_the_background(env: Path) -> None:
+    bot, session = make_bot()
+    runtime = await build_runtime(load(), bot, clock=FakeClock(), storectl=FakeStorectl())
+    try:
+        async with runtime.db.transaction() as conn:
+            await conn.execute("INSERT INTO users (tg_id, first_seen_at) VALUES (7, 0)")
+        owner = Actor(900, Role.OWNER)
+        broadcast = runtime.dp.workflow_data["broadcast"]
+        await broadcast.create(owner, segment=Segment.ALL, text="Привет")
+        runtime.dp.workflow_data["kick_broadcasts"]()
+        await asyncio.gather(*runtime.background)
+        assert [m.chat_id for m in session.of(SendMessage)] == [7]
+    finally:
+        await runtime.close()
+
+
+async def test_the_maintenance_mode_is_restored_on_start(env: Path) -> None:
+    bot, _ = make_bot()
+    runtime = await build_runtime(load(), bot, clock=FakeClock(), storectl=FakeStorectl())
+    try:
+        await runtime.dp.workflow_data["maintenance"].start(Actor(900, Role.OWNER), "Работы")
+    finally:
+        await runtime.close()
+    bot, _ = make_bot()
+    runtime = await build_runtime(load(), bot, clock=FakeClock(), storectl=FakeStorectl())
+    try:
+        state = runtime.dp.workflow_data["maintenance"].state
+        assert state is not None and state.text == "Работы"
     finally:
         await runtime.close()
 

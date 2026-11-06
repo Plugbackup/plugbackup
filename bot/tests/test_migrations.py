@@ -6,8 +6,11 @@ from pathlib import Path
 
 import pytest_asyncio
 
+from fakes import FakeClock, RecordingMessenger
+from helpers import CATALOG
 from plugbackup_bot.db import Database, migrate
 from plugbackup_bot.db.migrate import load_migrations
+from plugbackup_bot.services.broadcast import BroadcastService, BroadcastStatus
 
 NOW = 1_760_000_000
 
@@ -89,6 +92,19 @@ async def test_existing_data_survives_every_migration(old_db: Database) -> None:
     assert await one(old_db, "SELECT text, sent, failed FROM broadcasts") == ("привет", 7, 1)
     assert await one(old_db, "SELECT status, note FROM restore_requests") == ("done", "готово")
     assert await one(old_db, "SELECT text FROM service_events") == ("работы",)
+
+
+async def test_old_broadcasts_stay_finished_with_their_counts(old_db: Database) -> None:
+    await migrate(old_db)
+    assert await one(
+        old_db, "SELECT status, segment, kind, total, buttons_json FROM broadcasts"
+    ) == ("done", "all", "manual", 0, "[]")
+    assert await one(old_db, "SELECT COUNT(*) FROM broadcast_recipients") == (0,)
+    service = BroadcastService(old_db, FakeClock(), RecordingMessenger(), CATALOG)
+    [item], total = await service.page(limit=10, offset=0)
+    assert total == 1 and item.status is BroadcastStatus.DONE
+    assert (item.sent, item.failed, item.blocked) == (7, 1, 0)  # счётчики прежней рассылки
+    assert await service.run_due() == 0  # старое повторно не уходит
 
 
 async def test_new_columns_get_safe_defaults_for_old_rows(old_db: Database) -> None:

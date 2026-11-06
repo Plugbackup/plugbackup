@@ -1,95 +1,23 @@
-"""Команды, которые ещё живут в старом виде: ноды, инвайты, рассылка, плановые работы и решения
-по заявкам на восстановление. По мере переноса в новые разделы файл пустеет."""
+"""Команды, которые ещё живут в старом виде: плановые работы нод и решения по заявкам на
+восстановление. По мере переноса в новые разделы файл пустеет."""
 
-import asyncio
-import html
 import logging
 
 from aiogram import F, Router
 from aiogram.filters import Command, CommandObject
-from aiogram.fsm.context import FSMContext
-from aiogram.types import CallbackQuery, InlineKeyboardButton, InlineKeyboardMarkup, Message
+from aiogram.types import CallbackQuery, Message
 
 from plugbackup_bot.domain.roles import Actor, Permission
 from plugbackup_bot.services.admin import AdminService
-from plugbackup_bot.services.broadcast import MAX_TEXT, BroadcastService
 from plugbackup_bot.services.notify import Messenger
 from plugbackup_bot.services.restore import RestoreService
 from plugbackup_bot.tg import texts
 from plugbackup_bot.tg.admin.core import requires
 from plugbackup_bot.tg.format import fmt_iso_date
-from plugbackup_bot.tg.states import AdminStates
 
 log = logging.getLogger(__name__)
 
 _USAGE_MAINT = "Использование: /maint имя_ноды текст для клиентов. Вместо имени ноды можно all."
-_BROADCAST_ASK = "Пришлите текст рассылки одним сообщением. Отмена: /cancel."
-
-
-# --- рассылка ---
-
-
-@requires(Permission.BROADCASTS)
-async def cmd_broadcast(message: Message, state: FSMContext, actor: Actor) -> None:
-    await state.set_state(AdminStates.broadcast_text)
-    await message.answer(_BROADCAST_ASK)
-
-
-@requires(Permission.BROADCASTS)
-async def msg_broadcast_text(
-    message: Message, state: FSMContext, broadcast: BroadcastService, actor: Actor
-) -> None:
-    text = (message.text or "").strip()
-    if not text or len(text) > MAX_TEXT:
-        await message.answer(f"Нужен текст от 1 до {MAX_TEXT} символов. Отмена: /cancel.")
-        return
-    await state.update_data(text=text)
-    count = len(await broadcast.recipients())
-    rows = [
-        [
-            InlineKeyboardButton(text="Отправить", callback_data="bc:send"),
-            InlineKeyboardButton(text="Отмена", callback_data="bc:cancel"),
-        ]
-    ]
-    await message.answer(
-        f"Рассылка получит {count} чел. Текст:\n\n{html.escape(text)}",
-        reply_markup=InlineKeyboardMarkup(inline_keyboard=rows),
-    )
-
-
-@requires(Permission.BROADCASTS)
-async def cb_broadcast_send(
-    callback: CallbackQuery,
-    state: FSMContext,
-    broadcast: BroadcastService,
-    background_tasks: set[asyncio.Task[None]],
-    actor: Actor,
-) -> None:
-    data = await state.get_data()
-    text = data.get("text")
-    await state.clear()
-    await callback.answer()
-    if not text or not isinstance(callback.message, Message):
-        return
-    broadcast_id = await broadcast.create(callback.from_user.id, text)
-    reply_to = callback.message
-
-    async def deliver() -> None:
-        sent, failed = await broadcast.run(broadcast_id)
-        await reply_to.answer(
-            f"Рассылка №{broadcast_id} завершена: доставлено {sent}, не доставлено {failed}."
-        )
-
-    task = asyncio.create_task(deliver())
-    background_tasks.add(task)
-    task.add_done_callback(background_tasks.discard)
-    await reply_to.answer(f"Рассылка №{broadcast_id} запущена.")
-
-
-@requires(Permission.BROADCASTS)
-async def cb_broadcast_cancel(callback: CallbackQuery, state: FSMContext, actor: Actor) -> None:
-    await state.clear()
-    await callback.answer("Рассылка отменена.")
 
 
 # --- плановые работы ---
@@ -148,12 +76,6 @@ async def cb_request(
 
 
 def register(router: Router) -> None:
-    router.message.register(cmd_broadcast, Command("broadcast"))
     router.message.register(cmd_maint, Command("maint"))
     router.message.register(cmd_maint_end, Command("maint_end"))
-    router.message.register(
-        msg_broadcast_text, AdminStates.broadcast_text, F.text, ~F.text.startswith("/")
-    )
-    router.callback_query.register(cb_broadcast_send, F.data == "bc:send")
-    router.callback_query.register(cb_broadcast_cancel, F.data == "bc:cancel")
     router.callback_query.register(cb_request, F.data.startswith("rq:"))
