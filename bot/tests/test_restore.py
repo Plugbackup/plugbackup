@@ -3,11 +3,13 @@ import pytest_asyncio
 
 from fakes import FakeClock
 from harness import ADMIN, ADMIN_CHAT, OTHER, USER, Harness
-from helpers import add_client, add_user, fake_key_body
+from helpers import add_client, add_user, fake_key_body, plain
 from plugbackup_bot import texts_ru as T
 from plugbackup_bot.db import Database
 from plugbackup_bot.services.restore import RestoreKind
 from plugbackup_bot.tg import texts
+from plugbackup_bot.tg.admin import core
+from plugbackup_bot.tg.admin.core import cb
 
 KEY = fake_key_body(0)
 HOUR = 3600
@@ -128,37 +130,28 @@ async def test_restore_flow_from_date_to_admin_decision(h: Harness) -> None:
     markup = h.messenger.markups[-1]
     assert markup is not None
     assert [b.callback_data for row in markup.inline_keyboard for b in row] == [
-        "rq:done:1",
-        "rq:rej:1",
+        cb(core.RESTORE, "card", i=1)
     ]
 
-    # Администратор подтверждает, клиент получает ответ.
-    await h.press("rq:done:1", user=ADMIN)
+    # Администратор открывает заявку, выбирает решение и подтверждает: клиент получает ответ.
+    await h.press(cb(core.RESTORE, "card", i=1), user=ADMIN)
+    await h.press(cb(core.RESTORE, "dn", i=1), user=ADMIN)
+    await h.press(cb(core.RESTORE, "sk", i=1, x="d"), user=ADMIN)
+    assert await requests(h) == [(1, "2025-10-08", "new")]  # пока только подтверждение
+    await h.press(cb(core.RESTORE, "ok", i=1), user=ADMIN)
     client_messages = [text for tg, text in h.messenger.sent if tg == USER.id]
     assert client_messages[-1] == texts.restore_resolved(1, "8 октября", done=True)
     assert await requests(h) == [(1, "2025-10-08", "done")]
 
 
-async def test_rejection_reaches_the_client(h: Harness) -> None:
+async def test_old_buttons_in_the_admin_chat_open_the_card(h: Harness) -> None:
     await h.press("restore:ok:2025-10-08")
-    await h.press("rq:rej:1", user=ADMIN)
-    assert h.messenger.sent[-1] == (USER.id, texts.restore_resolved(1, "8 октября", done=False))
-
-
-async def test_only_admins_can_resolve_requests(h: Harness) -> None:
-    await h.press("restore:ok:2025-10-08")
+    for data in ("rq:done:1", "rq:rej:1"):
+        await h.press(data, user=ADMIN)
+        assert "Заявка №1 на восстановление" in plain(h.last().text)
+    assert await requests(h) == [(1, "2025-10-08", "new")]  # сами по себе ничего не решают
     await h.press("rq:done:1", user=OTHER)
-    await h.press("rq:done:1")  # даже сам клиент
     assert await requests(h) == [(1, "2025-10-08", "new")]
-
-
-async def test_a_request_is_resolved_once(h: Harness) -> None:
-    await h.press("restore:ok:2025-10-08")
-    await h.press("rq:done:1", user=ADMIN)
-    sent = len(h.messenger.sent)
-    await h.press("rq:rej:1", user=ADMIN)
-    assert h.callback_answers()[-1].text == "Заявка уже обработана."
-    assert len(h.messenger.sent) == sent
 
 
 async def test_the_alert_button_opens_the_same_screen(h: Harness) -> None:

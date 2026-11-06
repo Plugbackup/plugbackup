@@ -11,6 +11,8 @@ from plugbackup_bot.emoji import E
 from plugbackup_bot.services.notify import Messenger
 from plugbackup_bot.services.restore import RestoreKind, RestoreService
 from plugbackup_bot.tg import keyboards, texts
+from plugbackup_bot.tg.admin import core
+from plugbackup_bot.tg.admin.core import cb as admin_cb
 from plugbackup_bot.tg.alert_texts import CB_RESTORE
 from plugbackup_bot.tg.format import fmt_iso_date
 from plugbackup_bot.ui import buttons
@@ -89,8 +91,9 @@ async def cb_confirm(
     client = result.client
     rows = [
         [
-            buttons.success(T.BTN_REQUEST_DONE, f"rq:done:{result.request_id}"),
-            buttons.danger(T.BTN_REQUEST_REJECT, f"rq:rej:{result.request_id}"),
+            buttons.primary(
+                T.RESTORE_ADMIN_OPEN, admin_cb(core.RESTORE, "card", i=result.request_id), E.refresh
+            )
         ]
     ]
     await messenger.send(

@@ -6,8 +6,11 @@ from datetime import datetime, timedelta
 from enum import StrEnum
 from zoneinfo import ZoneInfo
 
-from plugbackup_bot.db import Database
+import aiosqlite
+
+from plugbackup_bot.db import Database, audit
 from plugbackup_bot.db.clients import Client, get_client, get_live_client
+from plugbackup_bot.domain.roles import Actor, Permission
 from plugbackup_bot.domain.states import State
 from plugbackup_bot.infra.clock import Clock
 
@@ -39,6 +42,39 @@ class ResolvedRequest:
     status: str
     snapshot_date: str
     client: Client
+    note: str | None = None
+
+
+@dataclass(frozen=True, slots=True)
+class RestoreView:
+    """Заявка целиком: для очереди и карточки в админке."""
+
+    request_id: int
+    status: str  # new, done или rejected
+    snapshot_date: str
+    note: str | None
+    created_at: int
+    handled_at: int | None
+    handled_by: int | None
+    client: Client
+    username: str | None
+
+
+MAX_NOTE = 500
+_VIEW_SQL = (
+    "SELECT r.id AS request_id, r.status AS req_status, r.snapshot_date, r.note,"
+    " r.created_at AS req_created_at, r.handled_at, r.handled_by, u.username AS username, c.*"
+    " FROM restore_requests r JOIN clients c ON c.id = r.client_id"
+    " LEFT JOIN users u ON u.tg_id = c.tg_id"
+)
+
+
+def _view(row: aiosqlite.Row) -> RestoreView:
+    return RestoreView(
+        row["request_id"], row["req_status"], row["snapshot_date"], row["note"],
+        row["req_created_at"], row["handled_at"], row["handled_by"], Client.from_row(row),
+        row["username"],
+    )  # fmt: skip
 
 
 class RestoreService:
@@ -89,11 +125,19 @@ class RestoreService:
         return RestoreResult(RestoreKind.OK, cur.lastrowid, client)
 
     async def resolve(
-        self, request_id: int, status: str, note: str | None = None
+        self,
+        request_id: int,
+        status: str,
+        note: str | None = None,
+        actor: Actor | None = None,
     ) -> ResolvedRequest | None:
-        """Закрывает заявку (done или rejected). None, если она уже обработана или не найдена."""
+        """Закрывает заявку (done или rejected). None, если она уже обработана, не найдена или
+        у администратора нет права. Комментарий уйдёт клиенту вместе с решением."""
         if status not in ("done", "rejected"):
             raise ValueError("статус заявки: done или rejected")
+        if actor is not None and not actor.can(Permission.RESTORE):
+            return None
+        note = (note or "").strip()[:MAX_NOTE] or None
         now = self._clock.now()
         async with self._db.transaction() as conn:
             async with conn.execute(
@@ -105,13 +149,47 @@ class RestoreService:
             if row is None:
                 return None
             await conn.execute(
-                "UPDATE restore_requests SET status = ?, note = ?, handled_at = ? WHERE id = ?",
-                (status, note, now, request_id),
+                "UPDATE restore_requests SET status = ?, note = ?, handled_at = ?, handled_by = ?"
+                " WHERE id = ?",
+                (status, note, now, actor.tg_id if actor else None, request_id),
             )
+            if actor is not None:
+                await audit.record(
+                    conn, actor, "restore.resolve", now=now, target_type="restore",
+                    target_id=request_id, status=status, comment=note is not None,
+                )  # fmt: skip
             client = await get_client(conn, row["client_id"])
         if client is None:
             return None
-        return ResolvedRequest(request_id, status, row["snapshot_date"], client)
+        return ResolvedRequest(request_id, status, row["snapshot_date"], client, note)
+
+    async def get(self, request_id: int) -> RestoreView | None:
+        async with (
+            self._db.read() as conn,
+            conn.execute(f"{_VIEW_SQL} WHERE r.id = ?", (request_id,)) as cur,
+        ):
+            row = await cur.fetchone()
+        return _view(row) if row else None
+
+    async def page(
+        self, *, handled: bool, limit: int, offset: int
+    ) -> tuple[list[RestoreView], int]:
+        """Очередь: новые заявки, самые старые первыми. Обработанные: свежие сверху."""
+        if handled:
+            where, order = "r.status <> 'new'", "r.handled_at DESC, r.id DESC"
+        else:
+            where, order = "r.status = 'new'", "r.created_at ASC, r.id ASC"
+        async with self._db.read() as conn:
+            async with conn.execute(
+                f"SELECT COUNT(*) FROM restore_requests r WHERE {where}"  # noqa: S608
+            ) as cur:
+                total = int((await cur.fetchone())[0])  # type: ignore[index]
+            async with conn.execute(
+                f"{_VIEW_SQL} WHERE {where} ORDER BY {order} LIMIT ? OFFSET ?",
+                (limit, offset),
+            ) as cur:
+                rows = [_view(row) for row in await cur.fetchall()]
+        return rows, total
 
     async def open_count(self) -> int:
         async with (

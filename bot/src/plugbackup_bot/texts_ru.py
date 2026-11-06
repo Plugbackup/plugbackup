@@ -1074,3 +1074,43 @@ SUPA_REOPENED = "Обращение открыто снова."
 SUPA_REOPEN_OTHER = "У клиента уже есть другое открытое обращение."
 SUPA_ALREADY_CLOSED = "Обращение уже закрыто."
 SUPA_REOPEN_STATE = "Обращение не закрыто."
+
+# --- админка: заявки на восстановление ---
+
+RA_TITLE = "Восстановление"
+RA_SUMMARY = "Новых заявок: {total}. Решение уходит клиенту в бот."
+RA_SUMMARY_HANDLED = "Обработанных заявок: {total}."
+RA_EMPTY = "Новых заявок нет."
+RA_EMPTY_HANDLED = "Обработанных заявок нет."
+BTN_RA_NEW = "Новые"
+BTN_RA_HANDLED = "Обработанные"
+RA_ROW = "№{id} · {login} · {date}"
+RA_CARD_TITLE = "Заявка №{id} на восстановление"
+RA_CLIENT = "Клиент"
+RA_SNAPSHOT = "Снимок за"
+RA_CREATED = "Подана"
+RA_STATUS = "Статус"
+RA_STATUSES = {"new": "ждёт решения", "done": "выполнена", "rejected": "отклонена"}
+RA_HANDLED_BY = "Решил: {admin}, {at}"
+RA_NOTE = "Комментарий клиенту"
+RA_HINT = "Автоматического отката нет: проверьте снимок на ноде и ответьте клиенту."
+BTN_RA_DONE = "Выполнено"
+BTN_RA_REJECT = "Отклонить"
+BTN_RA_SKIP = "Без комментария"
+BTN_RA_CLIENT = "Карточка клиента"
+RA_ASK_NOTE = (
+    "Заявка №{id}: {verdict}. Напишите комментарий для клиента одним сообщением, до {max} знаков, "
+    "или продолжите без него."
+)
+RA_VERDICT_DONE = "выполнена"
+RA_VERDICT_REJECTED = "отклонена"
+RA_BAD_NOTE = "Нужен текст от 1 до {max} знаков."
+RA_CONFIRM = (
+    "Заявка №{id} будет помечена как {verdict}, клиент получит сообщение. Комментарий: {note}."
+)
+RA_NO_NOTE = "без комментария"
+RA_DONE_FLASH = "Заявка №{id} {verdict}, клиент уведомлён."
+RA_TOO_LATE = "Заявка уже обработана."
+RA_LOST = "Черновик решения потерян. Откройте заявку заново."
+RESTORE_RESOLVED_NOTE = "Комментарий: {note}"
+RESTORE_ADMIN_OPEN = "Открыть заявку"

@@ -63,3 +63,9 @@ class SupportAdminStates(StatesGroup):
     """Администратор пишет ответ на обращение."""
 
     reply = State()
+
+
+class RestoreAdminStates(StatesGroup):
+    """Администратор пишет комментарий к решению по заявке на восстановление."""
+
+    note = State()

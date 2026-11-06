@@ -24,7 +24,7 @@ from plugbackup_bot.services.access import RedeemKind, StatusView
 from plugbackup_bot.services.billing import Reject
 from plugbackup_bot.tg.format import fmt_bytes, fmt_date, fmt_datetime, gb, quota_bar
 from plugbackup_bot.ui import cards
-from plugbackup_bot.ui.markup import esc, fill
+from plugbackup_bot.ui.markup import Raw, esc, fill
 
 __all__ = ["esc"]
 
@@ -361,6 +361,9 @@ def restore_accepted(request_id: int) -> str:
     return fill(T.RESTORE_ACCEPTED, request_id=request_id)
 
 
-def restore_resolved(request_id: int, date: str, *, done: bool) -> str:
+def restore_resolved(request_id: int, date: str, *, done: bool, note: str | None = None) -> str:
     template = T.RESTORE_RESOLVED_DONE if done else T.RESTORE_RESOLVED_REJECTED
-    return fill(template, request_id=request_id, date=date)
+    text = fill(template, request_id=request_id, date=date)
+    if not note:
+        return text
+    return Raw(f"{text}\n\n{fill(T.RESTORE_RESOLVED_NOTE, note=note)}")

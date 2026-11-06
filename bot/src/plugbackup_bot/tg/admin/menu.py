@@ -26,6 +26,7 @@ SECTIONS: tuple[tuple[Permission, str, str, Icon], ...] = (
     (Permission.BROADCASTS, T.BTN_ADM_BROADCASTS, core.BROADCASTS, E.bell),
     (Permission.MAINTENANCE, T.BTN_ADM_MAINT, core.MAINT, E.settings),
     (Permission.TICKETS, T.BTN_ADM_SUPPORT, core.SUPPORT, E.support),
+    (Permission.RESTORE, T.BTN_ADM_RESTORE, core.RESTORE, E.refresh),
 )
 
 
