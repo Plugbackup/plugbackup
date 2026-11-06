@@ -75,3 +75,9 @@ class PaymentAdminStates(StatesGroup):
     """Администратор вводит запрос для поиска платежа."""
 
     search = State()
+
+
+class AdminAdminStates(StatesGroup):
+    """Владелец вводит Telegram id нового помощника."""
+
+    add_id = State()

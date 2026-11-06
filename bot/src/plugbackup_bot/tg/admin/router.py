@@ -4,10 +4,13 @@ from aiogram import Router
 
 from plugbackup_bot.services.admins import AdminDirectory
 from plugbackup_bot.tg.admin import (
+    admins,
     broadcasts,
     clients,
     dashboard,
+    export,
     invites,
+    journal,
     legacy,
     maintenance,
     menu,
@@ -37,6 +40,9 @@ def build_router(directory: AdminDirectory) -> Router:
     support.register(router)
     restore.register(router)
     payments.register(router)
+    admins.register(router)
+    journal.register(router)
+    export.register(router)
     legacy.register(router)
     menu.register_fallback(router)  # последним
     return router

@@ -28,6 +28,7 @@ from plugbackup_bot.services.alert_settings import AlertSettingsService
 from plugbackup_bot.services.alerts import AlertEngine
 from plugbackup_bot.services.billing import BillingService
 from plugbackup_bot.services.broadcast import BroadcastService
+from plugbackup_bot.services.exports import ExportService
 from plugbackup_bot.services.health import HealthMonitor, Probe, tcp_probe
 from plugbackup_bot.services.invites import InviteService
 from plugbackup_bot.services.lifecycle import LifecycleService
@@ -191,6 +192,7 @@ async def build_runtime(
         maintenance=maintenance,
         support=SupportService(db, clock),
         payments=PaymentsAdmin(db, clock, stars, billing, admin_service),
+        exports=ExportService(db, clock, tz),
         admin_chat_id=settings.admin_chat_id,
         messenger=notifier,
         alerter=notifier,

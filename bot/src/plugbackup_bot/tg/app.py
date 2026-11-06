@@ -19,6 +19,7 @@ from plugbackup_bot.services.admins import AdminDirectory
 from plugbackup_bot.services.alert_settings import AlertSettingsService
 from plugbackup_bot.services.billing import BillingService
 from plugbackup_bot.services.broadcast import BroadcastService
+from plugbackup_bot.services.exports import ExportService
 from plugbackup_bot.services.invites import InviteService
 from plugbackup_bot.services.lifecycle import LifecycleService
 from plugbackup_bot.services.maintenance_mode import MaintenanceMode
@@ -63,6 +64,7 @@ class Deps:
     maintenance: MaintenanceMode
     support: SupportService
     payments: PaymentsAdmin
+    exports: ExportService
     admin_chat_id: int
     messenger: Messenger
     alerter: AdminAlerter
@@ -100,6 +102,7 @@ def build_dispatcher(
         maintenance=deps.maintenance,
         support=deps.support,
         payments=deps.payments,
+        exports=deps.exports,
         admin_chat_id=deps.admin_chat_id,
         clock=deps.clock,
         background_tasks=set[asyncio.Task[None]](),

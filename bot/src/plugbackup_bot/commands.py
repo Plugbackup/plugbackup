@@ -10,6 +10,8 @@ from dataclasses import dataclass, field
 from aiogram import Bot
 from aiogram.types import BotCommand, BotCommandScopeChat
 
+from plugbackup_bot.domain.roles import Role
+
 log = logging.getLogger(__name__)
 
 Menu = Sequence[tuple[str, str]]
@@ -48,6 +50,7 @@ ADMIN_COMMANDS: Menu = (
     ("nodes", "ноды и их загрузка"),
     ("invite", "инвайт-коды беты"),
     ("broadcast", "рассылка"),
+    ("backup_db", "копия базы данных"),
     ("emoji_preview", "пак эмодзи и сопоставление"),
     *COMMANDS,
 )
@@ -76,6 +79,22 @@ class CommandsReport:
     @property
     def ok(self) -> bool:
         return not self.general_failed
+
+
+async def set_admin_menu(bot: Bot, tg_id: int, role: Role | None) -> bool:
+    """Личное меню команд человека по его роли. role None: личное меню убирается, остаётся общее.
+    False, если Telegram не знает этот чат (человек ещё не открывал бота). Не бросает."""
+    scope = BotCommandScopeChat(chat_id=tg_id)
+    try:
+        if role is None:
+            await bot.delete_my_commands(scope=scope)
+        else:
+            menu = ADMIN_COMMANDS if role is Role.OWNER else SUPPORT_COMMANDS
+            await bot.set_my_commands(to_bot_commands(menu), scope=scope)
+    except Exception:
+        log.warning("could not change the command menu of %s", tg_id, exc_info=True)
+        return False
+    return True
 
 
 async def set_commands(

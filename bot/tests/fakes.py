@@ -21,6 +21,7 @@ from aiogram.methods import (
     EditMessageText,
     GetMe,
     GetStickerSet,
+    SendDocument,
     SendMessage,
     SendPhoto,
     SetMyCommands,
@@ -162,6 +163,8 @@ def _actions(button: Any) -> int:
 
 MAX_CALLBACK_ANSWER = 200
 MAX_CAPTION_LENGTH = 1024
+# Предел Telegram на файл, который отправляет бот.
+MAX_FILE_BYTES = 50 * 1024 * 1024
 FAKE_TOKEN = "123456789:" + "x" * 35
 
 
@@ -230,6 +233,17 @@ class FakeSession(BaseSession):
                 date=datetime.now(UTC),
                 chat=Chat(id=chat_id, type="private"),
                 text=method.text,
+            )
+        if isinstance(method, SendDocument):
+            chat_id = int(method.chat_id)
+            size = len(getattr(method.document, "data", b""))
+            if size > MAX_FILE_BYTES:
+                raise TelegramBadRequest(method=method, message="Bad Request: file is too big")
+            return Message(
+                message_id=self._new_message(chat_id, "text"),
+                date=datetime.now(UTC),
+                chat=Chat(id=chat_id, type="private"),
+                caption=method.caption,
             )
         if isinstance(method, SendPhoto):
             chat_id = int(method.chat_id)

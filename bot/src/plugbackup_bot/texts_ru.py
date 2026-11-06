@@ -1165,3 +1165,106 @@ PAY_REFUND_CLIENT_REVOKED = (
     "Доступ к хранилищу приостановлен, данные сохранены. Если это ошибка, напишите в "
     "поддержку: /support."
 )
+
+# --- админка: администраторы ---
+
+ADMINS_TITLE = "Админы"
+ADMINS_OWNERS = "Владельцы"
+ADMINS_OWNERS_NOTE = "Владельцы берутся из ADMIN_IDS в .env. Чтобы изменить, правьте файл."
+ADMINS_SUPPORT = "Помощники"
+ADMINS_NO_SUPPORT = "Помощников пока нет."
+ADMINS_SUPPORT_NOTE = (
+    "Помощник видит клиентов (без продления, смены тарифа, бонусов и удаления), обращения и "
+    "заявки на восстановление."
+)
+ADMINS_LINE = "{tg_id}{name}"
+ADMINS_LINE_NAME = " (@{name})"
+BTN_ADMINS_ADD = "Добавить помощника"
+BTN_ADMINS_REMOVE = "Убрать {tg_id}"
+ADMINS_ASK_ID = (
+    "Telegram id нового помощника, число. Он должен хотя бы раз открыть бота, иначе меню команд "
+    "ему не поставится."
+)
+ADMINS_BAD_ID = "Нужен Telegram id: целое число, например 123456789."
+ADMINS_ADDED = "Помощник {tg_id} добавлен."
+ADMINS_MENU_SET = "Меню команд поставлено."
+ADMINS_MENU_LATER = "Меню команд появится после его первого /start."
+ADMINS_ALREADY = "Этот человек уже администратор."
+ADMINS_REMOVE_CONFIRM = "Убрать помощника {tg_id}? Он сразу потеряет доступ к админке."
+ADMINS_REMOVED = "Помощник {tg_id} убран."
+ADMINS_PROTECTED = "Владельца или запись из .env убрать нельзя: правьте ADMIN_IDS."
+ADMINS_NOT_FOUND = "Такого администратора нет."
+ADMINS_WELCOME = "Вам выданы права помощника. Откройте /admin."
+ADMINS_GOODBYE = "Права помощника сняты."
+
+# --- админка: журнал ---
+
+JOURNAL_TITLE = "Журнал"
+JOURNAL_SUMMARY = "Записей: {total}. Новые сверху. Тексты сообщений в журнал не пишутся."
+JOURNAL_EMPTY = "В журнале пока пусто."
+JOURNAL_LINE = "{at} · {actor} ({role}) · {action}{target}{details}"
+JOURNAL_TARGET = " · {type} {id}"
+JOURNAL_ACTIONS = {
+    "admin.add": "добавлен помощник",
+    "admin.remove": "убран помощник",
+    "broadcast.cancel": "рассылка отменена",
+    "broadcast.create": "рассылка создана",
+    "client.block": "клиент заблокирован",
+    "client.bonus": "бонусные ГБ",
+    "client.delete": "клиент удалён",
+    "client.extend": "срок продлён",
+    "client.message": "сообщение клиенту",
+    "client.note": "заметка о клиенте",
+    "client.plan": "смена тарифа",
+    "client.unblock": "клиент разблокирован",
+    "export.backup": "копия базы",
+    "export.clients": "выгрузка клиентов",
+    "export.payments": "выгрузка платежей",
+    "invite.create": "инвайты созданы",
+    "invite.revoke": "инвайт отозван",
+    "job.requeue": "задача перезапущена",
+    "maintenance.end": "техработы закончены",
+    "maintenance.start": "техработы начаты",
+    "node.add": "нода добавлена",
+    "node.capacity": "ёмкость ноды",
+    "node.disable": "нода отключена",
+    "node.enable": "нода включена",
+    "node.oversell": "коэффициент ноды",
+    "payment.refund": "возврат Stars",
+    "restore.resolve": "заявка на восстановление",
+    "tariff.gb": "объём тарифа",
+    "tariff.hide": "тариф скрыт",
+    "tariff.rub": "цена в рублях",
+    "tariff.show": "тариф показан",
+    "tariff.stars": "цена в Stars",
+    "ticket.close": "обращение закрыто",
+    "ticket.reopen": "обращение открыто снова",
+    "ticket.reply": "ответ на обращение",
+}
+
+# --- админка: экспорт и копия базы ---
+
+EXPORT_TITLE = "Экспорт"
+EXPORT_INTRO = (
+    "Файлы придут вам в личные сообщения. CSV открывается в Excel и LibreOffice, разделитель "
+    "точка с запятой. SSH-ключей и заметок в выгрузках нет."
+)
+EXPORT_BACKUP_NOTE = (
+    "Копия базы содержит все данные сервиса. Храните её как секрет и удаляйте из чата, когда она "
+    "не нужна."
+)
+BTN_EXPORT_CLIENTS = "Клиенты (CSV)"
+BTN_EXPORT_PAYMENTS = "Платежи (CSV)"
+BTN_EXPORT_BACKUP = "Копия базы"
+EXPORT_SENT = "Файл {name} отправлен вам в личные сообщения, строк: {rows}."
+EXPORT_BACKUP_SENT = "Копия базы отправлена вам в личные сообщения."
+EXPORT_CAPTION_CSV = "Выгрузка: {title}, строк: {rows}."
+EXPORT_CAPTION_BACKUP = "Копия базы PlugBackup. Это секретные данные."
+EXPORT_TITLES = {"clients": "клиенты", "payments": "платежи"}
+EXPORT_FAILED = (
+    "Не удалось отправить файл. Откройте личный чат с ботом, нажмите /start и повторите."
+)
+EXPORT_TOO_BIG = (
+    "Файл больше 50 МБ, Telegram его не примет. Снимите копию на сервере: deploy/backup-db.sh."
+)
+EXPORT_PRIVATE_NOTE = "Файл отправлен в личный чат, не сюда."
