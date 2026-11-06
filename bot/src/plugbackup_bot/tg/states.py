@@ -69,3 +69,9 @@ class RestoreAdminStates(StatesGroup):
     """Администратор пишет комментарий к решению по заявке на восстановление."""
 
     note = State()
+
+
+class PaymentAdminStates(StatesGroup):
+    """Администратор вводит запрос для поиска платежа."""
+
+    search = State()

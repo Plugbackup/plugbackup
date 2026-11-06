@@ -127,6 +127,20 @@ async def test_new_tables_exist_after_the_upgrade(old_db: Database) -> None:
     } <= names  # fmt: skip
 
 
+async def test_old_payments_and_requests_get_empty_refund_and_handler_fields(
+    old_db: Database,
+) -> None:
+    await migrate(old_db)
+    assert await one(
+        old_db, "SELECT status, refunded_at, refunded_by, refund_revoked FROM payments"
+    ) == ("paid", None, None, 0)
+    assert await one(old_db, "SELECT status, note, handled_by FROM restore_requests") == (
+        "done",
+        "готово",
+        None,
+    )
+
+
 async def test_the_upgraded_database_is_consistent(old_db: Database) -> None:
     await migrate(old_db)
     assert await one(old_db, "PRAGMA integrity_check") == ("ok",)

@@ -35,6 +35,7 @@ from plugbackup_bot.services.maintenance import prune_all
 from plugbackup_bot.services.maintenance_mode import MaintenanceMode
 from plugbackup_bot.services.nodes import NodeService
 from plugbackup_bot.services.notify import TelegramNotifier
+from plugbackup_bot.services.payments_admin import PaymentsAdmin
 from plugbackup_bot.services.plans import PlanService
 from plugbackup_bot.services.provisioning import Provisioner
 from plugbackup_bot.services.restore import RestoreService
@@ -149,7 +150,8 @@ async def build_runtime(
     ui = Ui(BannerStore(db, settings.assets_dir, clock), effects, MaintenanceBanner(maintenance))
     risk_version = texts.RISK_TEXT_VERSION
 
-    billing = BillingService(db, clock, catalog, TelegramStars(bot), risk_version)
+    stars = TelegramStars(bot)
+    billing = BillingService(db, clock, catalog, stars, risk_version)
     access = AccessService(db, clock, catalog, billing, storectl, risk_version)
     provisioner = Provisioner(db, storectl, clock, ClientHooks(db, notifier, notifier))
     lifecycle = LifecycleService(db, clock, catalog, billing, notifier, TelegramNoticeRenderer(tz))
@@ -188,6 +190,7 @@ async def build_runtime(
         nodes=NodeService(db, clock, admin_service, node_probe),
         maintenance=maintenance,
         support=SupportService(db, clock),
+        payments=PaymentsAdmin(db, clock, stars, billing, admin_service),
         admin_chat_id=settings.admin_chat_id,
         messenger=notifier,
         alerter=notifier,

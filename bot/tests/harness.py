@@ -37,6 +37,7 @@ from plugbackup_bot.services.invites import InviteService
 from plugbackup_bot.services.lifecycle import LifecycleService
 from plugbackup_bot.services.maintenance_mode import MaintenanceMode
 from plugbackup_bot.services.nodes import NodeService
+from plugbackup_bot.services.payments_admin import PaymentsAdmin
 from plugbackup_bot.services.plans import PlanService
 from plugbackup_bot.services.provisioning import Provisioner
 from plugbackup_bot.services.restore import RestoreService
@@ -96,6 +97,7 @@ class Harness:
     broadcast: BroadcastService
     maintenance: MaintenanceMode
     support: SupportService
+    payments: PaymentsAdmin
     kicks: list[int] = field(default_factory=list)
     broadcast_kicks: list[int] = field(default_factory=list)
     # Отвечает ли нода на проверку связи: тест переключает через set_node_up.
@@ -136,6 +138,7 @@ class Harness:
         broadcast = BroadcastService(db, clock, messenger, catalog, rate_per_s=1000)
         maintenance = MaintenanceMode(db, clock, broadcast, directory)
         support = SupportService(db, clock)
+        payments = PaymentsAdmin(db, clock, stars, billing, admin)
         storage = MemoryStorage()
         state = {"up": True}
 
@@ -147,7 +150,7 @@ class Harness:
             db, clock, bot, session, None, storage,  # type: ignore[arg-type]
             stars, storectl, messenger, alerter, billing, access, provisioner, lifecycle,
             alert_settings, restore, admin, directory, catalog, plans, invites, nodes, broadcast,
-            maintenance, support,
+            maintenance, support, payments,
         )  # fmt: skip
         harness._probe_state = state
         deps = Deps(
@@ -167,6 +170,7 @@ class Harness:
             nodes=nodes,
             maintenance=maintenance,
             support=support,
+            payments=payments,
             admin_chat_id=ADMIN_CHAT,
             messenger=messenger,
             alerter=alerter,

@@ -444,11 +444,19 @@ class FakeStars:
     def __init__(self) -> None:
         self.calls: list[tuple[int, str, bool]] = []
         self.fail = False
+        self.refunds: list[tuple[int, str]] = []
+        # Что ответит Telegram на возврат: None, если всё хорошо, иначе текст ошибки.
+        self.refund_error: str | None = None
 
     async def set_canceled(self, tg_id: int, charge_id: str, canceled: bool) -> None:
         self.calls.append((tg_id, charge_id, canceled))
         if self.fail:
             raise RuntimeError("Bad Request: subscription not found")
+
+    async def refund(self, tg_id: int, charge_id: str) -> None:
+        self.refunds.append((tg_id, charge_id))
+        if self.refund_error is not None:
+            raise RuntimeError(self.refund_error)
 
 
 class RecordingMessenger:

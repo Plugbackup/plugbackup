@@ -1114,3 +1114,54 @@ RA_TOO_LATE = "Заявка уже обработана."
 RA_LOST = "Черновик решения потерян. Откройте заявку заново."
 RESTORE_RESOLVED_NOTE = "Комментарий: {note}"
 RESTORE_ADMIN_OPEN = "Открыть заявку"
+
+# --- админка: платежи и возврат Stars ---
+
+PAY_TITLE = "Платежи"
+PAY_SUMMARY = "Платежей: {total}. Новые сверху."
+PAY_SUMMARY_FOUND = "По запросу «{query}» найдено: {total}."
+PAY_EMPTY = "Платежей пока нет."
+PAY_NOTHING = "Ничего не найдено."
+BTN_PAY_SEARCH = "Поиск"
+BTN_PAY_RESET = "Сбросить поиск"
+PAY_ASK_SEARCH = (
+    "Что искать? Логин (u1001), Telegram id, @username или часть номера платежа Telegram "
+    "от 4 знаков."
+)
+PAY_BAD_QUERY = "Нужен непустой запрос не длиннее {max} знаков."
+PAY_ROW = "№{id} · {who} · {stars} Stars · {date}{mark}"
+PAY_ROW_REFUNDED = " · возврат"
+PAY_CARD_TITLE = "Платёж №{id}"
+PAY_CLIENT = "Клиент"
+PAY_PLAN = "Тариф"
+PAY_AMOUNT = "Сумма"
+PAY_AMOUNT_VALUE = "{stars} Stars"
+PAY_DATE = "Дата"
+PAY_KIND = "Вид"
+PAY_KINDS = {"first": "первая оплата", "renewal": "продление", "single": "разовая оплата"}
+PAY_STATUS = "Статус"
+PAY_STATUSES = {"paid": "оплачен", "refunded": "возвращён"}
+PAY_CHARGE = "Номер в Telegram"
+PAY_REFUND_INFO = "Возврат: {at}, администратор {admin}. {access}"
+PAY_ACCESS_OFF = "Доступ приостановлен."
+PAY_ACCESS_KEPT = "Доступ сохранён."
+BTN_PAY_REFUND = "Вернуть Stars"
+PAY_REFUND_TITLE = "Возврат Stars"
+PAY_REFUND_ASK = (
+    "Вернуть {stars} Stars клиенту {who} за платёж №{id}? Звёзды вернутся на его баланс в "
+    "Telegram, отменить возврат нельзя."
+)
+PAY_REFUND_CHOOSE = "Что сделать с доступом клиента?"
+PAY_REFUND_OLD = "Это не последний платёж клиента, поэтому доступ останется как есть."
+BTN_PAY_REFUND_REVOKE = "Вернуть и отключить доступ"
+BTN_PAY_REFUND_KEEP = "Вернуть, доступ оставить"
+BTN_PAY_REFUND_ONLY = "Вернуть Stars"
+PAY_REFUNDED = "Платёж №{id} возвращён: {stars} Stars."
+PAY_REFUNDED_REVOKED = "Автопродление отключено, доступ приостановлен."
+PAY_REFUND_FAILED = "Telegram не вернул платёж: {reason}. В боте ничего не изменилось."
+PAY_REFUND_ALREADY = "Платёж уже возвращён."
+PAY_REFUND_CLIENT = "Платёж на {stars} Stars возвращён, звёзды вернутся на ваш баланс в Telegram."
+PAY_REFUND_CLIENT_REVOKED = (
+    "Доступ к хранилищу приостановлен, данные сохранены. Если это ошибка, напишите в "
+    "поддержку: /support."
+)
