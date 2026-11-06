@@ -1,0 +1,188 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Сравнение с BorgBase, Hetzner и S3-облаками · PlugBackup</title>
+  <meta name="description" content="Честное сравнение PlugBackup с BorgBase, Hetzner Storage Box, Backblaze B2, Yandex Object Storage и Selectel: цены, протоколы, снапшоты, алерты, оплата. Со ссылками на источники и датой проверки.">
+  <link rel="canonical" href="https://plugbackup.site/compare/">
+  <meta name="theme-color" content="#F6F7F9" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#16181C" media="(prefers-color-scheme: dark)">
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="PlugBackup">
+  <meta property="og:locale" content="ru_RU">
+  <meta property="og:title" content="Сравнение с BorgBase, Hetzner и S3-облаками">
+  <meta property="og:description" content="Цены, протоколы, снапшоты, алерты и оплата. Со ссылками на источники. Где PlugBackup хуже, сказано отдельно.">
+  <meta property="og:url" content="https://plugbackup.site/compare/">
+  <meta property="og:image" content="https://plugbackup.site/assets/img/og-image.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+  <link rel="preload" href="/assets/fonts/IBMPlexSans-SemiBold-Cyrillic.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="/assets/fonts/IBMPlexSans-Regular-Cyrillic.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="/assets/fonts/fonts.css">
+  <link rel="stylesheet" href="/assets/css/tokens.css">
+  <link rel="stylesheet" href="/assets/css/components.css">
+  <link rel="stylesheet" href="/assets/css/animations.css">
+  <link rel="stylesheet" href="/assets/css/site.css">
+  <script src="/assets/js/theme.js"></script>
+</head>
+<body>
+<a class="skip-link" href="#main">К основному тексту</a>
+<header class="site-header">
+  <div class="wrap site-header__inner">
+    <a class="site-brand" href="/" aria-label="PlugBackup, на главную">
+      <img class="site-brand__logo site-brand__logo--light" src="/assets/img/logo-on-light.svg" alt="PlugBackup" width="159" height="32">
+      <img class="site-brand__logo site-brand__logo--dark" src="/assets/img/logo-on-dark.svg" alt="" aria-hidden="true" width="159" height="32">
+    </a>
+    <nav class="site-nav" aria-label="Основная">
+      <a href="/docs/">Инструкция</a>
+      <a href="/compare/">Сравнение</a>
+      <a href="/terms/">Правила</a>
+    </nav>
+    <div class="site-header__actions">
+      <a class="pb-button pb-button--primary pb-button--sm" href="https://t.me/PlugBackupBot">Открыть бота</a>
+      <div class="pb-segmented theme-switch" role="group" aria-label="Тема оформления" data-theme-switch>
+        <button type="button" data-theme-value="auto" aria-pressed="true">Авто</button>
+        <button type="button" data-theme-value="light" aria-pressed="false">Светлая</button>
+        <button type="button" data-theme-value="dark" aria-pressed="false">Тёмная</button>
+      </div>
+    </div>
+  </div>
+</header>
+
+<main id="main">
+
+  <article class="doc doc--wide">
+    <div class="wrap doc__wrap">
+      <header class="doc__head">
+        <p class="pb-label">Сравнение</p>
+        <h1 class="pb-h1">PlugBackup и другие хранилища</h1>
+        <p class="pb-lead">Сравниваем PlugBackup с BorgBase, Hetzner Storage Box, Backblaze B2, Yandex Object Storage и Selectel Object Storage. Факты взяты с официальных страниц. Дата проверки указана в каждой строке.</p>
+        <p class="pb-small">Метка <span class="pb-badge pb-badge--warning">проверить</span> означает, что факт на официальной странице не подтверждён, и его стоит перепроверить до решения. Таблица широкая: на телефоне её можно прокрутить вправо, название сервиса при этом остаётся на месте.</p>
+      </header>
+
+      <section class="doc__section" aria-labelledby="table-title">
+        <h2 class="pb-h2" id="table-title">Таблица</h2>
+        <div class="compare-scroll" role="region" aria-labelledby="compare-caption" tabindex="0">
+    <table class="compare-table">
+      <caption id="compare-caption" class="compare-caption">Сравнение по состоянию на 06.11.2026</caption>
+      <thead>
+        <tr><th scope="col">Сервис</th><th scope="col">Цена и за что платишь</th><th scope="col">Протоколы</th><th scope="col">Бесплатный объём</th><th scope="col">Снапшоты и append-only</th><th scope="col">Алерты</th><th scope="col">Оплата и доступность из России</th><th scope="col">Открытый код</th><th scope="col">Кто стоит за сервисом</th></tr>
+      </thead>
+      <tbody>
+      <tr class="is-own">
+        <th scope="row"><span class="compare-name">PlugBackup</span><span class="compare-meta">Источник: <a href="https://github.com/Plugbackup/plugbackup/blob/main/design/data/plans.json" rel="noopener">design/data/plans.json проекта</a>. Проверено 06.11.2026.</span></th>
+        <td>79 ₽/мес за 50 ГБ, 149 ₽/мес за 100 ГБ, 249 ₽/мес за 200 ГБ. Оплата в Telegram Stars, рубли — ориентир.</td>
+        <td>SFTP. Работа через restic и rclone.</td>
+        <td>10 ГБ по инвайт-коду в бете.</td>
+        <td>Ежедневные снапшоты, восстановление по заявке в боте. Append-only уточнить. <span class="pb-badge pb-badge--warning compare-todo">проверить</span></td>
+        <td>Настраиваемые алерты безопасности в боте: давно не приходил бэкап, резкое удаление данных, заполнение квоты и другие.</td>
+        <td>Регистрация и оплата в @PlugBackupBot. Вопрос доступности из России уточнить. <span class="pb-badge pb-badge--warning compare-todo">проверить</span></td>
+        <td>Да, AGPL-3.0. Код: github.com/Plugbackup/plugbackup.</td>
+        <td>Один человек. Проект в бете, поддержка через бота.</td>
+      </tr>
+      <tr>
+        <th scope="row"><span class="compare-name">BorgBase</span><span class="compare-meta">Источник: <a href="https://www.borgbase.com/" rel="noopener">borgbase.com: тарифы, протоколы, алерты, оператор</a>. Проверено 06.11.2026.</span></th>
+        <td>Small: $30 в год за 250 ГБ. Medium: $110 в год за 1 ТБ. Large: $210 в год или $20 в месяц за 2 ТБ. Сверх объёма: $0,015/ГБ в месяц (Small), $12/ТБ (Medium), $10/ТБ (Large). Считается размер после сжатия и дедупликации.</td>
+        <td>Репозитории borg и restic. SFTP, S3 и rclone на странице не указаны. <span class="pb-badge pb-badge--warning compare-todo">проверить</span></td>
+        <td>10 ГБ и 2 репозитория, без срока.</td>
+        <td>Append-only режим есть: он не даёт менять прошлые бэкапы. Retention и управление снапшотами на странице не описаны. <span class="pb-badge pb-badge--warning compare-todo">проверить</span></td>
+        <td>Есть: уведомления о сбое бэкапа и о том, что бэкапы давно не обновлялись. Каналы: email, Pushover, webhook.</td>
+        <td>Полный список способов оплаты на официальных страницах не найден. Доступность из России не указана. <span class="pb-badge pb-badge--warning compare-todo">проверить</span></td>
+        <td>Не указано, проверить по репозиториям. <span class="pb-badge pb-badge--warning compare-todo">проверить</span></td>
+        <td>Peakford Ltd, Мальта (указано на сайте). По словам компании, больше десяти лет опыта хостинга.</td>
+      </tr>
+      <tr>
+        <th scope="row"><span class="compare-name">Hetzner Storage Box</span><span class="compare-meta">Источник: <a href="https://www.hetzner.com/storage/storage-box/bx11/" rel="noopener">hetzner.com: Storage Box BX11</a>; <a href="https://www.hetzner.com/storage/storage-box/" rel="noopener">hetzner.com: Storage Box</a>. Проверено 06.11.2026.</span></th>
+        <td>BX11: €3,20 в месяц за 1 ТБ без НДС. Трафик не ограничен.</td>
+        <td>SFTP, SCP, FTP(S), WebDAV, Samba, HTTPS. BorgBackup, restic, rclone и rsync по SSH.</td>
+        <td>Бесплатного объёма на официальных страницах не найдено.</td>
+        <td>10 снапшотов включено и 10 автоматических по расписанию. Append-only или иммутабельность: проверить. <span class="pb-badge pb-badge--warning compare-todo">проверить</span></td>
+        <td>На проверенных страницах не описано. <span class="pb-badge pb-badge--warning compare-todo">проверить</span></td>
+        <td>Банковский перевод, карта, PayPal и SEPA (по официальным страницам через поиск). Доступность из России не указана. <span class="pb-badge pb-badge--warning compare-todo">проверить</span></td>
+        <td>Не указано. <span class="pb-badge pb-badge--warning compare-todo">проверить</span></td>
+        <td>Hetzner. Дата-центры FSN1 (Германия) и HEL1 (Финляндия). Юрлицо проверить. <span class="pb-badge pb-badge--warning compare-todo">проверить</span></td>
+      </tr>
+      <tr>
+        <th scope="row"><span class="compare-name">Backblaze B2</span><span class="compare-meta">Источник: <a href="https://www.backblaze.com/cloud-storage/pricing" rel="noopener">backblaze.com: тарифы B2</a>; <a href="https://www.backblaze.com/docs/cloud-storage-integrate-restic-with-backblaze-b2" rel="noopener">backblaze.com: restic с B2</a>. Проверено 06.11.2026.</span></th>
+        <td>$6,95 за ТБ в месяц. Трафик до 3× среднего объёма хранения бесплатно, дальше $0,01/ГБ.</td>
+        <td>S3-совместимый API и нативный B2 API. restic и rclone работают через S3-совместимый API.</td>
+        <td>10 ГБ хранилища бесплатно, без срока.</td>
+        <td>Версионирование и Object Lock (иммутабельность): проверить. <span class="pb-badge pb-badge--warning compare-todo">проверить</span></td>
+        <td>Не проверено. <span class="pb-badge pb-badge--warning compare-todo">проверить</span></td>
+        <td>Способы оплаты и доступность из России не проверены. <span class="pb-badge pb-badge--warning compare-todo">проверить</span></td>
+        <td>Не указано. <span class="pb-badge pb-badge--warning compare-todo">проверить</span></td>
+        <td>Backblaze. Юрлицо и страну проверить. <span class="pb-badge pb-badge--warning compare-todo">проверить</span></td>
+      </tr>
+      <tr>
+        <th scope="row"><span class="compare-name">Yandex Object Storage</span><span class="compare-meta">Источник: <a href="https://yandex.cloud/ru/docs/storage/pricing" rel="noopener">yandex.cloud: тарифы Object Storage</a>. Проверено 06.11.2026.</span></th>
+        <td>Тарифы для региона «Россия» в рублях. Цена за ГБ в месяц на странице не приведена, только ссылка на калькулятор. Ледяное хранилище: минимум 12 месяцев. <span class="pb-badge pb-badge--warning compare-todo">проверить</span></td>
+        <td>S3 API: операции на странице сопоставлены с методами S3.</td>
+        <td>1 ГБ хранилища, 100 ГБ исходящего трафика и часть запросов в месяц. Неиспользованное не переносится.</td>
+        <td>Версионирование на странице не описано. <span class="pb-badge pb-badge--warning compare-todo">проверить</span></td>
+        <td>На странице тарифов не описано. <span class="pb-badge pb-badge--warning compare-todo">проверить</span></td>
+        <td>Валюта зависит от юрлица заказчика (₽ или ₸, по странице). Способы оплаты не указаны. <span class="pb-badge pb-badge--warning compare-todo">проверить</span></td>
+        <td>Не указано. <span class="pb-badge pb-badge--warning compare-todo">проверить</span></td>
+        <td>Яндекс.Облако. Юрлицо проверить. <span class="pb-badge pb-badge--warning compare-todo">проверить</span></td>
+      </tr>
+      <tr>
+        <th scope="row"><span class="compare-name">Selectel Object Storage</span><span class="compare-meta">Источник: <a href="https://docs.selectel.ru/en/s3/about/payment/" rel="noopener">docs.selectel.ru: оплата S3</a>; <a href="https://selectel.ru/prices/calculator/" rel="noopener">selectel.ru: калькулятор</a>. Проверено 06.11.2026.</span></th>
+        <td>Оплата по факту с баланса, каждый час. Цена за ГБ в месяц в документации не приведена, нужен калькулятор. Стандартный класс зависит от объёма, холодный и glacier фиксированы. <span class="pb-badge pb-badge--warning compare-todo">проверить</span></td>
+        <td>S3 API.</td>
+        <td>Бесплатный объём хранения на странице не указан. Входящий трафик бесплатен. <span class="pb-badge pb-badge--warning compare-todo">проверить</span></td>
+        <td>Версионирование описано: тарифицируются все версии, кроме помеченных Deleted. Append-only не описано. <span class="pb-badge pb-badge--warning compare-todo">проверить</span></td>
+        <td>Уведомления о балансе описаны. Алерты о бэкапах не описаны. <span class="pb-badge pb-badge--warning compare-todo">проверить</span></td>
+        <td>Единый баланс с автопополнением. Способы оплаты не перечислены, доступность из России не проверена. <span class="pb-badge pb-badge--warning compare-todo">проверить</span></td>
+        <td>Не указано. <span class="pb-badge pb-badge--warning compare-todo">проверить</span></td>
+        <td>Selectel. Юрлицо проверить. <span class="pb-badge pb-badge--warning compare-todo">проверить</span></td>
+      </tr>
+      </tbody>
+    </table>
+  </div>
+      </section>
+
+      <section class="doc__section" aria-labelledby="worse-title">
+        <h2 class="pb-h2" id="worse-title">В чём PlugBackup хуже</h2>
+        <ul class="feature-list feature-list--spaced">
+          <li><strong>Цена за гигабайт.</strong> 50&nbsp;ГБ за 79&nbsp;₽ в месяц — около 1,58&nbsp;₽ за гигабайт. Hetzner Storage Box (BX11: €3,20 за 1&nbsp;ТБ без НДС) и Backblaze B2 ($6,95 за&nbsp;ТБ) за гигабайт стоят меньше. Точное сравнение зависит от курса и НДС.</li>
+          <li><strong>Один диск в бете.</strong> Без резервирования и без ИБП. При отказе диска данные пропадут.</li>
+          <li><strong>Один человек на поддержке.</strong> Ответы могут идти дольше, чем у крупных сервисов.</li>
+          <li><strong>Аптайм.</strong> Процент аптайма мы не публикуем. Текущее состояние работы — на <a class="pb-link" href="https://status.plugbackup.site">status.plugbackup.site</a>.</li>
+        </ul>
+      </section>
+
+      <section class="doc__section" aria-labelledby="how-title">
+        <h2 class="pb-h2" id="how-title">Как проверяли</h2>
+        <p class="pb-body">Цены, протоколы и условия взяты со страниц тарифов и документации самих сервисов. Если страница не показывает цену за гигабайт, например потому что её надо считать в калькуляторе, строка помечена как «проверить», и цена не подставлена из памяти.</p>
+        <p class="pb-body">Данные таблицы лежат в файле <code class="pb-code">site/src/data/compare.json</code> в <a class="pb-link" href="https://github.com/Plugbackup/plugbackup/blob/main/site/src/data/compare.json">репозитории</a>. Обновляются цифры и даты там, без правки вёрстки.</p>
+      </section>
+    </div>
+  </article>
+
+</main>
+<footer class="site-footer">
+  <div class="wrap site-footer__grid">
+    <div class="site-footer__about">
+      <p class="pb-label">PlugBackup</p>
+      <p class="pb-small">Хранилище резервных копий по SFTP. Регистрация и оплата в Telegram-боте @PlugBackupBot.</p>
+    </div>
+    <nav class="site-footer__nav" aria-label="Ссылки внизу страницы">
+      <ul>
+        <li><a href="https://t.me/PlugBackupBot">Бот @PlugBackupBot</a></li>
+        <li><a href="https://status.plugbackup.site">Статус работы</a></li>
+        <li><a href="https://github.com/Plugbackup/plugbackup">Код на GitHub (AGPL-3.0)</a></li>
+        <li><a href="/terms/">Правила</a></li>
+        <li><a href="/docs/">Инструкция</a></li>
+        <li><a href="/compare/">Сравнение</a></li>
+      </ul>
+    </nav>
+  </div>
+  <div class="wrap site-footer__legal">
+    <p class="pb-caption">Код открыт по лицензии AGPL-3.0. Название PlugBackup и логотип в лицензию не входят, см. <a href="https://github.com/Plugbackup/plugbackup/blob/main/TRADEMARKS.md">TRADEMARKS.md</a>.</p>
+  </div>
+</footer>
+
+<script src="/assets/js/app.js" defer></script>
+</body>
+</html>

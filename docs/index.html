@@ -1,0 +1,226 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Инструкция: подключение по SFTP с restic и rclone</title>
+  <meta name="description" content="Как подключиться к PlugBackup по SFTP: ключ ed25519, файл ~/.ssh/config, restic init, backup и forget с prune, вариант с rclone. Linux, macOS и Windows.">
+  <link rel="canonical" href="https://plugbackup.site/docs/">
+  <meta name="theme-color" content="#F6F7F9" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#16181C" media="(prefers-color-scheme: dark)">
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="PlugBackup">
+  <meta property="og:locale" content="ru_RU">
+  <meta property="og:title" content="Инструкция: подключение по SFTP с restic и rclone">
+  <meta property="og:description" content="Ключ ed25519, настройка SSH, restic init, backup, forget и prune, вариант с rclone.">
+  <meta property="og:url" content="https://plugbackup.site/docs/">
+  <meta property="og:image" content="https://plugbackup.site/assets/img/og-image.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+  <link rel="preload" href="/assets/fonts/IBMPlexSans-SemiBold-Cyrillic.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="/assets/fonts/IBMPlexSans-Regular-Cyrillic.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="/assets/fonts/fonts.css">
+  <link rel="stylesheet" href="/assets/css/tokens.css">
+  <link rel="stylesheet" href="/assets/css/components.css">
+  <link rel="stylesheet" href="/assets/css/animations.css">
+  <link rel="stylesheet" href="/assets/css/site.css">
+  <script src="/assets/js/theme.js"></script>
+</head>
+<body>
+<a class="skip-link" href="#main">К основному тексту</a>
+<header class="site-header">
+  <div class="wrap site-header__inner">
+    <a class="site-brand" href="/" aria-label="PlugBackup, на главную">
+      <img class="site-brand__logo site-brand__logo--light" src="/assets/img/logo-on-light.svg" alt="PlugBackup" width="159" height="32">
+      <img class="site-brand__logo site-brand__logo--dark" src="/assets/img/logo-on-dark.svg" alt="" aria-hidden="true" width="159" height="32">
+    </a>
+    <nav class="site-nav" aria-label="Основная">
+      <a href="/docs/">Инструкция</a>
+      <a href="/compare/">Сравнение</a>
+      <a href="/terms/">Правила</a>
+    </nav>
+    <div class="site-header__actions">
+      <a class="pb-button pb-button--primary pb-button--sm" href="https://t.me/PlugBackupBot">Открыть бота</a>
+      <div class="pb-segmented theme-switch" role="group" aria-label="Тема оформления" data-theme-switch>
+        <button type="button" data-theme-value="auto" aria-pressed="true">Авто</button>
+        <button type="button" data-theme-value="light" aria-pressed="false">Светлая</button>
+        <button type="button" data-theme-value="dark" aria-pressed="false">Тёмная</button>
+      </div>
+    </div>
+  </div>
+</header>
+
+<main id="main">
+
+  <article class="doc">
+    <div class="wrap doc__wrap">
+      <header class="doc__head">
+        <p class="pb-label">Инструкция</p>
+        <h1 class="pb-h1">Подключение по SFTP</h1>
+        <p class="pb-lead">Пошагово для Linux, macOS и Windows: ключ, настройка SSH, restic и вариант с rclone. Команды можно скопировать кнопкой справа.</p>
+      </header>
+
+      <div class="pb-alert pb-alert--info doc__callout">
+        <div>
+          <p class="pb-alert__title">Что понадобится</p>
+          <p class="pb-alert__text">Доступ, который выдал бот @PlugBackupBot, логин для SFTP и установленный restic или rclone. Пароль от репозитория придумываете вы и храните его отдельно от копий.</p>
+        </div>
+      </div>
+
+      <section class="doc__section" aria-labelledby="step-key">
+        <h2 class="pb-h2" id="step-key">1. Создайте ключ</h2>
+        <p class="pb-body">Доступ идёт по ключу SSH. Создайте пару ключей ed25519. Приватный файл остаётся у вас, публичный (с расширением <code class="pb-code">.pub</code>) отправьте боту.</p>
+
+        <div class="pb-code-block">
+          <div class="pb-code-block__bar">
+            <span>Linux и macOS</span>
+            <span class="pb-sr-only" role="status" data-copy-status></span>
+            <button type="button" class="pb-copy" data-copy-target="cmd-key-unix" data-label="Копировать">Копировать</button>
+          </div>
+          <pre tabindex="0"><code id="cmd-key-unix">ssh-keygen -t ed25519 -f ~/.ssh/plugbackup_ed25519 -C plugbackup</code></pre>
+        </div>
+
+        <div class="pb-code-block">
+          <div class="pb-code-block__bar">
+            <span>Windows, PowerShell (OpenSSH уже есть в Windows 10 и 11)</span>
+            <span class="pb-sr-only" role="status" data-copy-status></span>
+            <button type="button" class="pb-copy" data-copy-target="cmd-key-win" data-label="Копировать">Копировать</button>
+          </div>
+          <pre tabindex="0"><code id="cmd-key-win">ssh-keygen -t ed25519 -f $HOME\.ssh\plugbackup_ed25519 -C plugbackup</code></pre>
+        </div>
+
+        <p class="pb-small">Пароль на ключ можно задать: если приватный файл попадёт к посторонним, без пароля им не воспользоваться. Минус в том, что ssh будет его спрашивать при каждом подключении.</p>
+      </section>
+
+      <section class="doc__section" aria-labelledby="step-ssh">
+        <h2 class="pb-h2" id="step-ssh">2. Настройте ~/.ssh/config</h2>
+        <p class="pb-body">Файл настроек ssh создаёт один раз. Имя <code class="pb-code">plugbackup</code> в нём станет коротким именем хоста для restic и rclone. Адрес сервера: <code class="pb-code">node1.plugbackup.site</code>. В поле <code class="pb-code">User</code> укажите логин для SFTP.</p>
+
+        <div class="pb-code-block">
+          <div class="pb-code-block__bar">
+            <span>~/.ssh/config (на Windows: C:\Users\имя\.ssh\config)</span>
+            <span class="pb-sr-only" role="status" data-copy-status></span>
+            <button type="button" class="pb-copy" data-copy-target="cmd-ssh-config" data-label="Копировать">Копировать</button>
+          </div>
+          <pre tabindex="0"><code id="cmd-ssh-config">Host plugbackup
+    HostName node1.plugbackup.site
+    User &lt;логин&gt;
+    IdentityFile ~/.ssh/plugbackup_ed25519
+    IdentitiesOnly yes</code></pre>
+        </div>
+
+        <p class="pb-body">Проверьте подключение командой <code class="pb-code">sftp plugbackup</code>. Если ssh спросит про отпечаток ключа сервера, сверьтесь с отпечатком, который вы получили при подключении. Если позже ssh напишет, что ключ сервера изменился, не продолжайте, пока не выясните причину.</p>
+      </section>
+
+      <section class="doc__section" aria-labelledby="step-restic">
+        <h2 class="pb-h2" id="step-restic">3. Restic</h2>
+        <p class="pb-body">Установите restic из пакетного менеджера вашей системы или с <a class="pb-link" href="https://restic.net">restic.net</a>. Путь к репозиторию: <code class="pb-code">sftp:&lt;хост&gt;:/data/restic</code>, где <code class="pb-code">&lt;хост&gt;</code> — имя из файла config, в примере <code class="pb-code">plugbackup</code>.</p>
+
+        <h3 class="pb-h4 doc__subhead">Создать репозиторий (один раз)</h3>
+        <div class="pb-code-block">
+          <div class="pb-code-block__bar">
+            <span>Linux и macOS</span>
+            <span class="pb-sr-only" role="status" data-copy-status></span>
+            <button type="button" class="pb-copy" data-copy-target="cmd-restic-init" data-label="Копировать">Копировать</button>
+          </div>
+          <pre tabindex="0"><code id="cmd-restic-init">restic -r sftp:plugbackup:/data/restic init</code></pre>
+        </div>
+        <p class="pb-body">Restic спросит пароль от репозитория. Он нужен для любой работы с копиями. Если его потерять, данные не восстановить, и у нас их тоже нет.</p>
+
+        <h3 class="pb-h4 doc__subhead">Сделать копию</h3>
+        <div class="pb-code-block">
+          <div class="pb-code-block__bar">
+            <span>Linux и macOS</span>
+            <span class="pb-sr-only" role="status" data-copy-status></span>
+            <button type="button" class="pb-copy" data-copy-target="cmd-restic-backup" data-label="Копировать">Копировать</button>
+          </div>
+          <pre tabindex="0"><code id="cmd-restic-backup">restic -r sftp:plugbackup:/data/restic backup ~/Documents</code></pre>
+        </div>
+
+        <h3 class="pb-h4 doc__subhead">Оставить нужные копии и удалить лишние</h3>
+        <div class="pb-code-block">
+          <div class="pb-code-block__bar">
+            <span>Linux и macOS</span>
+            <span class="pb-sr-only" role="status" data-copy-status></span>
+            <button type="button" class="pb-copy" data-copy-target="cmd-restic-forget" data-label="Копировать">Копировать</button>
+          </div>
+          <pre tabindex="0"><code id="cmd-restic-forget">restic -r sftp:plugbackup:/data/restic forget --keep-daily 7 --keep-weekly 4 --keep-monthly 6 --prune</code></pre>
+        </div>
+        <p class="pb-body"><code class="pb-code">forget</code> отмечает старые снимки, а <code class="pb-code">--prune</code> освобождает место от данных, которые больше никому не нужны. Значения <code class="pb-code">--keep-*</code> здесь примерные, выберите свои.</p>
+
+        <h3 class="pb-h4 doc__subhead">Windows, PowerShell</h3>
+        <div class="pb-code-block">
+          <div class="pb-code-block__bar">
+            <span>PowerShell</span>
+            <span class="pb-sr-only" role="status" data-copy-status></span>
+            <button type="button" class="pb-copy" data-copy-target="cmd-restic-win" data-label="Копировать">Копировать</button>
+          </div>
+          <pre tabindex="0"><code id="cmd-restic-win">$env:RESTIC_REPOSITORY = "sftp:plugbackup:/data/restic"
+restic init
+restic backup "$HOME\Documents"
+restic forget --keep-daily 7 --keep-weekly 4 --keep-monthly 6 --prune</code></pre>
+        </div>
+        <p class="pb-body">Переменная <code class="pb-code">RESTIC_REPOSITORY</code> избавляет от флага <code class="pb-code">-r</code> в каждой команде. Пароль лучше не записывать в открытом виде в скрипты.</p>
+      </section>
+
+      <section class="doc__section" aria-labelledby="step-rclone">
+        <h2 class="pb-h2" id="step-rclone">4. Вариант с rclone</h2>
+        <p class="pb-body">Создайте remote, который ходит по SFTP. Пароль и ключ останутся в настройках rclone.</p>
+
+        <div class="pb-code-block">
+          <div class="pb-code-block__bar">
+            <span>Linux, macOS и Windows</span>
+            <span class="pb-sr-only" role="status" data-copy-status></span>
+            <button type="button" class="pb-copy" data-copy-target="cmd-rclone-config" data-label="Копировать">Копировать</button>
+          </div>
+          <pre tabindex="0"><code id="cmd-rclone-config">rclone config create plugbackup sftp host node1.plugbackup.site user &lt;логин&gt; key_file ~/.ssh/plugbackup_ed25519
+rclone copy ~/Documents plugbackup:/data/rclone</code></pre>
+        </div>
+
+        <div class="pb-alert pb-alert--warning doc__callout">
+          <div>
+            <p class="pb-alert__title">Rclone не шифрует сам по себе</p>
+            <p class="pb-alert__text">Без шифрования файлы уйдут на сервер в открытом виде. Чтобы данные шифровались на вашем устройстве, создайте поверх SFTP remote типа <code class="pb-code">crypt</code> и храните его пароль отдельно. Порядок настройки описан в <a class="pb-link" href="https://rclone.org/crypt/">документации rclone</a>.</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="doc__section" aria-labelledby="step-problems">
+        <h2 class="pb-h2" id="step-problems">Если что-то не работает</h2>
+        <ul class="feature-list feature-list--spaced">
+          <li><strong>Permission denied (publickey).</strong> Проверьте, что бот получил публичный ключ, что в config указан приватный файл из той же пары и что логин совпадает с выданным.</li>
+          <li><strong>Host key verification failed.</strong> Ключ сервера изменился. Не продолжайте, пока не выясните причину: проверьте <a class="pb-link" href="https://status.plugbackup.site">статус</a> и напишите в бот.</li>
+          <li><strong>Wrong password.</strong> Пароль репозитория неверный. Если вы его потеряли, восстановить данные нельзя.</li>
+          <li><strong>Соединение не открывается.</strong> Возможны простои в бете. Проверьте <a class="pb-link" href="https://status.plugbackup.site">статус работы</a>.</li>
+        </ul>
+      </section>
+    </div>
+  </article>
+
+</main>
+<footer class="site-footer">
+  <div class="wrap site-footer__grid">
+    <div class="site-footer__about">
+      <p class="pb-label">PlugBackup</p>
+      <p class="pb-small">Хранилище резервных копий по SFTP. Регистрация и оплата в Telegram-боте @PlugBackupBot.</p>
+    </div>
+    <nav class="site-footer__nav" aria-label="Ссылки внизу страницы">
+      <ul>
+        <li><a href="https://t.me/PlugBackupBot">Бот @PlugBackupBot</a></li>
+        <li><a href="https://status.plugbackup.site">Статус работы</a></li>
+        <li><a href="https://github.com/Plugbackup/plugbackup">Код на GitHub (AGPL-3.0)</a></li>
+        <li><a href="/terms/">Правила</a></li>
+        <li><a href="/docs/">Инструкция</a></li>
+        <li><a href="/compare/">Сравнение</a></li>
+      </ul>
+    </nav>
+  </div>
+  <div class="wrap site-footer__legal">
+    <p class="pb-caption">Код открыт по лицензии AGPL-3.0. Название PlugBackup и логотип в лицензию не входят, см. <a href="https://github.com/Plugbackup/plugbackup/blob/main/TRADEMARKS.md">TRADEMARKS.md</a>.</p>
+  </div>
+</footer>
+
+<script src="/assets/js/app.js" defer></script>
+</body>
+</html>
