@@ -1,0 +1,40 @@
+name: site-deploy
+
+# Собирает сайт из site/ и design/ и публикует готовые файлы в корень ветки deploy.
+# Хостинг забирает ветку deploy как есть, поэтому сборка делается здесь, а не на хостинге.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'site/**'
+      - 'design/**'
+      - '.github/workflows/site-deploy.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: site-deploy
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: Сборка и публикация сайта
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Получить код
+        uses: actions/checkout@v4
+
+      - name: Установить Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Собрать сайт
+        run: node site/build.mjs --out build/site
+
+      - name: Опубликовать в ветку deploy
+        run: bash site/tools/publish-deploy.sh build/site
