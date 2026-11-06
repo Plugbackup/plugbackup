@@ -229,7 +229,7 @@ async def cb_visibility(
 def register(router: Router) -> None:
     t = core.TARIFFS
     router.message.register(cmd_tariffs, Command("tariffs"))
-    router.callback_query.register(cb_list, Adm.filter((F.s == t) & (F.a == "list")))
+    router.callback_query.register(cb_list, Adm.filter((F.s == t) & F.a.in_({"", "list"})))
     router.callback_query.register(cb_card, Adm.filter((F.s == t) & (F.a == "card")))
     router.callback_query.register(cb_edit, Adm.filter((F.s == t) & F.a.in_(set(_FIELDS))))
     router.callback_query.register(cb_visibility, Adm.filter((F.s == t) & (F.a == "vis")))

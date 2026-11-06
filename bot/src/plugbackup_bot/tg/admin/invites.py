@@ -362,11 +362,11 @@ async def cb_revoke(
 def register(router: Router) -> None:
     v = core.INVITES
 
-    def only(action: str):  # type: ignore[no-untyped-def]
-        return Adm.filter((F.s == v) & (F.a == action))
+    def only(*actions: str):  # type: ignore[no-untyped-def]
+        return Adm.filter((F.s == v) & F.a.in_(set(actions)))
 
     router.message.register(cmd_invite, Command("invite"))
-    router.callback_query.register(cb_list, only("list"))
+    router.callback_query.register(cb_list, only("", "list"))
     router.callback_query.register(cb_card, only("card"))
     router.callback_query.register(cb_new, only("n"))
     router.callback_query.register(cb_uses, only("n2"))

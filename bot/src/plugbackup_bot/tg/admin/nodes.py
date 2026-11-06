@@ -451,7 +451,7 @@ def register(router: Router) -> None:
         return Adm.filter((F.s == n) & F.a.in_(set(actions)))
 
     router.message.register(cmd_nodes, Command("nodes"))
-    router.callback_query.register(cb_list, only("list"))
+    router.callback_query.register(cb_list, only("", "list"))
     router.callback_query.register(cb_card, only("card"))
     router.callback_query.register(cb_edit, only("cp", "ov"))
     router.callback_query.register(cb_check, only("ck"))

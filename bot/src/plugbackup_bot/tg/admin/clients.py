@@ -721,15 +721,15 @@ async def cb_requeue(
         kick_provisioning()
 
 
-def _only(section: str, action: str) -> object:
-    return Adm.filter((F.s == section) & (F.a == action))
+def _only(section: str, *actions: str) -> object:
+    return Adm.filter((F.s == section) & F.a.in_(set(actions)))
 
 
 def register(router: Router) -> None:
     c = core.CLIENTS
     router.message.register(cmd_clients, Command("clients"))
     router.message.register(cmd_client, Command("client"))
-    router.callback_query.register(cb_list, _only(c, "list"))
+    router.callback_query.register(cb_list, _only(c, "", "list"))
     router.callback_query.register(cb_find, _only(c, "find"))
     router.callback_query.register(cb_card, _only(c, "card"))
     router.callback_query.register(cb_extend_menu, _only(c, "ex"))
