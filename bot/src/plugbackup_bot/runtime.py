@@ -38,6 +38,7 @@ from plugbackup_bot.services.notify import TelegramNotifier
 from plugbackup_bot.services.plans import PlanService
 from plugbackup_bot.services.provisioning import Provisioner
 from plugbackup_bot.services.restore import RestoreService
+from plugbackup_bot.services.support import SupportService
 from plugbackup_bot.services.usage import UsagePoller
 from plugbackup_bot.tg import texts
 from plugbackup_bot.tg.alert_texts import TelegramAlertRenderer
@@ -186,6 +187,7 @@ async def build_runtime(
         invites=InviteService(db, clock),
         nodes=NodeService(db, clock, admin_service, node_probe),
         maintenance=maintenance,
+        support=SupportService(db, clock),
         admin_chat_id=settings.admin_chat_id,
         messenger=notifier,
         alerter=notifier,

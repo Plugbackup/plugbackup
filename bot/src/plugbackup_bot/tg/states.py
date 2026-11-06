@@ -51,3 +51,15 @@ class NodeStates(StatesGroup):
     add_addr = State()
     add_host = State()
     add_capacity = State()
+
+
+class SupportStates(StatesGroup):
+    """Клиент пишет в поддержку."""
+
+    message = State()
+
+
+class SupportAdminStates(StatesGroup):
+    """Администратор пишет ответ на обращение."""
+
+    reply = State()

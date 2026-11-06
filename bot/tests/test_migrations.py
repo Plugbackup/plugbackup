@@ -121,7 +121,10 @@ async def test_new_tables_exist_after_the_upgrade(old_db: Database) -> None:
     names = {
         row[0] for row in await _all(old_db, "SELECT name FROM sqlite_master WHERE type = 'table'")
     }
-    assert {"admins", "audit_log", "app_settings", "media_cache", "plans", "invite_uses"} <= names
+    assert {
+        "admins", "audit_log", "app_settings", "media_cache", "plans", "invite_uses",
+        "broadcast_recipients", "tickets", "ticket_messages",
+    } <= names  # fmt: skip
 
 
 async def test_the_upgraded_database_is_consistent(old_db: Database) -> None:

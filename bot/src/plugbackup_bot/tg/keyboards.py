@@ -32,6 +32,7 @@ RISK_BETA = "beta"
 # Экраны других разделов, на которые ведут кнопки статуса.
 ALERTS_HOME = "al:back"
 RESTORE_START = "restore:start"
+SUPPORT_START = "sup:start"
 
 
 def main_menu(has_client: bool) -> InlineKeyboardMarkup:
@@ -41,11 +42,15 @@ def main_menu(has_client: bool) -> InlineKeyboardMarkup:
             buttons.plain(T.BTN_TARIFFS, MENU_TARIFFS, E.payment),
             buttons.plain(T.BTN_HOW, MENU_HOW),
         ]
-        third = [buttons.plain(T.BTN_BETA, MENU_BETA, E.invite)]
+        third = [
+            buttons.plain(T.BTN_BETA, MENU_BETA, E.invite),
+            buttons.plain(T.BTN_SUPPORT, SUPPORT_START, E.support),
+        ]
         return markup(first, second, third)
     return markup(
         [buttons.primary(T.BTN_TARIFFS, MENU_TARIFFS, E.payment)],
         [buttons.plain(T.BTN_BETA, MENU_BETA, E.invite), buttons.plain(T.BTN_HOW, MENU_HOW)],
+        [buttons.plain(T.BTN_SUPPORT, SUPPORT_START, E.support)],
     )
 
 

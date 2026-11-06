@@ -62,6 +62,7 @@ async def test_start_shows_the_menu(h: Harness) -> None:
         T.BTN_TARIFFS,
         T.BTN_BETA,
         T.BTN_HOW,
+        T.BTN_SUPPORT,
     ]
     assert "бета" in h.last().text.lower()
 

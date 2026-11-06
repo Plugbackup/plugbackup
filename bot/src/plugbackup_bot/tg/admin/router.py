@@ -12,6 +12,7 @@ from plugbackup_bot.tg.admin import (
     maintenance,
     menu,
     nodes,
+    support,
     tariffs,
 )
 from plugbackup_bot.tg.admin.core import AdminFilter
@@ -31,6 +32,7 @@ def build_router(directory: AdminDirectory) -> Router:
     nodes.register(router)
     broadcasts.register(router)
     maintenance.register(router)
+    support.register(router)
     legacy.register(router)
     menu.register_fallback(router)  # последним
     return router

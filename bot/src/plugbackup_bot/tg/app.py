@@ -26,6 +26,7 @@ from plugbackup_bot.services.nodes import NodeService
 from plugbackup_bot.services.notify import AdminAlerter, Messenger
 from plugbackup_bot.services.plans import PlanService
 from plugbackup_bot.services.restore import RestoreService
+from plugbackup_bot.services.support import SupportService
 from plugbackup_bot.tg.admin.router import build_router as build_admin_router
 from plugbackup_bot.tg.handlers import (
     access,
@@ -36,6 +37,7 @@ from plugbackup_bot.tg.handlers import (
     restore,
     start,
     status,
+    support,
 )
 from plugbackup_bot.tg.middlewares import AttemptLimiter, ThrottleMiddleware, UserMiddleware
 from plugbackup_bot.ui.screen import Ui
@@ -58,6 +60,7 @@ class Deps:
     invites: InviteService
     nodes: NodeService
     maintenance: MaintenanceMode
+    support: SupportService
     admin_chat_id: int
     messenger: Messenger
     alerter: AdminAlerter
@@ -93,6 +96,7 @@ def build_dispatcher(
         nodes=deps.nodes,
         broadcast=deps.broadcast,
         maintenance=deps.maintenance,
+        support=deps.support,
         admin_chat_id=deps.admin_chat_id,
         clock=deps.clock,
         background_tasks=set[asyncio.Task[None]](),
@@ -115,6 +119,7 @@ def build_dispatcher(
     dp.include_router(lifecycle.build_router())
     dp.include_router(alerts.build_router())
     dp.include_router(restore.build_router())
+    dp.include_router(support.build_router())
     # Админка раньше «любого текста»: иначе текст рассылки уйдёт в запасной handler.
     dp.include_router(build_admin_router(deps.directory))
     dp.include_router(emoji_preview.build_router(deps.directory))

@@ -21,6 +21,7 @@ COMMANDS: Menu = (
     ("key", "заменить SSH-ключ"),
     ("alerts", "настройки уведомлений"),
     ("restore", "запросить восстановление"),
+    ("support", "написать в поддержку"),
     ("rules", "правила"),
     ("help", "справка"),
 )
@@ -33,6 +34,7 @@ COMMANDS_EN: Menu = (
     ("key", "replace SSH key"),
     ("alerts", "notification settings"),
     ("restore", "request a restore"),
+    ("support", "contact support"),
     ("rules", "rules"),
     ("help", "help"),
 )

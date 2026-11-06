@@ -1010,3 +1010,67 @@ MAINT_BROADCAST_START = "Технические работы. {text}\n\nМы с�
 MAINT_BROADCAST_END = "Технические работы закончены, всё работает в обычном режиме."
 DASH_MAINT = "Идут технические работы: {text}"
 BC_CARD_BUTTONS = "Кнопки"
+
+# --- поддержка: клиент ---
+
+SUP_TITLE = "Поддержка"
+BTN_SUPPORT = "Поддержка"
+SUP_INTRO = (
+    "Опишите вопрос или проблему одним сообщением, ответ придёт сюда. "
+    "Не присылайте пароли, приватные ключи и платёжные данные."
+)
+SUP_INTRO_OPEN = "У вас открыто обращение №{id}, новое сообщение дополнит его."
+BTN_SUP_CLOSE = "Закрыть обращение"
+BTN_SUP_REPLY = "Ответить"
+SUP_BAD_TEXT = "Нужен текст от 1 до {max} знаков."
+SUP_ACCEPTED = "Обращение №{id} принято. Ответ придёт в этот чат."
+SUP_APPENDED = "Сообщение добавлено к обращению №{id}. Ответ придёт в этот чат."
+SUP_FULL = (
+    "В обращении №{id} слишком много сообщений. Дождитесь ответа или закройте его и откройте новое."
+)
+SUP_ANSWER_TITLE = "Ответ по обращению №{id}"
+SUP_CLOSED_BY_ME = "Обращение №{id} закрыто."
+SUP_CLOSED_BY_STAFF = "Обращение №{id} закрыто. Если вопрос остался, напишите снова: /support."
+SUP_NOTHING_TO_CLOSE = "Открытых обращений нет."
+
+# --- поддержка: админка ---
+
+SUPA_NEW = "Новое обращение №{id}"
+SUPA_MORE = "Новое сообщение в обращении №{id}"
+SUPA_NOTICE_FROM = "От: {who}"
+BTN_SUPA_OPEN_TICKET = "Открыть обращение"
+SUPA_TITLE = "Поддержка"
+SUPA_SUMMARY = "Ждут ответа: {waiting}. Всего открытых: {total}."
+SUPA_SUMMARY_CLOSED = "Закрытых обращений: {total}."
+SUPA_EMPTY = "Открытых обращений нет."
+SUPA_EMPTY_CLOSED = "Закрытых обращений нет."
+BTN_SUPA_OPENED = "Открытые"
+BTN_SUPA_CLOSED = "Закрытые"
+SUPA_ROW = "№{id} · {who} · {status}"
+SUPA_STATUS = {"open": "ждёт ответа", "answered": "отвечено", "closed": "закрыто"}
+SUPA_CARD_TITLE = "Обращение №{id}"
+SUPA_CLIENT = "Клиент"
+SUPA_STATUS_FIELD = "Статус"
+SUPA_CREATED = "Создано"
+SUPA_UPDATED = "Последнее сообщение"
+SUPA_THREAD = "Переписка"
+SUPA_THREAD_CUT = "Показаны последние сообщения, остальные скрыты."
+SUPA_MSG_CLIENT = "Клиент, {at}"
+SUPA_MSG_ADMIN = "Поддержка {admin}, {at}"
+SUPA_NO_CLIENT = "без доступа"
+BTN_SUPA_REPLY = "Ответить"
+BTN_SUPA_CLOSE = "Закрыть"
+BTN_SUPA_REOPEN = "Открыть снова"
+BTN_SUPA_CLIENT = "Карточка клиента"
+SUPA_ASK_REPLY = (
+    "Ответ клиенту по обращению №{id}. Напишите текст одним сообщением, до {max} знаков: "
+    "он уйдёт клиенту в бот."
+)
+SUPA_BAD_REPLY = "Нужен текст от 1 до {max} знаков."
+SUPA_REPLIED = "Ответ отправлен клиенту."
+SUPA_REPLIED_LOST = "Ответ сохранён, но клиент его не получил: он заблокировал бота."
+SUPA_CLOSED = "Обращение закрыто, клиент уведомлён."
+SUPA_REOPENED = "Обращение открыто снова."
+SUPA_REOPEN_OTHER = "У клиента уже есть другое открытое обращение."
+SUPA_ALREADY_CLOSED = "Обращение уже закрыто."
+SUPA_REOPEN_STATE = "Обращение не закрыто."

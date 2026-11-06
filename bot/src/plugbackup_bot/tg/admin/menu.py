@@ -8,6 +8,8 @@ from aiogram.types import CallbackQuery, Message
 from plugbackup_bot import texts_ru as T
 from plugbackup_bot.domain.roles import Actor, Permission
 from plugbackup_bot.emoji import E, Icon
+from plugbackup_bot.services.restore import RestoreService
+from plugbackup_bot.services.support import SupportService
 from plugbackup_bot.tg.admin import core
 from plugbackup_bot.tg.admin.core import Adm, admin_nav, cb, requires
 from plugbackup_bot.ui import buttons, cards, pagination
@@ -23,6 +25,7 @@ SECTIONS: tuple[tuple[Permission, str, str, Icon], ...] = (
     (Permission.NODES, T.BTN_ADM_NODES, core.NODES, E.disk),
     (Permission.BROADCASTS, T.BTN_ADM_BROADCASTS, core.BROADCASTS, E.bell),
     (Permission.MAINTENANCE, T.BTN_ADM_MAINT, core.MAINT, E.settings),
+    (Permission.TICKETS, T.BTN_ADM_SUPPORT, core.SUPPORT, E.support),
 )
 
 
@@ -54,17 +57,36 @@ def menu_screen(actor: Actor, badges: dict[str, int] | None = None) -> Screen:
     return Screen(text, buttons.markup(*rows))
 
 
+async def badges(support: SupportService, restore: RestoreService) -> dict[str, int]:
+    """Сколько необработанного в разделах: показывается числом на кнопке."""
+    return {core.SUPPORT: await support.waiting_count(), core.RESTORE: await restore.open_count()}
+
+
 @requires(Permission.PANEL)
-async def cmd_admin(message: Message, state: FSMContext, ui: Ui, actor: Actor) -> None:
+async def cmd_admin(
+    message: Message,
+    state: FSMContext,
+    ui: Ui,
+    support: SupportService,
+    restore: RestoreService,
+    actor: Actor,
+) -> None:
     await state.clear()
-    await ui.show(message, menu_screen(actor))
+    await ui.show(message, menu_screen(actor, await badges(support, restore)))
 
 
 @requires(Permission.PANEL)
-async def cb_menu(callback: CallbackQuery, state: FSMContext, ui: Ui, actor: Actor) -> None:
+async def cb_menu(
+    callback: CallbackQuery,
+    state: FSMContext,
+    ui: Ui,
+    support: SupportService,
+    restore: RestoreService,
+    actor: Actor,
+) -> None:
     await state.clear()
     await callback.answer()
-    await ui.show(callback, menu_screen(actor))
+    await ui.show(callback, menu_screen(actor, await badges(support, restore)))
 
 
 @requires(Permission.PANEL)

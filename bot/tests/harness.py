@@ -40,6 +40,7 @@ from plugbackup_bot.services.nodes import NodeService
 from plugbackup_bot.services.plans import PlanService
 from plugbackup_bot.services.provisioning import Provisioner
 from plugbackup_bot.services.restore import RestoreService
+from plugbackup_bot.services.support import SupportService
 from plugbackup_bot.tg import texts
 from plugbackup_bot.tg.app import Deps, build_dispatcher
 from plugbackup_bot.tg.hooks import ClientHooks
@@ -94,6 +95,7 @@ class Harness:
     nodes: NodeService
     broadcast: BroadcastService
     maintenance: MaintenanceMode
+    support: SupportService
     kicks: list[int] = field(default_factory=list)
     broadcast_kicks: list[int] = field(default_factory=list)
     # Отвечает ли нода на проверку связи: тест переключает через set_node_up.
@@ -133,6 +135,7 @@ class Harness:
         await directory.sync()
         broadcast = BroadcastService(db, clock, messenger, catalog, rate_per_s=1000)
         maintenance = MaintenanceMode(db, clock, broadcast, directory)
+        support = SupportService(db, clock)
         storage = MemoryStorage()
         state = {"up": True}
 
@@ -144,7 +147,7 @@ class Harness:
             db, clock, bot, session, None, storage,  # type: ignore[arg-type]
             stars, storectl, messenger, alerter, billing, access, provisioner, lifecycle,
             alert_settings, restore, admin, directory, catalog, plans, invites, nodes, broadcast,
-            maintenance,
+            maintenance, support,
         )  # fmt: skip
         harness._probe_state = state
         deps = Deps(
@@ -163,6 +166,7 @@ class Harness:
             invites=invites,
             nodes=nodes,
             maintenance=maintenance,
+            support=support,
             admin_chat_id=ADMIN_CHAT,
             messenger=messenger,
             alerter=alerter,

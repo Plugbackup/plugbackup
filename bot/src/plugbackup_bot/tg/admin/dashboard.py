@@ -13,6 +13,7 @@ from plugbackup_bot.infra.clock import Clock
 from plugbackup_bot.services import stats as stats_service
 from plugbackup_bot.services.admin import AdminService
 from plugbackup_bot.services.maintenance_mode import MaintenanceMode
+from plugbackup_bot.services.support import SupportService
 from plugbackup_bot.tg.admin import core, views
 from plugbackup_bot.tg.admin.core import Adm, admin_nav, cb, requires
 from plugbackup_bot.ui import buttons
@@ -26,10 +27,11 @@ async def _screen(
     admin: AdminService,
     catalog: PlanCatalog,
     maintenance: MaintenanceMode,
+    support: SupportService,
     tz: str,
 ) -> Screen:
     data = await stats_service.collect(db, clock, admin, tz, catalog.beta.id)
-    text = views.dashboard(data, catalog, tz)
+    text = views.dashboard(data, catalog, tz, await support.waiting_count())
     if maintenance.state is not None:
         text = f"{fill(T.DASH_MAINT, text=maintenance.state.text)}\n\n{text}"
     refresh = buttons.plain(T.BTN_ADM_REFRESH, cb(core.DASH), E.refresh)
@@ -45,10 +47,13 @@ async def cmd_stats(
     admin: AdminService,
     catalog: PlanCatalog,
     maintenance: MaintenanceMode,
+    support: SupportService,
     default_tz: str,
     actor: Actor,
 ) -> None:
-    await ui.show(message, await _screen(db, clock, admin, catalog, maintenance, default_tz))
+    await ui.show(
+        message, await _screen(db, clock, admin, catalog, maintenance, support, default_tz)
+    )
 
 
 @requires(Permission.DASHBOARD)
@@ -60,11 +65,14 @@ async def cb_dashboard(
     admin: AdminService,
     catalog: PlanCatalog,
     maintenance: MaintenanceMode,
+    support: SupportService,
     default_tz: str,
     actor: Actor,
 ) -> None:
     await callback.answer()
-    await ui.show(callback, await _screen(db, clock, admin, catalog, maintenance, default_tz))
+    await ui.show(
+        callback, await _screen(db, clock, admin, catalog, maintenance, support, default_tz)
+    )
 
 
 def register(router: Router) -> None:
