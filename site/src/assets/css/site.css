@@ -1,0 +1,604 @@
+/*
+ * Стили страниц plugbackup.site.
+ * Токены, шрифты и компоненты берутся из design/ (их копирует сборка), здесь только вёрстка страниц.
+ * Mobile-first, без inline-стилей: CSP сайта их запрещает. Тема переключается в tokens.css.
+ */
+
+[hidden] {
+  display: none !important;
+}
+
+/* Элементы управления видны только при работающем JavaScript (класс js ставит theme.js). */
+html:not(.js) [data-theme-switch],
+html:not(.js) [data-copy-target] {
+  display: none !important;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  font-family: var(--font-family-sans);
+  font-size: var(--font-size-base);
+  line-height: var(--line-height-normal);
+  color: var(--color-text-primary);
+  background: var(--color-bg-page);
+  -webkit-font-smoothing: antialiased;
+}
+
+main {
+  flex: 1 0 auto;
+}
+
+img {
+  max-width: 100%;
+  height: auto;
+}
+
+a {
+  color: var(--color-text-link);
+  text-underline-offset: 0.2em;
+}
+
+a:hover {
+  color: var(--color-text-link-hover);
+}
+
+a:focus-visible,
+summary:focus-visible,
+pre:focus-visible {
+  outline: none;
+  border-radius: var(--radius-xs);
+  box-shadow: var(--shadow-focus);
+}
+
+.wrap {
+  width: min(100% - 2rem, var(--size-container));
+  margin-inline: auto;
+}
+
+/* Ссылка «К основному тексту»: видна только при фокусе с клавиатуры. */
+.skip-link {
+  position: absolute;
+  top: var(--space-2);
+  left: var(--space-2);
+  z-index: 10;
+  padding: var(--space-2) var(--space-3);
+  transform: translateY(-200%);
+  color: var(--color-text-primary);
+  background: var(--color-bg-surface);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-md);
+}
+
+.skip-link:focus-visible {
+  transform: none;
+}
+
+/* Шапка ------------------------------------------------------------------ */
+
+.site-header {
+  background: var(--color-bg-surface);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.site-header__inner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3) var(--space-6);
+  padding-block: var(--space-3);
+}
+
+.site-brand {
+  display: inline-flex;
+  border-radius: var(--radius-xs);
+}
+
+.site-brand__logo {
+  width: auto;
+  height: 2rem;
+}
+
+/* Логотип для светлого и тёмного фона: показываем тот, что подходит текущей теме. */
+.site-brand__logo--dark {
+  display: none;
+}
+
+:root[data-theme='dark'] .site-brand__logo--light {
+  display: none;
+}
+
+:root[data-theme='dark'] .site-brand__logo--dark {
+  display: block;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) .site-brand__logo--light {
+    display: none;
+  }
+
+  :root:not([data-theme='light']) .site-brand__logo--dark {
+    display: block;
+  }
+}
+
+.site-nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1) var(--space-4);
+  font-size: var(--font-size-sm);
+}
+
+.site-nav a {
+  padding-block: var(--space-1);
+  color: var(--color-text-secondary);
+  text-decoration: none;
+}
+
+.site-nav a:hover {
+  color: var(--color-text-primary);
+  text-decoration: underline;
+}
+
+.site-header__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2) var(--space-3);
+  margin-left: auto;
+}
+
+/* Первый экран ----------------------------------------------------------- */
+
+.hero {
+  padding-block: var(--space-12) var(--space-10);
+}
+
+.hero--compact {
+  padding-block: var(--space-12) var(--space-16);
+}
+
+.hero__eyebrow {
+  margin: 0 0 var(--space-4);
+  color: var(--color-text-muted);
+}
+
+.hero__title {
+  max-width: 17em;
+}
+
+.hero__lead {
+  max-width: var(--size-prose);
+  margin-top: var(--space-5);
+}
+
+.hero__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-4) var(--space-6);
+  margin-top: var(--space-8);
+}
+
+.hero__note {
+  margin: var(--space-6) 0 0;
+}
+
+/* Разделы ---------------------------------------------------------------- */
+
+.section {
+  padding-block: var(--space-16);
+}
+
+.section--sunken {
+  background: var(--color-bg-sunken);
+  border-block: 1px solid var(--color-border);
+}
+
+.section__title {
+  margin: 0 0 var(--space-3);
+}
+
+.section__lead {
+  max-width: var(--size-prose);
+  margin: 0 0 var(--space-8);
+}
+
+.grid {
+  display: grid;
+  gap: var(--space-4);
+}
+
+.grid--3 {
+  grid-template-columns: 1fr;
+}
+
+.steps {
+  display: grid;
+  gap: var(--space-4);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.step {
+  display: grid;
+  gap: var(--space-3);
+  align-content: start;
+  margin: 0;
+}
+
+.step__num {
+  color: var(--color-text-muted);
+}
+
+.plans-note {
+  margin: var(--space-6) 0 0;
+}
+
+.plans-features-title {
+  margin: var(--space-12) 0 var(--space-4);
+}
+
+/* Тарифы: сетка из компонента, список без маркеров. */
+.pb-plans {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.pb-plans > li {
+  min-width: 0;
+}
+
+.pb-alert {
+  margin: 0 0 var(--space-8);
+}
+
+/* Списки с маркерами в цвете акцента. */
+.feature-list {
+  display: grid;
+  gap: var(--space-3);
+  max-width: var(--size-prose);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  color: var(--color-text-secondary);
+  line-height: var(--line-height-normal);
+}
+
+.feature-list li {
+  display: flex;
+  gap: var(--space-3);
+}
+
+.feature-list li::before {
+  content: '';
+  flex: none;
+  width: 0.375rem;
+  height: 0.375rem;
+  margin-top: 0.6em;
+  background: var(--color-accent);
+  border-radius: 1.5px;
+}
+
+.feature-list strong {
+  color: var(--color-text-primary);
+  font-weight: var(--font-weight-semibold);
+}
+
+.feature-list--spaced {
+  margin-top: var(--space-8);
+}
+
+/* FAQ: раскрывающиеся блоки на <details>, работают без JavaScript. */
+.faq {
+  display: grid;
+  gap: var(--space-3);
+  max-width: var(--size-prose);
+}
+
+.faq__item {
+  padding: var(--space-4) var(--space-5);
+  background: var(--color-bg-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+}
+
+.faq__item[open] {
+  border-color: var(--color-accent-border);
+}
+
+.faq__item summary {
+  position: relative;
+  padding-right: var(--space-8);
+  font-weight: var(--font-weight-medium);
+  line-height: var(--line-height-snug);
+  cursor: pointer;
+  list-style: none;
+}
+
+.faq__item summary::-webkit-details-marker {
+  display: none;
+}
+
+.faq__item summary::after {
+  content: '+';
+  position: absolute;
+  top: 0;
+  right: 0;
+  font-family: var(--font-family-mono);
+  font-size: var(--font-size-lg);
+  line-height: 1;
+  color: var(--color-text-link);
+}
+
+.faq__item[open] summary::after {
+  content: '\2212';
+}
+
+.faq__item p {
+  margin: var(--space-3) 0 0;
+  color: var(--color-text-secondary);
+}
+
+/* Текстовые страницы: инструкция, правила, сравнение ----------------------- */
+
+.doc {
+  padding-block: var(--space-12) var(--space-16);
+}
+
+.doc__wrap {
+  width: min(100% - 2rem, 46rem);
+  margin-inline: auto;
+}
+
+.doc--wide .doc__wrap {
+  width: min(100% - 2rem, var(--size-container));
+}
+
+.doc__head {
+  margin-bottom: var(--space-10);
+}
+
+.doc__head .pb-label {
+  margin: 0 0 var(--space-3);
+  color: var(--color-text-muted);
+}
+
+.doc__head h1 {
+  margin: 0 0 var(--space-4);
+}
+
+.doc__head .pb-small {
+  margin-top: var(--space-4);
+}
+
+.doc__section {
+  margin-top: var(--space-12);
+}
+
+.doc__section > h2 {
+  margin: 0;
+}
+
+.doc__section > * + * {
+  margin-top: var(--space-4);
+}
+
+.doc__subhead {
+  margin-top: var(--space-8);
+}
+
+.doc__callout {
+  margin-top: var(--space-8);
+}
+
+.pb-code {
+  overflow-wrap: anywhere;
+}
+
+.pb-code-block {
+  margin-bottom: 0;
+}
+
+/* Таблица сравнения ------------------------------------------------------ */
+
+.compare-scroll {
+  overflow-x: auto;
+  background: var(--color-bg-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  -webkit-overflow-scrolling: touch;
+}
+
+.compare-scroll:focus-visible {
+  outline: none;
+  box-shadow: var(--shadow-focus);
+}
+
+.compare-table {
+  width: max-content;
+  min-width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-snug);
+}
+
+.compare-caption {
+  caption-side: top;
+  padding: var(--space-3) var(--space-4);
+  text-align: left;
+  color: var(--color-text-secondary);
+}
+
+.compare-table th,
+.compare-table td {
+  padding: var(--space-3) var(--space-4);
+  text-align: left;
+  vertical-align: top;
+  border-top: 1px solid var(--color-border);
+}
+
+.compare-table thead th {
+  min-width: 13rem;
+  max-width: 18rem;
+  font-family: var(--font-family-mono);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  letter-spacing: var(--letter-spacing-wide);
+  color: var(--color-text-secondary);
+  background: var(--color-bg-sunken);
+  border-top: 0;
+}
+
+.compare-table thead th:first-child {
+  position: sticky;
+  left: 0;
+  z-index: 2;
+}
+
+.compare-table tbody th {
+  position: sticky;
+  left: 0;
+  z-index: 1;
+  min-width: 15rem;
+  max-width: 18rem;
+  font-weight: var(--font-weight-regular);
+  background: var(--color-bg-surface);
+  box-shadow: inset -1px 0 0 var(--color-border);
+}
+
+.compare-table td {
+  min-width: 13rem;
+  max-width: 20rem;
+  color: var(--color-text-primary);
+}
+
+.compare-table tr.is-own > * {
+  background-color: var(--color-accent-subtle);
+}
+
+.compare-name {
+  display: block;
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
+}
+
+.compare-meta {
+  display: block;
+  margin-top: var(--space-2);
+  font-size: var(--font-size-xs);
+  line-height: var(--line-height-snug);
+  color: var(--color-text-muted);
+}
+
+.compare-todo {
+  margin-left: var(--space-1);
+  vertical-align: 0.1em;
+}
+
+/* Подвал ----------------------------------------------------------------- */
+
+.site-footer {
+  margin-top: auto;
+  padding-block: var(--space-10) var(--space-8);
+  background: var(--color-bg-surface);
+  border-top: 1px solid var(--color-border);
+}
+
+.site-footer__grid {
+  display: grid;
+  gap: var(--space-8);
+}
+
+.site-footer__about p {
+  margin: var(--space-2) 0 0;
+  max-width: var(--size-prose);
+  color: var(--color-text-secondary);
+}
+
+.site-footer__nav ul {
+  display: grid;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.site-footer__nav a {
+  color: var(--color-text-secondary);
+}
+
+.site-footer__legal {
+  margin-top: var(--space-8);
+  padding-top: var(--space-6);
+  border-top: 1px solid var(--color-border);
+}
+
+.site-footer__legal p {
+  margin: 0;
+}
+
+/* Широкие экраны */
+
+@media (min-width: 48rem) {
+  .hero {
+    padding-block: var(--space-20) var(--space-16);
+  }
+
+  .hero--compact {
+    padding-block: var(--space-20) var(--space-24);
+  }
+
+  .section {
+    padding-block: var(--space-24);
+  }
+
+  .grid--3 {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .steps {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .site-footer__grid {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .site-footer__nav ul {
+    grid-template-columns: repeat(2, max-content);
+    column-gap: var(--space-8);
+  }
+}
+
+/* Четыре тарифа: в одну строку на широких экранах, два на два на планшетах. */
+@media (min-width: 48rem) and (max-width: 59.99rem) {
+  .pb-plans {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 60rem) {
+  .pb-plans {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}

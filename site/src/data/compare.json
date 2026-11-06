@@ -1,0 +1,133 @@
+{
+  "_note": "Данные страницы /compare/. Цифры и тексты меняйте здесь, вёрстка не трогается. У каждой строки нужны источник и дата проверки. todo: true выводит метку «проверить»: факт не подтверждён официальной страницей. Сборка: node site/build.mjs.",
+  "updated": "2026-11-06",
+  "columns": [
+    { "id": "price", "label": "Цена и за что платишь" },
+    { "id": "protocols", "label": "Протоколы" },
+    { "id": "free", "label": "Бесплатный объём" },
+    { "id": "snapshots", "label": "Снапшоты и append-only" },
+    { "id": "alerts", "label": "Алерты" },
+    { "id": "payment", "label": "Оплата и доступность из России" },
+    { "id": "opensource", "label": "Открытый код" },
+    { "id": "operator", "label": "Кто стоит за сервисом" }
+  ],
+  "services": [
+    {
+      "id": "plugbackup",
+      "name": "PlugBackup",
+      "own": true,
+      "checked": "2026-11-06",
+      "sources": [
+        { "title": "design/data/plans.json проекта", "url": "https://github.com/Plugbackup/plugbackup/blob/main/design/data/plans.json" }
+      ],
+      "cells": {
+        "price": { "text": "79 ₽/мес за 50 ГБ, 149 ₽/мес за 100 ГБ, 249 ₽/мес за 200 ГБ. Оплата в Telegram Stars, рубли — ориентир." },
+        "protocols": { "text": "SFTP. Работа через restic и rclone." },
+        "free": { "text": "10 ГБ по инвайт-коду в бете." },
+        "snapshots": { "text": "Ежедневные снапшоты, восстановление по заявке в боте. Append-only уточнить.", "todo": true },
+        "alerts": { "text": "Настраиваемые алерты безопасности в боте: давно не приходил бэкап, резкое удаление данных, заполнение квоты и другие." },
+        "payment": { "text": "Регистрация и оплата в @PlugBackupBot. Вопрос доступности из России уточнить.", "todo": true },
+        "opensource": { "text": "Да, AGPL-3.0. Код: github.com/Plugbackup/plugbackup." },
+        "operator": { "text": "Один человек. Проект в бете, поддержка через бота." }
+      }
+    },
+    {
+      "id": "borgbase",
+      "name": "BorgBase",
+      "own": false,
+      "checked": "2026-11-06",
+      "sources": [
+        { "title": "borgbase.com: тарифы, протоколы, алерты, оператор", "url": "https://www.borgbase.com/" }
+      ],
+      "cells": {
+        "price": { "text": "Small: $30 в год за 250 ГБ. Medium: $110 в год за 1 ТБ. Large: $210 в год или $20 в месяц за 2 ТБ. Сверх объёма: $0,015/ГБ в месяц (Small), $12/ТБ (Medium), $10/ТБ (Large). Считается размер после сжатия и дедупликации." },
+        "protocols": { "text": "Репозитории borg и restic. SFTP, S3 и rclone на странице не указаны.", "todo": true },
+        "free": { "text": "10 ГБ и 2 репозитория, без срока." },
+        "snapshots": { "text": "Append-only режим есть: он не даёт менять прошлые бэкапы. Retention и управление снапшотами на странице не описаны.", "todo": true },
+        "alerts": { "text": "Есть: уведомления о сбое бэкапа и о том, что бэкапы давно не обновлялись. Каналы: email, Pushover, webhook." },
+        "payment": { "text": "Полный список способов оплаты на официальных страницах не найден. Доступность из России не указана.", "todo": true },
+        "opensource": { "text": "Не указано, проверить по репозиториям.", "todo": true },
+        "operator": { "text": "Peakford Ltd, Мальта (указано на сайте). По словам компании, больше десяти лет опыта хостинга." }
+      }
+    },
+    {
+      "id": "hetzner",
+      "name": "Hetzner Storage Box",
+      "own": false,
+      "checked": "2026-11-06",
+      "sources": [
+        { "title": "hetzner.com: Storage Box BX11", "url": "https://www.hetzner.com/storage/storage-box/bx11/" },
+        { "title": "hetzner.com: Storage Box", "url": "https://www.hetzner.com/storage/storage-box/" }
+      ],
+      "cells": {
+        "price": { "text": "BX11: €3,20 в месяц за 1 ТБ без НДС. Трафик не ограничен." },
+        "protocols": { "text": "SFTP, SCP, FTP(S), WebDAV, Samba, HTTPS. BorgBackup, restic, rclone и rsync по SSH." },
+        "free": { "text": "Бесплатного объёма на официальных страницах не найдено." },
+        "snapshots": { "text": "10 снапшотов включено и 10 автоматических по расписанию. Append-only или иммутабельность: проверить.", "todo": true },
+        "alerts": { "text": "На проверенных страницах не описано.", "todo": true },
+        "payment": { "text": "Банковский перевод, карта, PayPal и SEPA (по официальным страницам через поиск). Доступность из России не указана.", "todo": true },
+        "opensource": { "text": "Не указано.", "todo": true },
+        "operator": { "text": "Hetzner. Дата-центры FSN1 (Германия) и HEL1 (Финляндия). Юрлицо проверить.", "todo": true }
+      }
+    },
+    {
+      "id": "backblaze-b2",
+      "name": "Backblaze B2",
+      "own": false,
+      "checked": "2026-11-06",
+      "sources": [
+        { "title": "backblaze.com: тарифы B2", "url": "https://www.backblaze.com/cloud-storage/pricing" },
+        { "title": "backblaze.com: restic с B2", "url": "https://www.backblaze.com/docs/cloud-storage-integrate-restic-with-backblaze-b2" }
+      ],
+      "cells": {
+        "price": { "text": "$6,95 за ТБ в месяц. Трафик до 3× среднего объёма хранения бесплатно, дальше $0,01/ГБ." },
+        "protocols": { "text": "S3-совместимый API и нативный B2 API. restic и rclone работают через S3-совместимый API." },
+        "free": { "text": "10 ГБ хранилища бесплатно, без срока." },
+        "snapshots": { "text": "Версионирование и Object Lock (иммутабельность): проверить.", "todo": true },
+        "alerts": { "text": "Не проверено.", "todo": true },
+        "payment": { "text": "Способы оплаты и доступность из России не проверены.", "todo": true },
+        "opensource": { "text": "Не указано.", "todo": true },
+        "operator": { "text": "Backblaze. Юрлицо и страну проверить.", "todo": true }
+      }
+    },
+    {
+      "id": "yandex-object-storage",
+      "name": "Yandex Object Storage",
+      "own": false,
+      "checked": "2026-11-06",
+      "sources": [
+        { "title": "yandex.cloud: тарифы Object Storage", "url": "https://yandex.cloud/ru/docs/storage/pricing" }
+      ],
+      "cells": {
+        "price": { "text": "Тарифы для региона «Россия» в рублях. Цена за ГБ в месяц на странице не приведена, только ссылка на калькулятор. Ледяное хранилище: минимум 12 месяцев.", "todo": true },
+        "protocols": { "text": "S3 API: операции на странице сопоставлены с методами S3." },
+        "free": { "text": "1 ГБ хранилища, 100 ГБ исходящего трафика и часть запросов в месяц. Неиспользованное не переносится." },
+        "snapshots": { "text": "Версионирование на странице не описано.", "todo": true },
+        "alerts": { "text": "На странице тарифов не описано.", "todo": true },
+        "payment": { "text": "Валюта зависит от юрлица заказчика (₽ или ₸, по странице). Способы оплаты не указаны.", "todo": true },
+        "opensource": { "text": "Не указано.", "todo": true },
+        "operator": { "text": "Яндекс.Облако. Юрлицо проверить.", "todo": true }
+      }
+    },
+    {
+      "id": "selectel-object-storage",
+      "name": "Selectel Object Storage",
+      "own": false,
+      "checked": "2026-11-06",
+      "sources": [
+        { "title": "docs.selectel.ru: оплата S3", "url": "https://docs.selectel.ru/en/s3/about/payment/" },
+        { "title": "selectel.ru: калькулятор", "url": "https://selectel.ru/prices/calculator/" }
+      ],
+      "cells": {
+        "price": { "text": "Оплата по факту с баланса, каждый час. Цена за ГБ в месяц в документации не приведена, нужен калькулятор. Стандартный класс зависит от объёма, холодный и glacier фиксированы.", "todo": true },
+        "protocols": { "text": "S3 API." },
+        "free": { "text": "Бесплатный объём хранения на странице не указан. Входящий трафик бесплатен.", "todo": true },
+        "snapshots": { "text": "Версионирование описано: тарифицируются все версии, кроме помеченных Deleted. Append-only не описано.", "todo": true },
+        "alerts": { "text": "Уведомления о балансе описаны. Алерты о бэкапах не описаны.", "todo": true },
+        "payment": { "text": "Единый баланс с автопополнением. Способы оплаты не перечислены, доступность из России не проверена.", "todo": true },
+        "opensource": { "text": "Не указано.", "todo": true },
+        "operator": { "text": "Selectel. Юрлицо проверить.", "todo": true }
+      }
+    }
+  ]
+}

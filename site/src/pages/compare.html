@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Сравнение с BorgBase, Hetzner и S3-облаками · PlugBackup</title>
+  <meta name="description" content="Честное сравнение PlugBackup с BorgBase, Hetzner Storage Box, Backblaze B2, Yandex Object Storage и Selectel: цены, протоколы, снапшоты, алерты, оплата. Со ссылками на источники и датой проверки.">
+  <link rel="canonical" href="{{site.origin}}/compare/">
+  <meta name="theme-color" content="#F6F7F9" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#16181C" media="(prefers-color-scheme: dark)">
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="PlugBackup">
+  <meta property="og:locale" content="ru_RU">
+  <meta property="og:title" content="Сравнение с BorgBase, Hetzner и S3-облаками">
+  <meta property="og:description" content="Цены, протоколы, снапшоты, алерты и оплата. Со ссылками на источники. Где PlugBackup хуже, сказано отдельно.">
+  <meta property="og:url" content="{{site.origin}}/compare/">
+  <meta property="og:image" content="{{site.origin}}/assets/img/og-image.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+  <link rel="preload" href="/assets/fonts/IBMPlexSans-SemiBold-Cyrillic.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="/assets/fonts/IBMPlexSans-Regular-Cyrillic.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="/assets/fonts/fonts.css">
+  <link rel="stylesheet" href="/assets/css/tokens.css">
+  <link rel="stylesheet" href="/assets/css/components.css">
+  <link rel="stylesheet" href="/assets/css/animations.css">
+  <link rel="stylesheet" href="/assets/css/site.css">
+  <script src="/assets/js/theme.js"></script>
+</head>
+<body>
+{{header}}
+<main id="main">
+
+  <article class="doc doc--wide">
+    <div class="wrap doc__wrap">
+      <header class="doc__head">
+        <p class="pb-label">Сравнение</p>
+        <h1 class="pb-h1">PlugBackup и другие хранилища</h1>
+        <p class="pb-lead">Сравниваем PlugBackup с BorgBase, Hetzner Storage Box, Backblaze B2, Yandex Object Storage и Selectel Object Storage. Факты взяты с официальных страниц. Дата проверки указана в каждой строке.</p>
+        <p class="pb-small">Метка <span class="pb-badge pb-badge--warning">проверить</span> означает, что факт на официальной странице не подтверждён, и его стоит перепроверить до решения. Таблица широкая: на телефоне её можно прокрутить вправо, название сервиса при этом остаётся на месте.</p>
+      </header>
+
+      <section class="doc__section" aria-labelledby="table-title">
+        <h2 class="pb-h2" id="table-title">Таблица</h2>
+        {{compare}}
+      </section>
+
+      <section class="doc__section" aria-labelledby="worse-title">
+        <h2 class="pb-h2" id="worse-title">В чём PlugBackup хуже</h2>
+        <ul class="feature-list feature-list--spaced">
+          <li><strong>Цена за гигабайт.</strong> 50&nbsp;ГБ за 79&nbsp;₽ в месяц — около 1,58&nbsp;₽ за гигабайт. Hetzner Storage Box (BX11: €3,20 за 1&nbsp;ТБ без НДС) и Backblaze B2 ($6,95 за&nbsp;ТБ) за гигабайт стоят меньше. Точное сравнение зависит от курса и НДС.</li>
+          <li><strong>Один диск в бете.</strong> Без резервирования и без ИБП. При отказе диска данные пропадут.</li>
+          <li><strong>Один человек на поддержке.</strong> Ответы могут идти дольше, чем у крупных сервисов.</li>
+          <li><strong>Аптайм.</strong> Процент аптайма мы не публикуем. Текущее состояние работы — на <a class="pb-link" href="https://status.plugbackup.site">status.plugbackup.site</a>.</li>
+        </ul>
+      </section>
+
+      <section class="doc__section" aria-labelledby="how-title">
+        <h2 class="pb-h2" id="how-title">Как проверяли</h2>
+        <p class="pb-body">Цены, протоколы и условия взяты со страниц тарифов и документации самих сервисов. Если страница не показывает цену за гигабайт, например потому что её надо считать в калькуляторе, строка помечена как «проверить», и цена не подставлена из памяти.</p>
+        <p class="pb-body">Данные таблицы лежат в файле <code class="pb-code">site/src/data/compare.json</code> в <a class="pb-link" href="https://github.com/Plugbackup/plugbackup/blob/main/site/src/data/compare.json">репозитории</a>. Обновляются цифры и даты там, без правки вёрстки.</p>
+      </section>
+    </div>
+  </article>
+
+</main>
+{{footer}}
+<script src="/assets/js/app.js" defer></script>
+</body>
+</html>

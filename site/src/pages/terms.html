@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Правила сервиса PlugBackup</title>
+  <meta name="description" content="Правила PlugBackup: бета без гарантий, оплата и блокировка, удаление данных через 14 дней, ответственность клиента за пароль и содержимое.">
+  <link rel="canonical" href="{{site.origin}}/terms/">
+  <meta name="theme-color" content="#F6F7F9" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#16181C" media="(prefers-color-scheme: dark)">
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="PlugBackup">
+  <meta property="og:locale" content="ru_RU">
+  <meta property="og:title" content="Правила сервиса PlugBackup">
+  <meta property="og:description" content="Бета без гарантий, оплата, блокировка и удаление данных, ответственность клиента.">
+  <meta property="og:url" content="{{site.origin}}/terms/">
+  <meta property="og:image" content="{{site.origin}}/assets/img/og-image.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+  <link rel="preload" href="/assets/fonts/IBMPlexSans-SemiBold-Cyrillic.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="/assets/fonts/IBMPlexSans-Regular-Cyrillic.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="/assets/fonts/fonts.css">
+  <link rel="stylesheet" href="/assets/css/tokens.css">
+  <link rel="stylesheet" href="/assets/css/components.css">
+  <link rel="stylesheet" href="/assets/css/animations.css">
+  <link rel="stylesheet" href="/assets/css/site.css">
+  <script src="/assets/js/theme.js"></script>
+</head>
+<body>
+{{header}}
+<main id="main">
+
+  <article class="doc">
+    <div class="wrap doc__wrap">
+      <header class="doc__head">
+        <p class="pb-label">Документ</p>
+        <h1 class="pb-h1">Правила сервиса</h1>
+        <p class="pb-lead">Редакция от 6&nbsp;ноября&nbsp;2026. Правила описывают, как работает PlugBackup в бете, что обещаем и чего не обещаем.</p>
+      </header>
+
+      <section class="doc__section" aria-labelledby="t-beta">
+        <h2 class="pb-h2" id="t-beta">1. Бета без гарантий</h2>
+        <p class="pb-body">Сервис сейчас в бете. Бесплатный доступ и тарифы предоставляются без гарантий доступности и сохранности данных. Сервер один, диск один и без резервирования. Возможны простои. При отказе диска данные пропадут.</p>
+        <p class="pb-body">Владелец сервиса не обещает конкретного уровня доступности. Текущее состояние работы публикуется на <a class="pb-link" href="https://status.plugbackup.site">status.plugbackup.site</a>.</p>
+      </section>
+
+      <section class="doc__section" aria-labelledby="t-pay">
+        <h2 class="pb-h2" id="t-pay">2. Оплата и блокировка</h2>
+        <p class="pb-body">Тарифы оплачиваются в Telegram Stars в боте {{bot.handle}}. Сумма в рублях указана для ориентира. Регистрация, оплата и выдача доступа идут только через бота.</p>
+        <p class="pb-body">Если оплата не продлена, доступ блокируется. Через 14 дней после блокировки данные удаляются без возможности восстановления.</p>
+      </section>
+
+      <section class="doc__section" aria-labelledby="t-client">
+        <h2 class="pb-h2" id="t-client">3. Ответственность клиента</h2>
+        <p class="pb-body">Пароль от репозитория задаёт клиент и хранит его у себя. У владельца сервиса этого пароля нет, и восстановить его он не может. Потеря пароля означает, что данные восстановить нельзя.</p>
+        <p class="pb-body">Клиент отвечает за содержимое своих репозиториев и за то, что в них хранится. Важные данные рекомендуем хранить хотя бы в двух местах, а не только здесь.</p>
+      </section>
+
+      <section class="doc__section" aria-labelledby="t-forbidden">
+        <h2 class="pb-h2" id="t-forbidden">4. Что нельзя хранить</h2>
+        <p class="pb-body">На сервисе запрещено хранить:</p>
+        <ul class="feature-list feature-list--spaced">
+          <li>материалы, распространение или хранение которых запрещено законом;</li>
+          <li>материалы, связанные с сексуальной эксплуатацией детей;</li>
+          <li>вредоносное программное обеспечение и инструменты для атак на чужие системы;</li>
+          <li>материалы, которые нарушают права третьих лиц.</li>
+        </ul>
+        <p class="pb-body">Список не исчерпывающий. Владелец сервиса не видит содержимое копий: оно зашифровано на устройстве клиента. Поэтому проверить материалы он может только по техническим признакам и по обращениям. Если сомневаетесь, не загружайте материал и спросите в боте {{bot.handle}}.</p>
+      </section>
+
+      <section class="doc__section" aria-labelledby="t-changes">
+        <h2 class="pb-h2" id="t-changes">5. Изменения правил</h2>
+        <p class="pb-body">Правила могут меняться. Актуальная редакция всегда на этой странице, в ней указана дата последнего изменения. Исходный код сайта открыт: история правок видна в репозитории на GitHub.</p>
+      </section>
+    </div>
+  </article>
+
+</main>
+{{footer}}
+<script src="/assets/js/app.js" defer></script>
+</body>
+</html>

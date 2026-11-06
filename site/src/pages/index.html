@@ -1,0 +1,174 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>PlugBackup: резервные копии, зашифрованные на вашем устройстве</title>
+  <meta name="description" content="Хранилище резервных копий по SFTP для VPN- и privacy-комьюнити. Данные шифруются на вашем устройстве, владелец сервиса их не видит. Регистрация и оплата в Telegram-боте @PlugBackupBot.">
+  <link rel="canonical" href="{{site.origin}}/">
+  <meta name="theme-color" content="#F6F7F9" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#16181C" media="(prefers-color-scheme: dark)">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="PlugBackup">
+  <meta property="og:locale" content="ru_RU">
+  <meta property="og:title" content="PlugBackup: резервные копии, зашифрованные на вашем устройстве">
+  <meta property="og:description" content="Хранилище резервных копий по SFTP для VPN- и privacy-комьюнити. Шифрование на вашей стороне, restic и rclone.">
+  <meta property="og:url" content="{{site.origin}}/">
+  <meta property="og:image" content="{{site.origin}}/assets/img/og-image.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+  <link rel="preload" href="/assets/fonts/IBMPlexSans-SemiBold-Cyrillic.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="/assets/fonts/IBMPlexSans-Regular-Cyrillic.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="/assets/fonts/fonts.css">
+  <link rel="stylesheet" href="/assets/css/tokens.css">
+  <link rel="stylesheet" href="/assets/css/components.css">
+  <link rel="stylesheet" href="/assets/css/animations.css">
+  <link rel="stylesheet" href="/assets/css/site.css">
+  <script src="/assets/js/theme.js"></script>
+</head>
+<body>
+{{header}}
+<main id="main">
+
+  <section class="hero" aria-labelledby="hero-title">
+    <div class="wrap">
+      <p class="pb-label hero__eyebrow">Бета · SFTP · restic · rclone</p>
+      <h1 class="pb-display hero__title" id="hero-title">Резервные копии, зашифрованные на вашем устройстве</h1>
+      <p class="pb-lead hero__lead">Клиент подключается по SFTP и работает с restic или rclone. Пароль от репозитория есть только у вас, владелец сервиса не видит содержимое копий. Регистрация, оплата и доступ — в Telegram-боте.</p>
+      <div class="hero__actions">
+        <a class="pb-button pb-button--primary pb-button--lg" href="{{bot.url}}">Открыть бота</a>
+        <a class="pb-link" href="/docs/">Как подключиться</a>
+      </div>
+      <p class="pb-small hero__note">Сейчас бета: один диск без резервирования. <a class="pb-link" href="#beta">Что это значит</a></p>
+    </div>
+  </section>
+
+  <section class="section" aria-labelledby="how-title">
+    <div class="wrap">
+      <h2 class="pb-h2 section__title" id="how-title">Как это работает</h2>
+      <ol class="steps">
+        <li class="pb-card step">
+          <span class="pb-label step__num">Шаг 1</span>
+          <h3 class="pb-h4">Получите доступ в боте</h3>
+          <p class="pb-body">Регистрация, тариф и оплата проходят в {{bot.handle}}. Сейчас доступ в бете выдаётся по инвайт-коду.</p>
+        </li>
+        <li class="pb-card step">
+          <span class="pb-label step__num">Шаг 2</span>
+          <h3 class="pb-h4">Пришлите публичный ключ</h3>
+          <p class="pb-body">Создайте ключ ed25519 на своём устройстве и отправьте боту только публичную часть. Приватный ключ никуда не передаётся.</p>
+        </li>
+        <li class="pb-card step">
+          <span class="pb-label step__num">Шаг 3</span>
+          <h3 class="pb-h4">Настройте restic или rclone</h3>
+          <p class="pb-body">Укажите путь <code class="pb-code">sftp:&lt;хост&gt;:/data/restic</code>, создайте репозиторий и запускайте копии. Пошагово описано в <a class="pb-link" href="/docs/">инструкции</a>.</p>
+        </li>
+      </ol>
+    </div>
+  </section>
+
+  <section class="section section--sunken" aria-labelledby="security-title">
+    <div class="wrap">
+      <h2 class="pb-h2 section__title" id="security-title">Модель безопасности</h2>
+      <p class="pb-lead section__lead">Что шифруется, что видит владелец сервиса и чего он не видит.</p>
+      <div class="grid grid--3">
+        <article class="pb-card">
+          <h3 class="pb-h4">Что шифруется</h3>
+          <p class="pb-body">Данные шифруются на вашем устройстве до отправки на сервер. Ключ шифрования — ваш пароль от репозитория.</p>
+        </article>
+        <article class="pb-card">
+          <h3 class="pb-h4">Что видит владелец</h3>
+          <p class="pb-body">Размер хранилища, число и размеры зашифрованных объектов, время их изменения и IP-адрес, с которого вы подключаетесь. Если важно скрыть адрес, подключайтесь через свой VPN.</p>
+        </article>
+        <article class="pb-card">
+          <h3 class="pb-h4">Чего владелец не видит</h3>
+          <p class="pb-body">Содержимое копий. Пароль от репозитория есть только у вас: если вы его потеряете, данные не восстановить, и у нас их тоже нет.</p>
+        </article>
+      </div>
+      <ul class="feature-list feature-list--spaced">
+        <li><strong>Алерты безопасности в боте.</strong> Можно включить уведомления: бэкап давно не приходил, резко удалены данные, квота почти заполнена, и другие.</li>
+        <li><strong>Снапшоты.</strong> Ежедневные снапшоты на сервере. Восстановление из них оформляется заявкой в боте.</li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="section" aria-labelledby="plans-title">
+    <div class="wrap">
+      <h2 class="pb-h2 section__title" id="plans-title">Тарифы</h2>
+      <p class="pb-lead section__lead">Объём хранилища и цена за месяц. Тариф выбирается и оплачивается в боте.</p>
+      {{plans}}
+      <p class="pb-small plans-note">{{payment.note}}</p>
+      <h3 class="pb-h4 plans-features-title">Что входит в каждый тариф</h3>
+      {{features}}
+    </div>
+  </section>
+
+  <section class="section section--sunken" id="beta" aria-labelledby="beta-title">
+    <div class="wrap">
+      <h2 class="pb-h2 section__title" id="beta-title">Честно о бете</h2>
+      <div class="pb-alert pb-alert--warning">
+        <div>
+          <p class="pb-alert__title">Сейчас один сервер и один диск</p>
+          <p class="pb-alert__text">Без резервирования и без ИБП. Возможны простои. При отказе диска данные пропадут.</p>
+        </div>
+      </div>
+      <ul class="feature-list feature-list--spaced">
+        <li>Перед оплатой вы подтверждаете, что понимаете эти риски.</li>
+        <li>Простои возможны. Текущее состояние сервиса — на <a class="pb-link" href="https://status.plugbackup.site">status.plugbackup.site</a>.</li>
+        <li>Не храните здесь единственную копию важных данных.</li>
+        <li>Проект ведёт один человек. Продажи и поддержка идут через {{bot.handle}}, ответы могут занимать время.</li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="section" aria-labelledby="diff-title">
+    <div class="wrap">
+      <h2 class="pb-h2 section__title" id="diff-title">Чем мы отличаемся</h2>
+      <p class="pb-lead section__lead">Открытый код, шифрование на стороне клиента и алерты безопасности в боте. Взамен за гигабайт мы дороже Hetzner Storage Box и Backblaze B2, в бете работаем на одном диске, а поддержку ведёт один человек.</p>
+      <p><a class="pb-link" href="/compare/">Сравнение с BorgBase, Hetzner Storage Box, Backblaze B2 и российскими S3-облаками, с источниками</a></p>
+    </div>
+  </section>
+
+  <section class="section section--sunken" aria-labelledby="faq-title">
+    <div class="wrap">
+      <h2 class="pb-h2 section__title" id="faq-title">Вопросы</h2>
+      <div class="faq">
+        <details class="faq__item">
+          <summary>Нужен ли аккаунт на сайте?</summary>
+          <p>Нет. На сайте нет личного кабинета и форм. Регистрация, оплата и выдача доступа проходят в {{bot.handle}}.</p>
+        </details>
+        <details class="faq__item">
+          <summary>Что будет, если я потеряю пароль от репозитория?</summary>
+          <p>Данные восстановить будет нельзя. Пароль есть только у вас, у нас его нет.</p>
+        </details>
+        <details class="faq__item">
+          <summary>Кто может прочитать мои копии?</summary>
+          <p>Никто, кроме вас, если шифрование настроено. Restic шифрует репозиторий всегда. В rclone шифрование включается отдельно, это описано в <a class="pb-link" href="/docs/">инструкции</a>.</p>
+        </details>
+        <details class="faq__item">
+          <summary>Что будет, если я перестану платить?</summary>
+          <p>Если оплата не продлена, доступ блокируется. Через 14 дней данные удаляются. Подробности — в <a class="pb-link" href="/terms/">правилах</a>.</p>
+        </details>
+        <details class="faq__item">
+          <summary>Как оплатить?</summary>
+          <p>Оплата в Telegram Stars, в боте. Сумма в рублях приблизительная.</p>
+        </details>
+        <details class="faq__item">
+          <summary>Есть ли гарантия доступности?</summary>
+          <p>Нет. Сервис в бете и работает без гарантий. Подробности — в разделе «Честно о бете» и в <a class="pb-link" href="/terms/">правилах</a>.</p>
+        </details>
+        <details class="faq__item">
+          <summary>Что нельзя хранить?</summary>
+          <p>Ограничения по содержимому перечислены в <a class="pb-link" href="/terms/">правилах</a>.</p>
+        </details>
+      </div>
+    </div>
+  </section>
+
+</main>
+{{footer}}
+<script src="/assets/js/app.js" defer></script>
+</body>
+</html>
