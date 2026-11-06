@@ -1,0 +1,38 @@
+# Apache: HTTPS, страница 404, заголовки безопасности и кэширование.
+# Файл копируется в корень сборки и попадает в ветку deploy. Если на хостинге nginx,
+# .htaccess не работает: перенесите те же правила в конфиг nginx, см. site/README.md.
+
+# Всё только по HTTPS.
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  RewriteCond %{HTTPS} !=on
+  RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+</IfModule>
+
+ErrorDocument 404 /404.html
+
+AddDefaultCharset UTF-8
+AddType font/woff2 .woff2
+AddType image/svg+xml .svg
+
+<IfModule mod_headers.c>
+  # HSTS: браузер помнит, что сайт только по HTTPS. Без includeSubDomains, поддомены не затрагиваются.
+  Header always set Strict-Transport-Security "max-age=31536000"
+  Header always set X-Content-Type-Options "nosniff"
+  Header always set X-Frame-Options "DENY"
+  Header always set Referrer-Policy "strict-origin-when-cross-origin"
+  Header always set Permissions-Policy "accelerometer=(), camera=(), geolocation=(), gyroscope=(), microphone=(), payment=(), usb=()"
+  Header always set Cross-Origin-Opener-Policy "same-origin"
+  Header always set Content-Security-Policy "default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self'; font-src 'self'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'"
+
+  # HTML проверяется заново при каждом открытии, статика кэшируется.
+  <FilesMatch "\.html$">
+    Header set Cache-Control "no-cache"
+  </FilesMatch>
+  <FilesMatch "\.(css|js|svg|png|ico|txt|xml|json)$">
+    Header set Cache-Control "public, max-age=86400"
+  </FilesMatch>
+  <FilesMatch "\.woff2$">
+    Header set Cache-Control "public, max-age=31536000, immutable"
+  </FilesMatch>
+</IfModule>
